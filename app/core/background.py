@@ -1,0 +1,38 @@
+from fastapi import FastAPI
+from contextlib import asynccontextmanager
+import asyncio
+from loguru import logger
+from core.config import config
+
+#
+# Background tasks
+#
+async def backgroundTasks():
+    '''
+    Periodically run background tasks in import docs and sync annotations
+    '''
+    while True:
+        try:
+            logger.info("Background tasks running...")
+            
+            # await something
+            
+            await asyncio.sleep(60*config.background_sleep_minutes)
+        except Exception as x:
+            # Id a background process fails it should not derail the rest
+            logger.error(x)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    '''
+    Manage the app lifecycle
+    '''
+    # Create the recurring background tasks
+    asyncio.create_task(backgroundTasks())
+
+    # Run FastAPI
+    yield
+    
+    # any post app tasks here
+
+

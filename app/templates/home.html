@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+
+{% block main_modal %}
+<h3 class="text-lg font-bold mb-4">Dialog</h3>
+<p class="">This is content to appear in a dialog.</p>
+<span class="btn mt-4" onclick="main_modal.close()">Close</span>
+{% endblock main_modal %}
+
+{% block help_modal %}
+<p class="">This is content to appear in a help dialog.</p>
+{% endblock help_modal %}
+
+
+{% block nav_middle %}
+<span class="tooltip tooltip-bottom" data-tip="Open modal">
+  <span class="btn btn-ghost ml-1 text-md" onclick="main_modal.showModal()">M</span>
+</span>
+{% endblock nav_middle %}
+
+
+{% block user_menu %}
+  <li><i>{{ uid }}</i></li>
+  <li><a href="/logout">Logout</a></li>
+{% endblock user_menu %}
+
+
+{% block content %}
+<div class="flex flex-row m-4">
+  <h3 class="text-lg">TerminologyForge</h3>
+</div>
+{% endblock %}
