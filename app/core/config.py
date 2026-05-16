@@ -26,8 +26,9 @@ class Config(BaseSettings):
     #
     db_user: str = ""
     db_password: str = ""
-    db_name: str = "test.db"
-
+    db_url: str = "http://localhost:8529"
+    db_name: str = "TFDB"
+    
     #
     # OAuth2 configuration
     #

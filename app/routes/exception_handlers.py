@@ -4,6 +4,7 @@ from fastapi.templating import Jinja2Templates
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from core import exceptions
 from loguru import logger
+import traceback
 
 templates = Jinja2Templates(directory="app/templates")
 

@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 import asyncio
 from loguru import logger
 from core.config import config
+from db.db import Client
 
 #
 # Background tasks
@@ -30,9 +31,14 @@ async def lifespan(app: FastAPI):
     # Create the recurring background tasks
     asyncio.create_task(backgroundTasks())
 
+    # Open a database connection
+    app.state.client = Client()
+    await app.state.client.connect()
+    
     # Run FastAPI
     yield
     
-    # any post app tasks here
+    # Any post app tasks here
 
-
+    # Close database connection
+    await app.state.client.close()

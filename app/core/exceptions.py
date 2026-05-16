@@ -1,5 +1,4 @@
 from loguru import logger
-import traceback
 
 class BaseAppException(Exception):
     """Base exception for our application"""
