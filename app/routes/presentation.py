@@ -6,6 +6,7 @@ from loguru import logger
 from routes.authentication import auth_user
 
 from core import exceptions
+from db.schema import User
 
 router = APIRouter()
 
@@ -15,8 +16,19 @@ templates = Jinja2Templates(directory="app/templates")
 async def home(request: Request,
                uid=Depends(auth_user)):
 
+    user = uid
+
+    users = request.app.state.client.db.collection("users")
+    cursor = await users.find({"github": uid}, limit=1)
+    if cursor.empty():
+        user = None
+    else:
+        user = User(**cursor.pop())
+    cursor.close()
+    
     context = {
         "uid": uid,
+        "user": user,
     }
     
     return templates.TemplateResponse(request=request, name="home.html", context=context)

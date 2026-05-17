@@ -8,25 +8,35 @@
 {% endblock main_modal %}
 
 {% block help_modal %}
-<p class="">This is content to appear in a help dialog.</p>
+<p class="">This is your home page</p>
 {% endblock help_modal %}
 
 
 {% block nav_middle %}
-<span class="tooltip tooltip-bottom" data-tip="Open modal">
-  <span class="btn btn-ghost ml-1 text-md" onclick="main_modal.showModal()">M</span>
-</span>
 {% endblock nav_middle %}
 
 
 {% block user_menu %}
-  <li><i>{{ uid }}</i></li>
+  <li><i>{{ user.github }}</i></li>
   <li><a href="/logout">Logout</a></li>
 {% endblock user_menu %}
 
 
 {% block content %}
-<div class="flex flex-row m-4">
-  <h3 class="text-lg">TerminologyForge</h3>
+<div class="flex flex-col m-4">
+  <h3 class="text-lg">{{user.name}}</h3>
+  <table class="table">
+    <tbody>
+      <tr> <th>Name</th> <td>{{user.name}}</td> </tr>
+      <tr> <th>Email</th> <td>{{user.email}}</td> </tr>
+      <tr> <th>Gilhub</th> <td>{{user.github}}</td> </tr>
+      </tr>
+  </table>
+<h3>Editable Vocabularies</h3>
+<ul class="list bg-base-100 rounded-box shadow-md">
+    {% for vocab in user.editor %}
+    <a href="/list/{{vocab}}"><li class="list-row">{{vocab}}</li></a>
+    {% endfor %}
+</ul>
 </div>
 {% endblock %}
