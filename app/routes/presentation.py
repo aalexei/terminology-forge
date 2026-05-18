@@ -23,8 +23,8 @@ async def home(request: Request,
     if cursor.empty():
         user = None
     else:
-        user = User(**cursor.pop())
-    cursor.close()
+        user = User(_db=request.app.state.client.db, **cursor.pop())
+    await cursor.close()
     
     context = {
         "uid": uid,
