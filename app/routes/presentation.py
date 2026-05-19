@@ -6,7 +6,6 @@ from loguru import logger
 from routes.authentication import auth_user
 
 from core import exceptions
-# from db.schema import User
 from services.user import UserService
 
 router = APIRouter()
@@ -47,13 +46,4 @@ def vocab_list(request, filtr=""):
         "filter": filtr,
     }
     return templates.TemplateResponse(request=request, name="list.html", context=context)
-
-
-# @router.get("/", response_class=HTMLResponse)
-# async def root(request: Request, uid=Depends(auth_user)):
-
-#     context = {
-#         "uid": uid,
-#     }
-#     return templates.TemplateResponse(request=request, name="home.html", context=context)
 
