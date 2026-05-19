@@ -6,6 +6,7 @@ from loguru import logger
 from core.config import config
 from core.exceptions import UnauthorizedException
 from db.db import SESSIONS
+from services.user import UserService
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     '''
@@ -72,17 +73,15 @@ async def current_user(request: Request):
 # GitHub auth
 # ---------------------------------------------------
 
-def get_auth_github_user(guser):
+async def get_auth_github_user(db, guser):
     '''
     Return DB userid if user is authorised
     None otherwise
     '''
 
-    # Hardcoded for template
-    if guser == 'aalexei':
-        return 'aalexei'
-    else:
-        return None
+    user_service = UserService(db)
+    uid = await user_service.github_to_uid(guser)
+    return uid
 
 def is_token_expired(timestamp: int) -> bool:
     if timestamp:

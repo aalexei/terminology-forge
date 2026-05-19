@@ -17,24 +17,13 @@ templates = Jinja2Templates(directory="app/templates")
 async def home(request: Request,
                uid=Depends(auth_user)):
 
-    # user = uid
-
-    # users = request.app.state.client.db.collection("users")
-    # cursor = await users.find({"github": uid}, limit=1)
-    # if cursor.empty():
-    #     user = None
-    # else:
-    #     user = User(_db=request.app.state.client.db, **cursor.pop())
-    # await cursor.close()
-
     user_service = UserService(request.app.state.client.db)
-    user = await user_service.get_github(uid)
+    user = await user_service.get(uid)
     
     context = {
         "uid": uid,
         "user": user,
     }
-    
     return templates.TemplateResponse(request=request, name="home.html", context=context)
 
 

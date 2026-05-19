@@ -54,7 +54,7 @@ async def auth_callback(request: Request, code: str):
 
     # 'login' field has GitHub username
     guser = user_data.get('login', None)
-    uid = get_auth_github_user(guser)
+    uid = await get_auth_github_user(request.app.state.client.db, guser)
 
     if uid is not None:
         # Store access token in session
