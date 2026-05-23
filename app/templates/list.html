@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block main_modal %}
+<fieldset class="fieldset w-full">
+  <input type="text" class="input w-full" placeholder="Add and remove tags" name="action" value="" />
+  <p class="label">Add with +tag or just tag and remove with -tag</p>
+</fieldset>
+<button type="submit" class="btn">Set</button>
+<span class="btn" onclick="main_modal.close()">Cancel</span>
+{% endblock main_modal %}
+
+{% block body_top %}
+{% endblock body_top %}
+  
+{% block body_bottom %}
+{% endblock body_bottom %}
+
+{% block nav_middle %}
+<!-- Use name of filtr as filter is a python keyword -->
+<input id="filter" name="filtr" type="text" placeholder="Filter" class="input input-bordered w-24 md:w-auto search navbar-center text-base-content" value="{{ filter }}" />
+<span class="tooltip tooltip-bottom" data-tip="Clear selections">
+  <span class="btn btn-outline ml-4 px-2 text-xl" onclick="document.querySelectorAll('input[type=checkbox]').forEach(el => el.checked = false);">☒</span>
+</span>
+<span class="tooltip tooltip-bottom" data-tip="Set tags on selected">
+  <span class="btn ml-1 btn-outline text-md" onclick="main_modal.showModal()">Set tags</span>
+</span>
+{% endblock nav_middle %}
+
+{% block nav_end %}
+<ul class="menu menu-horizontal px-1">
+  <li>
+    <details>
+      <summary>Sort</summary>
+      <ul class="bg-neutral text-neutral-content rounded-t-none p-2">
+	<li><a class="sort" data-sort="listjs-term">Term</a></li>
+	<li><a class="sort" data-sort="listjs-cluster">Cluster</a></li>
+	<li><a class="sort" data-sort="listjs-status">Status</a></li>
+      </ul>
+    </details>
+  </li>
+</ul>
+{% endblock nav_end %}
+
+{% block user_menu %}
+  <li><i>{{ user.github }}</i></li>
+  <li><a href="/logout">Logout</a></li>
+{% endblock user_menu %}
+
+
+
+{% block content %}
+<ul class="list w-full">
+  {% for t in terms %}
+  <li id="{{ t.key_ }}" class="list-row w-full bg-base-100 scroll-mt-20">
+    <input type="checkbox" class="checkbox" name="selected" value="{{ t.key_ }}" />
+    <div>
+      <div class="flex flex-row w-full">
+	<a href="/vocab/{{vocab}}/term/{{t.key_}}" class="flex-1 listjs-term font-bold">
+	  {{ t.term }}
+	  {% if t.synonyms|length > 0 %}
+	  / {{ t.synonyms|join(' / ') }}
+	  {% endif %}
+	</a>
+	<div class="flex flex-row flex-none gap-2 listjs-tag">
+	  {% for tag in t._tags.split() %}
+	  <a href="#" class="badge badge-sm badge-outline badge-info" onclick="addtofilter('@{{ tag }}')">@{{ tag }}</a>
+	  {% endfor %}
+	  <span class="badge badge-sm badge-soft badge-info tooltip listjs-cluster" data-tip="cluster">{{ t.cluster }}</span>
+	  <span class="badge badge-sm badge-soft badge-success tooltip listjs-status" data-tip="status">{{ t.status }}</span>
+	  <span class="badge badge-sm badge-soft tooltip badge-neutral" data-tip="# notes">{{ t.notes | length }}</span>
+	</div>
+      </div>
+      <div class="list-col-wrap text-sm opacity-60 listjs-definition">
+	{{ t._definition_html | safe }}
+      </div>
+    </div>
+    <div>
+    </div>
+  </li>
+  {% endfor %}
+</ul>
+
+<div class="stats shadow w-full">
+  <div class="stat place-items-center">
+    <div class="stat-title">Total terms</div>
+    <div class="stat-value">{{ terms|length }}</div>
+  </div>
+</div>
+
+
+
+{% endblock %}

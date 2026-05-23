@@ -31,7 +31,7 @@ class Term(DocumentModel):
     """
     A term
     """
-    key: str
+    #key: str
     term: str
     definition: str
     synonyms: List[str]

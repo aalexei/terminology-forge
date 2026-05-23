@@ -7,6 +7,7 @@ from routes.authentication import auth_user
 
 from core import exceptions
 from services.user import UserService
+from services.term import TermService
 
 router = APIRouter()
 
@@ -26,24 +27,34 @@ async def home(request: Request,
     return templates.TemplateResponse(request=request, name="home.html", context=context)
 
 
-@router.get("/list/{vocab}", response_class=HTMLResponse)
+@router.get("/vocab/{vocab}/list", response_class=HTMLResponse)
 async def root_get(vocab: str,
                    request: Request,
                    uid=Depends(auth_user)):
-    return vocab_list(request)
-@router.post("/list/{vocab}", response_class=HTMLResponse)
+    return await vocab_list(request, vocab, uid)
+@router.post("/vocab/{vocab}/list", response_class=HTMLResponse)
 async def root_post(vocab: str,
                     request: Request,
                     filtr: Annotated[str, Form()] = "",
                     uid=Depends(auth_user)):
-    return vocab_list(request,filtr=filtr)
-def vocab_list(request, filtr=""):
-    items = [extend_item(t) for t in ITEMS.values()]
+    return await vocab_list(request,vocab, uid, filtr=filtr)
+async def vocab_list(request, vocab, uid, filtr=""):
+
+    user_service = UserService(request.app.state.client.db)
+    user = await user_service.get(uid)
+
+    # Every user has read access to all vocabs
+    
+    term_service = TermService(request.app.state.client.db, vocab)
+    terms = await term_service.get_terms(filtr)
+    
+    #items = [extend_item(t) for t in ITEMS.values()]
     
     context = {
-        "uid": uid,
-        "items": items,
+        "user": user,
+        "terms": terms,
         "filter": filtr,
+        "vocab": vocab,
     }
     return templates.TemplateResponse(request=request, name="list.html", context=context)
 

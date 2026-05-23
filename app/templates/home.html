@@ -35,7 +35,7 @@
 <h3>Editable Vocabularies</h3>
 <ul class="list bg-base-100 rounded-box shadow-md">
     {% for vocab in user.editor %}
-    <a href="/list/{{vocab}}"><li class="list-row">{{vocab}}</li></a>
+    <a href="/vocab/{{vocab}}/list"><li class="list-row">{{vocab}}</li></a>
     {% endfor %}
 </ul>
 <p>{{user}}</p>
