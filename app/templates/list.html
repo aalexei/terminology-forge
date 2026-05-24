@@ -62,11 +62,9 @@
 	  {% endif %}
 	</a>
 	<div class="flex flex-row flex-none gap-2 listjs-tag">
-	  {% for tag in t._tags.split() %}
-	  <a href="#" class="badge badge-sm badge-outline badge-info" onclick="addtofilter('@{{ tag }}')">@{{ tag }}</a>
+	  {% for tag in t._tags %}
+	  <a href="#" class="badge badge-sm badge-soft badge-info" onclick="addtofilter('@{{ tag['n'] }}')">@{{ tag['n'] }}</a>
 	  {% endfor %}
-	  <span class="badge badge-sm badge-soft badge-info tooltip listjs-cluster" data-tip="cluster">{{ t.cluster }}</span>
-	  <span class="badge badge-sm badge-soft badge-success tooltip listjs-status" data-tip="status">{{ t.status }}</span>
 	  <span class="badge badge-sm badge-soft tooltip badge-neutral" data-tip="# notes">{{ t.notes | length }}</span>
 	</div>
       </div>

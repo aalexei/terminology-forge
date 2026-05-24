@@ -55,20 +55,25 @@ class LinkedText:
         return re.sub(r'\[\[(.*?)\]\]', linkf, self.text)
 
 
-def extend_item(item, context='list'):
+def extend_term(term, context='list'):
     '''
     Add extra fields for display
     '''
-    linkf = lambda x: linkify(x, context)
 
-    item['_definition_html'] = LinkedText(item['definition']).linkify(context)
+    # term._tags = ''
+    
+    # linkf = lambda x: linkify(x, context)
+
+    #term._definition_html = LinkedText(term.definition)#.linkify(context)
+    term._definition_html = LinkedText(term.definition).html()
 
     notes_html = []
-    for n in item['notes']:
-        notes_html.append(LinkedText(n).linkify(context))
-    item['_notes_html'] = notes_html
+    for n in term.notes:
+        # notes_html.append(LinkedText(n).linkify(context))
+        notes_html.append(LinkedText(n).html())
+    term._notes_html = notes_html
         
-    return item
+    return term
 
 
 class TermService:
@@ -82,15 +87,31 @@ class TermService:
     async def get_terms(self, filtr):
         #terms_col = self.db.collection(self.collection)
 
+        query = """
+        FOR t IN @@coll
+          LET tags = (
+            FOR v IN INBOUND t._id tagged
+            RETURN {"_id":v._id, "n":v.n} 
+            )
+          LET links = (
+            FOR v IN ANY t._id link
+            RETURN {"_id":v._id, "term":v.term} 
+            )
+        RETURN { "term":t, "tags":tags, "links":links }
+        """
+
+        # "FOR doc IN @@coll RETURN doc"
         cursor = await self.db.aql.execute(
-            "FOR doc IN vqc RETURN doc",
-            #bind_vars={"col": self.collection},
+            query,
+            bind_vars={"@coll": self.collection},
         )
         terms = []
         async with cursor as ctx:
             async for t in ctx:
-                T = Term(**t)
-                T._tags = ''
+                T = Term(**t["term"])
+                T._tags = t["tags"]
+                T._links = t["links"]
+                extend_term(T)
                 terms.append(T)
                 
                 
