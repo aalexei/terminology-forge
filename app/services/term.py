@@ -83,43 +83,6 @@ class TermService:
         self.db = db
         self.collection = vocab
 
-    async def get_terms2(self, filtr):
-        # A different attempt
-        # more efficient in query
-        # less efficient in looking for membership in links in linkify
-        # trips up with pydantic
-        
-        query = """
-        FOR t IN @@coll
-          LET tags = (
-            FOR v IN INBOUND t._id tagged
-            RETURN {"_id":v._id, "n":v.n} 
-            )
-          LET links = (
-            FOR v IN OUTBOUND t._id link
-            RETURN {"_id":v._id, "term":v.term} 
-            )
-        RETURN MERGE(t, { "tags_":tags, "links_":links })
-        """
-
-        cursor = await self.db.aql.execute(
-            query,
-            bind_vars={"@coll": self.collection},
-        )
-        terms = []
-        async with cursor as ctx:
-            async for t in ctx:
-                T = Term(**t)
-                print("-"*30)
-                print("T.tags_:", T.tags_)
-                print("T:",T)
-                print("T.model_dump()",T.model_dump())
-                extend_term(T)
-                terms.append(T)
-                
-        
-        return terms
-        
 
     async def get_terms(self, filtr):
 
