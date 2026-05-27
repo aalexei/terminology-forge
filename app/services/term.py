@@ -2,31 +2,35 @@ import re
 from db.schema import Term
 
 
-def linkify(so, links, collection, context):
+def linkify(so, links, vocab, context):
     '''
     Transform link of form [[key][text]] or [[key]] to actual html links
     '''
     raw = so.group(1)
     pieces = raw.split('][')
     key = pieces[0].strip()
+    
+    if '/' in key:
+        target_vocab,target_key = key.split('/')
+    else:
+        target_key = key
+        target_vocab = vocab
+        
+    target_id = f"{target_vocab}/{target_key}"
+        
     if len(pieces)>1:
         text = pieces[1].strip()
     else:
-        if key in links:
-            text = links[key]['n']
+        if target_id in links:
+            text = links[target_id]
         else:
             text = key
 
-    if '/' in key:
-        tid = key
-    else:
-        tid = f'{collection}/{key}'
-    if tid in links:
+    if target_id in links:
         if context == 'list':
-            out = f'<a href="/vocab/{collection}/list#{key}" class="link">{text}</a>'
+            out = f'<a href="/vocab/{target_vocab}/list#{target_key}" class="link">{text}</a>'
         else:
-            out = f'<a href="/vocab/{collection}/term/{key}" class="link">{text}</a>'
-
+            out = f'<a href="/vocab/{target_vocab}/term/{target_key}" class="link">{text}</a>'
     else:
         # highlight that the link is dangling
         out = f'<a href="#" class="link link-warning">{text}</a>'
@@ -53,25 +57,25 @@ class LinkedText:
         html = self.text.replace(f'[[{key}]',f'[[<span class="text-secondary">{key}</span>]')
         return html
 
-    def linkify(self, links, collection, context):
-        linkf = lambda x: linkify(x, links, collection, context)
+    def linkify(self, links, vocab, context):
+        linkf = lambda x: linkify(x, links, vocab, context)
         return re.sub(r'\[\[(.*?)\]\]', linkf, self.text)
 
 
-def extend_term(term, tags, links, collection, context='list'):
+def extend_term(term, tags, links, vocab, context='list'):
     '''
     Add extra fields for display
     '''
 
     term._tags = tags
     term._links = { l['_id']:l['term'] for l in links }
-    term._collection = collection
+    term._vocab = vocab
     
-    term._definition_html = LinkedText(term.definition).linkify(term._links, term._collection,  context)
+    term._definition_html = LinkedText(term.definition).linkify(term._links, term._vocab,  context)
 
     notes_html = []
     for n in term.notes:
-        notes_html.append(LinkedText(n).linkify(term._links, term._collection, context))
+        notes_html.append(LinkedText(n).linkify(term._links, term._vocab, context))
     term._notes_html = notes_html
         
     return term
