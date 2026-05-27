@@ -62,8 +62,8 @@
 	  {% endif %}
 	</a>
 	<div class="flex flex-row flex-none gap-2 listjs-tag">
-	  {% for tag in t.tags_ %}
-	  <a href="#" class="badge badge-sm badge-soft badge-info" onclick="addtofilter('@{{ tag['n'] }}')">@{{ tag['n'] }}</a>
+	  {% for tag in t._tags %}
+	  <a href="#" class="badge badge-sm badge-soft badge-info" onclick="addtofilter('@{{ tag['name'] }}')">@{{ tag['name'] }}</a>
 	  {% endfor %}
 	  <span class="badge badge-sm badge-soft tooltip badge-neutral" data-tip="# notes">{{ t.notes | length }}</span>
 	</div>

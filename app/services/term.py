@@ -58,13 +58,15 @@ class LinkedText:
         return re.sub(r'\[\[(.*?)\]\]', linkf, self.text)
 
 
-def extend_term(term, context='list'):
+def extend_term(term, tags, links, collection, context='list'):
     '''
     Add extra fields for display
     '''
-    
-    # linkf = lambda x: linkify(x, prefix)
 
+    term._tags = tags
+    term._links = { l['_id']:l['term'] for l in links }
+    term._collection = collection
+    
     term._definition_html = LinkedText(term.definition).linkify(term._links, term._collection,  context)
 
     notes_html = []
@@ -90,7 +92,7 @@ class TermService:
         FOR t IN @@coll
           LET tags = (
             FOR v IN INBOUND t._id tagged
-            RETURN {"_id":v._id, "n":v.n} 
+            RETURN {"_id":v._id, "name":v.name} 
             )
           LET links = (
             FOR v IN ANY t._id link
@@ -107,10 +109,7 @@ class TermService:
         async with cursor as ctx:
             async for t in ctx:
                 T = Term(**t["term"])
-                T._tags = t["tags"]
-                T._links = { l['_id']:l['term'] for l in t["links"] }
-                T._collection = self.collection
-                extend_term(T)
+                extend_term(T, t["tags"], t["links"], self.collection)
                 terms.append(T)
                 
         return terms
