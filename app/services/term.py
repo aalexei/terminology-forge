@@ -2,7 +2,7 @@ import re
 from db.schema import Term
 
 
-def linkify(so, context='list'):
+def linkify(so, links, collection, context):
     '''
     Transform link of form [[key][text]] or [[key]] to actual html links
     '''
@@ -12,18 +12,21 @@ def linkify(so, context='list'):
     if len(pieces)>1:
         text = pieces[1].strip()
     else:
-        if key in ITEMS:
-            text = ITEMS[key]['term']
+        if key in links:
+            text = links[key]['n']
         else:
             text = key
 
-    if key in ITEMS:
-        if context=='list':
-            # link to term in terms-list
-            out = f'<a href="/#{key}" class="link">{text}</a>'
+    if '/' in key:
+        tid = key
+    else:
+        tid = f'{collection}/{key}'
+    if tid in links:
+        if context == 'list':
+            out = f'<a href="/vocab/{collection}/list#{key}" class="link">{text}</a>'
         else:
-            # link to term in term page
-            out = f'<a href="/term/{key}" class="link">{text}</a>'
+            out = f'<a href="/vocab/{collection}/term/{key}" class="link">{text}</a>'
+
     else:
         # highlight that the link is dangling
         out = f'<a href="#" class="link link-warning">{text}</a>'
@@ -50,8 +53,8 @@ class LinkedText:
         html = self.text.replace(f'[[{key}]',f'[[<span class="text-secondary">{key}</span>]')
         return html
 
-    def linkify(self, context='list'):
-        linkf = lambda x: linkify(x, context)
+    def linkify(self, links, collection, context):
+        linkf = lambda x: linkify(x, links, collection, context)
         return re.sub(r'\[\[(.*?)\]\]', linkf, self.text)
 
 
@@ -59,18 +62,14 @@ def extend_term(term, context='list'):
     '''
     Add extra fields for display
     '''
-
-    # term._tags = ''
     
-    # linkf = lambda x: linkify(x, context)
+    # linkf = lambda x: linkify(x, prefix)
 
-    #term._definition_html = LinkedText(term.definition)#.linkify(context)
-    term._definition_html = LinkedText(term.definition).html()
+    term._definition_html = LinkedText(term.definition).linkify(term._links, term._collection,  context)
 
     notes_html = []
     for n in term.notes:
-        # notes_html.append(LinkedText(n).linkify(context))
-        notes_html.append(LinkedText(n).html())
+        notes_html.append(LinkedText(n).linkify(term._links, term._collection, context))
     term._notes_html = notes_html
         
     return term
@@ -84,8 +83,45 @@ class TermService:
         self.db = db
         self.collection = vocab
 
+    async def get_terms2(self, filtr):
+        # A different attempt
+        # more efficient in query
+        # less efficient in looking for membership in links in linkify
+        # trips up with pydantic
+        
+        query = """
+        FOR t IN @@coll
+          LET tags = (
+            FOR v IN INBOUND t._id tagged
+            RETURN {"_id":v._id, "n":v.n} 
+            )
+          LET links = (
+            FOR v IN OUTBOUND t._id link
+            RETURN {"_id":v._id, "term":v.term} 
+            )
+        RETURN MERGE(t, { "tags_":tags, "links_":links })
+        """
+
+        cursor = await self.db.aql.execute(
+            query,
+            bind_vars={"@coll": self.collection},
+        )
+        terms = []
+        async with cursor as ctx:
+            async for t in ctx:
+                T = Term(**t)
+                print("-"*30)
+                print("T.tags_:", T.tags_)
+                print("T:",T)
+                print("T.model_dump()",T.model_dump())
+                extend_term(T)
+                terms.append(T)
+                
+        
+        return terms
+        
+
     async def get_terms(self, filtr):
-        #terms_col = self.db.collection(self.collection)
 
         query = """
         FOR t IN @@coll
@@ -100,7 +136,6 @@ class TermService:
         RETURN { "term":t, "tags":tags, "links":links }
         """
 
-        # "FOR doc IN @@coll RETURN doc"
         cursor = await self.db.aql.execute(
             query,
             bind_vars={"@coll": self.collection},
@@ -110,12 +145,9 @@ class TermService:
             async for t in ctx:
                 T = Term(**t["term"])
                 T._tags = t["tags"]
-                T._links = t["links"]
+                T._links = { l['_id']:l['term'] for l in t["links"] }
+                T._collection = self.collection
                 extend_term(T)
                 terms.append(T)
                 
-                
-        
         return terms
-        
-

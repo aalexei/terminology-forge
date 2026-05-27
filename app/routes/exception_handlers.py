@@ -47,16 +47,16 @@ def register_exception_handlers(app):
     # Catchall - details to log only
     @app.exception_handler(Exception)
     async def catch_all_handler(request: Request, exc: Exception):
-        logger.error(
-            "UnhandledException:\n%s", 
-            "".join(
-                traceback.format_exception(
-                    type(exc),
-                    exc,
-                    exc.__traceback__,
-                )
-            )
-        )
+        # logger.error(
+        #     "UnhandledException:\n%s"% 
+        #     "".join(
+        #         traceback.format_exception(
+        #             type(exc),
+        #             exc,
+        #             exc.__traceback__,
+        #         )
+        #     )
+        # )
         context = {
             'status_code':500,
             'message': "Something went wrong. Please try again later.",

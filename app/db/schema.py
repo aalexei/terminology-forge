@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, PrivateAttr
+from pydantic import BaseModel, Field, PrivateAttr, ConfigDict
 from typing import Optional, Union, List, Dict, Any
 from arangoasync.database import StandardDatabase
 
@@ -6,7 +6,8 @@ class DocumentModel(BaseModel):
     """
     Base ArangodDocument model.
     """
-    key_: Optional[str] = Field(alias="_key")
+    model_config = ConfigDict(serialize_by_alias=True)
+    key_: str = Field(alias="_key")
     #rev_: Optional[str] = Field(alias="_rev")
 
     
@@ -31,7 +32,6 @@ class Term(DocumentModel):
     """
     A term
     """
-    #key: str
     term: str
     definition: str
     synonyms: List[str]
@@ -43,6 +43,10 @@ class Term(DocumentModel):
     src: str
     rev: int
     log: List[str]
+
+    # Optional private keys with dynamic info on term
+    #tags_: List[dict] | None = Field(None, exclude=True)
+    #links_: List[dict] | None = Field(None, exclude=True)
 
 class Tag(DocumentModel):
     """
