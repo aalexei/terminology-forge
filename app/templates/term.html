@@ -43,25 +43,6 @@
 
     <div class="pt-4 flex flex-row gap-4">
       <div>
-      <h2 class="font-bold">Structural:</h2>
-      <table class="table-sm self-start table-zebra border border-base-content/5 bg-base-100">
-	<tbody>
-	  <tr>
-            <th><div class="tooltip tooltip-right" data-tip="Unique key">Key</div></th>
-            <td>{{ term.key_ }}</td>
-	  </tr>
-	  <tr>
-            <th><div class="tooltip tooltip-right" data-tip="Informal source">src</div></th>
-            <td>{{ term.src }}</td>
-	  </tr>
-	  <tr>
-            <th><div class="tooltip tooltip-right" data-tip="Revision">rev</div></th>
-            <td>{{ term.rev }}</td>
-	  </tr>
-	</tbody>
-      </table>
-      </div>
-      <div>
       <h2 class="font-bold">Formal:</h2>
       <table class="table-sm self-start table-zebra border border-base-content/5 bg-base-100">
 	<tbody>
@@ -80,6 +61,32 @@
 	</tbody>
       </table>
       </div>
+      <div>
+<h2 class="font-bold">Structural:</h2>
+      <table class="table-sm self-start table-zebra border border-base-content/5 bg-base-100">
+	<tbody>
+	  <tr>
+            <th><div class="tooltip tooltip-right" data-tip="Unique key">Key</div></th>
+            <td>{{ term.key_ }}</td>
+	  </tr>
+	  {% if term.src is not none %}
+	  <tr>
+            <th><div class="tooltip tooltip-right" data-tip="Informal source">src</div></th>
+            <td>{{ term.src }}</td>
+	  </tr>
+	  {% endif %}
+	  {% if term.rev is not none %}
+	  <tr>
+            <th><div class="tooltip tooltip-right" data-tip="Revision">rev</div></th>
+            <td>{{ term.rev }}</td>
+	  </tr>
+	  {% endif %}
+	</tbody>
+      </table>
+
+	
+      
+      </div>
     </div>   
   
     <div class="pt-4">
@@ -94,6 +101,7 @@
       </fieldset>
     </div>
 
+    {% if term.log is not none %}
     <div class="pt-4">
       <h2 class="font-bold">Change Log:</h2>
       <ol class="list-decimal ml-4">
@@ -107,7 +115,7 @@
       <i>No Changes.</i>
       {% endif %}
     </div>
-
+    {% endif %}
     
 </div>
 {% endblock %}

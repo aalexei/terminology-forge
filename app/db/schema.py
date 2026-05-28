@@ -40,9 +40,9 @@ class Term(DocumentModel):
     context: str
     section: str
 
-    src: str
-    rev: int
-    log: List[str]
+    src: str | None = None
+    rev: int | None = None
+    log: List[str] | None = None
 
     # Optional private keys with dynamic info on term
     #tags_: List[dict] | None = Field(None, exclude=True)
