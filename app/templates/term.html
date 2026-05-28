@@ -1,8 +1,18 @@
 {% extends "base.html" %}
 
+{% block main_menu %}
+<li><a href="/">Home</a></li>
+<li class="menu-title">Actions</li>
+<li><a href="/vocab/{{vocab}}/edit/{{ term.key_ }}">Edit</a></li>
+{% endblock main_menu %}
+	  
 {% block nav_end %}
 <a class="btn btn-outline" href="/vocab/{{vocab}}/edit/{{ term['key'] }}">Edit</a>
 {% endblock nav_end %}
+
+{% block nav_middle %}
+<span>{{vocab}}</span>
+{% endblock nav_middle %}
 
 {% block user_menu %}
   <li><i>{{ user.github }}</i></li>

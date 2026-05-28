@@ -13,6 +13,7 @@
 
 
 {% block nav_middle %}
+<span>{{user.name}}</span>
 {% endblock nav_middle %}
 
 
@@ -24,7 +25,7 @@
 
 {% block content %}
 <div class="flex flex-col m-4">
-  <h3 class="text-lg">{{user.name}}</h3>
+  <h1 class="text-2xl">{{user.name}}</h1>
   <table class="table">
     <tbody>
       <tr> <th>Name</th> <td>{{user.name}}</td> </tr>
@@ -32,12 +33,12 @@
       <tr> <th>Gilhub</th> <td>{{user.github}}</td> </tr>
       </tr>
   </table>
-<h3>Editable Vocabularies</h3>
+<h2 class"font-bold">Editable Vocabularies</h2>
 <ul class="list bg-base-100 rounded-box shadow-md">
     {% for vocab in user.editor %}
     <a href="/vocab/{{vocab}}/list"><li class="list-row">{{vocab}}</li></a>
     {% endfor %}
 </ul>
-<p>{{user}}</p>
+<h2 class"font-bold">Readonly Vocabularies</h2>
 </div>
 {% endblock %}
