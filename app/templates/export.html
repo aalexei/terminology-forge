@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block user_menu %}
+  <li><i>{{ user.github }}</i></li>
+  <li><a href="/logout">Logout</a></li>
+{% endblock user_menu %}
+
+{% block nav_middle %}
+<span>{{vocab}}</span>
+{% endblock nav_middle %}
+  
+
+{% block content %}
+<div class="flex flex-col px-6">
+  <h1 class="text-2xl">Export {{vocab}} data</h1>
+
+  <div class="flex flex-col gap-4 mt-4">
+    <form method="post" action="/vocab/{{vocab}}/export">
+      
+      <div class="collapse collapse-arrow bg-base-100 border border-base-300">
+	<input type="radio" name="export-types" checked="checked" />
+	<div class="collapse-title font-semibold"><code>JSON</code></div>
+	<div class="collapse-content text-sm">
+	  <p>Export vocabulary data in <code>JSON</code> format. Terms and keys are sorted alphabetically and the output is written to be human-readable.</p>
+	  <div class="flex flex-row justify-end w-full mt-2">
+	    <button class="btn" type="submit" name="action" value="json">Export JSON</button>
+	  </div>
+	</div>
+      </div>
+
+      <div class="collapse collapse-arrow bg-base-100 border border-base-300">
+	<input type="radio" name="export-types" />
+	<div class="collapse-title font-semibold"><code>CSV</code></div>
+	<div class="collapse-content text-sm">
+	  <p>Export vocabulary data as a <code>CSV</code> file. Notes are combined into a single column, separated by semicolon (;).</p>
+	  <div class="flex flex-row justify-end w-full mt-2">
+	    <button class="btn" type="submit" name="action" value="csv">Export CSV</button>
+	  </div>
+	</div>
+      </div>
+      
+    </form>
+  </div>
+  
+</div>
+{% endblock %}

@@ -72,3 +72,17 @@ async def show_term(vocab: str, tid: str, request: Request, uid=Depends(auth_use
     }
     return templates.TemplateResponse(request=request, name="term.html", context=context)
 
+@router.get("/vocab/{vocab}/export", response_class=HTMLResponse)
+async def show_term(vocab: str, request: Request, uid=Depends(auth_user)):
+
+    user_service = UserService(request.app.state.client.db)
+    user = await user_service.get(uid)
+    #term_service = TermService(request.app.state.client.db, vocab)
+
+    #term = await term_service.get_term(tid)
+    
+    context = {
+        "user": user,
+        "vocab": vocab,
+    }
+    return templates.TemplateResponse(request=request, name="export.html", context=context)
