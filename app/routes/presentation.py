@@ -48,8 +48,6 @@ async def vocab_list(request, vocab, uid, filtr=""):
     term_service = TermService(request.app.state.client.db, vocab)
     terms = await term_service.get_terms(filtr)
     
-    #items = [extend_item(t) for t in ITEMS.values()]
-    
     context = {
         "user": user,
         "terms": terms,
@@ -57,4 +55,20 @@ async def vocab_list(request, vocab, uid, filtr=""):
         "vocab": vocab,
     }
     return templates.TemplateResponse(request=request, name="list.html", context=context)
+
+@router.get("/vocab/{vocab}/term/{tid}", response_class=HTMLResponse)
+async def show_term(vocab: str, tid: str, request: Request, uid=Depends(auth_user)):
+
+    user_service = UserService(request.app.state.client.db)
+    user = await user_service.get(uid)
+    term_service = TermService(request.app.state.client.db, vocab)
+
+    term = await term_service.get_term(tid)
+    
+    context = {
+        "user": user,
+        "vocab": vocab,
+        "term": term,
+    }
+    return templates.TemplateResponse(request=request, name="term.html", context=context)
 

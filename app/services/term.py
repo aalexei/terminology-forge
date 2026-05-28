@@ -117,3 +117,26 @@ class TermService:
                 terms.append(T)
                 
         return terms
+
+    async def get_term(self, tid):
+        query = """
+        LET tags = (
+          FOR v IN INBOUND @tid tagged
+            RETURN {"_id":v._id, "name":v.name} 
+        )
+        LET links = (
+          FOR v IN OUTBOUND @tid link
+            RETURN {"_id":v._id, "term":v.term} 
+        )
+        RETURN {"term":DOCUMENT(@tid), "tags":tags, "links":links}
+        """
+        cursor = await self.db.aql.execute(
+            query,
+            bind_vars={"tid": f"{self.collection}/{tid}"},
+        )
+        async with cursor as ctx:
+            async for t in ctx:
+                T = Term(**t["term"])
+                extend_term(T, t["tags"], t["links"], self.collection, context="term")
+                
+        return T
