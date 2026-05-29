@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
-from core.security import get_auth_github_user, get_auth_user
+from core.security import get_auth_github_user
 from core.config import config
 from core.exceptions import UnauthorizedException
 import httpx
@@ -13,15 +13,7 @@ router = APIRouter()
 
 templates = Jinja2Templates(directory="app/templates")
 
-def auth_user(request: Request):
-    '''
-    Verify that user has a valid session.
-    Return uid if valid otherwise raise exceptions
-    '''
-    access_token = request.session.get('access_token')
-    result = get_auth_user(access_token)
-    return result['uid']
-
+    
 @router.get("/login")
 async def login():
     redirect_uri = f"{config.authorize_url}?client_id={config.client_id}&redirect_uri={config.redirect_uri}&scope=read:user"

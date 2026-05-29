@@ -3,8 +3,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from typing import Annotated, Union
 from loguru import logger
-from routes.authentication import auth_user
-
+from core.security import auth_user
 from core import exceptions
 from services.user import UserService
 from services.term import TermService
@@ -73,7 +72,7 @@ async def show_term(vocab: str, tid: str, request: Request, uid=Depends(auth_use
     return templates.TemplateResponse(request=request, name="term.html", context=context)
 
 @router.get("/vocab/{vocab}/export", response_class=HTMLResponse)
-async def show_term(vocab: str, request: Request, uid=Depends(auth_user)):
+async def export(vocab: str, request: Request, uid=Depends(auth_user)):
 
     user_service = UserService(request.app.state.client.db)
     user = await user_service.get(uid)

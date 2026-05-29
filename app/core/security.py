@@ -7,6 +7,7 @@ from core.config import config
 from core.exceptions import UnauthorizedException
 from db.db import SESSIONS
 from services.user import UserService
+from fastapi import Request
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     '''
@@ -92,11 +93,13 @@ def is_token_expired(timestamp: int) -> bool:
     else:
         return True
 
-def get_auth_user(sessionid):
+def auth_user(request: Request):
     '''
     Verify that user has a valid session.
     Return uid if valid otherwise raise exceptions
     '''
+    sessionid = request.session.get('access_token')
+    
     if not sessionid or sessionid not in SESSIONS:
         logger.info('No session ID')
         raise UnauthorizedException('You must be logged in')
@@ -106,7 +109,7 @@ def get_auth_user(sessionid):
         raise UnauthorizedException('Log in expired')
     else:
         logger.debug('Session valid')
-        return {'uid':SESSIONS[sessionid]['uid']}
+        return SESSIONS[sessionid]['uid']
 
 
 
