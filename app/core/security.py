@@ -93,7 +93,7 @@ def is_token_expired(timestamp: int) -> bool:
     else:
         return True
 
-def auth_user(request: Request):
+async def auth_user(request: Request):
     '''
     Verify that user has a valid session.
     Return uid if valid otherwise raise exceptions
@@ -109,7 +109,12 @@ def auth_user(request: Request):
         raise UnauthorizedException('Log in expired')
     else:
         logger.debug('Session valid')
-        return SESSIONS[sessionid]['uid']
+        uid = SESSIONS[sessionid]['uid']
+        user_service = UserService(request.app.state.client.db)
+        user = await user_service.get(uid)
+        return user
+
+    
 
 
 

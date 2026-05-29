@@ -14,13 +14,9 @@ templates = Jinja2Templates(directory="app/templates")
 
 @router.get("/", response_class=HTMLResponse)
 async def home(request: Request,
-               uid=Depends(auth_user)):
+               user=Depends(auth_user)):
 
-    user_service = UserService(request.app.state.client.db)
-    user = await user_service.get(uid)
-    
     context = {
-        "uid": uid,
         "user": user,
     }
     return templates.TemplateResponse(request=request, name="home.html", context=context)
@@ -29,18 +25,15 @@ async def home(request: Request,
 @router.get("/vocab/{vocab}/list", response_class=HTMLResponse)
 async def root_get(vocab: str,
                    request: Request,
-                   uid=Depends(auth_user)):
-    return await vocab_list(request, vocab, uid)
+                   user=Depends(auth_user)):
+    return await vocab_list(request, vocab, user)
 @router.post("/vocab/{vocab}/list", response_class=HTMLResponse)
 async def root_post(vocab: str,
                     request: Request,
                     filtr: Annotated[str, Form()] = "",
-                    uid=Depends(auth_user)):
-    return await vocab_list(request,vocab, uid, filtr=filtr)
-async def vocab_list(request, vocab, uid, filtr=""):
-
-    user_service = UserService(request.app.state.client.db)
-    user = await user_service.get(uid)
+                    user=Depends(auth_user)):
+    return await vocab_list(request,vocab, user, filtr=filtr)
+async def vocab_list(request, vocab, user, filtr=""):
 
     # Every user has read access to all vocabs
     
@@ -56,10 +49,8 @@ async def vocab_list(request, vocab, uid, filtr=""):
     return templates.TemplateResponse(request=request, name="list.html", context=context)
 
 @router.get("/vocab/{vocab}/term/{tid}", response_class=HTMLResponse)
-async def show_term(vocab: str, tid: str, request: Request, uid=Depends(auth_user)):
+async def show_term(vocab: str, tid: str, request: Request, user=Depends(auth_user)):
 
-    user_service = UserService(request.app.state.client.db)
-    user = await user_service.get(uid)
     term_service = TermService(request.app.state.client.db, vocab)
 
     term = await term_service.get_term(tid)
@@ -72,14 +63,8 @@ async def show_term(vocab: str, tid: str, request: Request, uid=Depends(auth_use
     return templates.TemplateResponse(request=request, name="term.html", context=context)
 
 @router.get("/vocab/{vocab}/export", response_class=HTMLResponse)
-async def export(vocab: str, request: Request, uid=Depends(auth_user)):
+async def export(vocab: str, request: Request, user=Depends(auth_user)):
 
-    user_service = UserService(request.app.state.client.db)
-    user = await user_service.get(uid)
-    #term_service = TermService(request.app.state.client.db, vocab)
-
-    #term = await term_service.get_term(tid)
-    
     context = {
         "user": user,
         "vocab": vocab,
