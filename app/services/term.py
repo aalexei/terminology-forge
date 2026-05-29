@@ -90,7 +90,7 @@ class TermService:
         self.collection = vocab
 
 
-    async def get_terms(self, filtr):
+    async def get_terms(self, filtr=''):
 
         query = """
         FOR t IN @@coll

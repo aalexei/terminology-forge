@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Request, Form, Depends
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, PlainTextResponse
 from fastapi.templating import Jinja2Templates
 from typing import Annotated, Union
 from loguru import logger
@@ -7,6 +7,7 @@ from core.security import auth_user
 from core import exceptions
 from services.user import UserService
 from services.term import TermService
+import json
 
 router = APIRouter()
 
@@ -69,4 +70,50 @@ async def export(vocab: str, request: Request, user=Depends(auth_user)):
         "user": user,
         "vocab": vocab,
     }
+    return templates.TemplateResponse(request=request, name="export.html", context=context)
+
+@router.post("/vocab/{vocab}/export")
+async def export_post(vocab: str, request: Request, action: Annotated[str, Form()] = "",  user=Depends(auth_user)):
+
+    term_service = TermService(request.app.state.client.db, vocab)
+    terms = await term_service.get_terms()
+    
+    export_data = []
+    for item in terms:
+        out = {}
+        for k,v in item.model_dump().items():
+            if k[0] != '_':
+                # Don't export any temporary keys
+                out[k] = v
+            elif k == '_key':
+                out['key'] = v
+        export_data.append(out)
+    # sort terms on key
+    export_data.sort(key=lambda x:x['key'].lower()) 
+        
+    if action == "json":
+        # Generate JSON in consistent and human-readable format for revision control
+        data_str = json.dumps({'terms':export_data}, sort_keys=True, indent=2)
+        return PlainTextResponse(data_str,
+                            headers={"Content-Disposition": f"attachment; filename=qcvocab.json"}
+                            )
+    elif action == "csv":
+        fp = io.StringIO()
+        fieldnames = ['key', 'term', 'definition', 'section', 'source', 'rev', 'tags', 'status', 'cluster', 'src']
+        csvwriter = csv.writer(fp, quoting=csv.QUOTE_NONNUMERIC)
+        csvwriter.writerow(fieldnames+['synonyms','notes','log'])
+        for item in export_data:
+            row = [item[f] for f in fieldnames]
+            row.append(";".join(item['synonyms']))
+            row.append(";".join(item['notes']))
+            row.append(";".join([str(l) for l in item['log']]))
+            csvwriter.writerow(row)
+        return PlainTextResponse(fp.getvalue(),
+                            headers={"Content-Disposition": f"attachment; filename=qcvocab.csv"}
+                            )
+
+        
+    context = {
+    }
+    
     return templates.TemplateResponse(request=request, name="export.html", context=context)
