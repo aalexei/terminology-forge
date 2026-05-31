@@ -1,0 +1,87 @@
+#+TITLE: JSON Format
+
+A vocabulary can be exported to and imported from a =JSON= encoded data file.
+
+* Formatting
+The file is structured so that it can be meaningfully revision controlled and is formatted for human readability. The keys in dictionaries are sorted in lexicographic order. Also in lists where the order does not convey importance (such as tags) lexicographic order should be applied. This is to avoid trivial changes being recorded.
+
+Human readability is by expanding to one field per line and indenting substructures by two spaces. Dictionary delimiters are also split into separate lines.
+
+e.g.
+#+BEGIN_SRC JSON 
+{
+  "cluster": "background",
+  "context": "",
+  "definition": "members of a set of [[quantum_state][quantum states]] which span the [[hilbert_space]] of a [[quantum_system]]",
+  "key": "basis_states",
+  "notes": [
+    "Any quantum state in the Hilbert space can be written as a linear combination, or [[quantum_superposition]], of basis states.",
+    "A set of basis states is often chosen to be complete and orthonormal. That is, the set spans the entire Hilbert space, and individual elements are orthogonal and normalised to length 1."
+  ],
+  "rev": 1,
+  "section": "Quantum physics background",
+  "source": "",
+  "synonyms": [],
+  "term": "basis states"
+},
+#+END_SRC
+
+
+* Meta fields
+The top level data structure is a dictionary with the following fields.
+- =info= - A dictionary containing information about the vocabulary (name, abreviation, description, readonly)
+- =terms= - A list of dictionaries for each term (see below).
+- =tags= - A list of dictionaries for each tag used in editable dictionaries (see below).
+
+* Term fields
+The fields in each term split into two categories. All vocabularies have a set of /formal/ fields that are used in the final specification. Vocabularies that are being edited have additional organisational and development fields which capture the work being done in the terminologies.
+
+** Formal fields
+- =key= - a unique key for each term (only lowercase letters =a-z=, numbers =0-9=, or underscore =_=). See below on how to assign.
+- =term= - the term itself.
+- =definition= - term definition with possible embedded cross-links. See below on syntax of links.
+- =synonyms= - optional list of synonyms. May be empty if there are no synonyms.
+- =notes= - optional list of notes with possible embedded cross-links.
+- =source= - optional formal source note, when the term and definition is taken from elsewhere with minor changes.
+- =context= - context for multiply-defined terms (main context is blank).
+- =section= - formal section for the term in the eventual document.
+
+These formal fields are necessary and sufficient to generate the terminology section of the final specification.
+
+** Organisational fields
+These may change as the project evolves.
+
+- =src= - Indicates if the term came from an existing vocabulary. This is a reminder to potentially set the =source= field eventually.
+- =rev= - revision number, used to ensure edits are consistent in multiuser environment.
+- =tags= - List of keywords to organise terms. See below for tags.
+- =log= - A list of changes to the term. Each change is a dictionary, see below for format.
+
+* Converting a term to a key
+For maximum compatibility with different databases the key should only consist of lowercase letters =a-z=, numbers =0-9=, or =_=. To get a key from a term, keep the ascii letters (lowercase) and replace all other characters with _. e.g. =Schrödinger's cat= becomes =schrodinger_s_cat=.
+
+This format ensures that keys are easy generate and type by hand when editing notes and definitions.
+
+* Cross-links
+Cross-links are links from a term to other terms. These are typically in the terms definition or notes, though may appear in organisational fields.
+
+To link to a term, there are two formats.
+1. Use the term's key in the form "=[[key]]=". This will display the linked term itself in the formatted text with a URL to the correct term.
+2. To override the formatted text use the format "=[[key][display text]]=" which will display /display text/ in the formatted text.
+
+The key may include a different vocabulary by using the using the vocabulary's short name as in "=[[vocab/key_in_vocab]]=". There should be no inter-vocabulary links in the formal fields.
+
+* Tags
+
+Tags are the main organisational vehicle when developing a vocabulary. Tags should only consist of lowercase letters =a-z=, numbers =0-9=, or =_= (so the tag name itself can form a DB id). Tags can have a hierarchy to indicate context by using a "=.=". e.g =status.new= and =group.new=.
+
+Tags may be assigned freely and have any context dependent meaning. To help clarify the intention of a tag, tags are saved as a dictionary in JSON and have a "=description=" field.
+
+#+BEGIN_SRC JSON 
+"tags" = [
+  {
+    "id": "cluster.background",
+    "description": "Indicates a necessary background term to make the terminology self-contained"
+  }
+], 
+#+END_SRC
+
