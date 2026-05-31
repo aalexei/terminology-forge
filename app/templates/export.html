@@ -9,6 +9,15 @@
 <span>{{vocab}}</span>
 {% endblock nav_middle %}
   
+{% block help_modal %}
+<div class="flex flex-col gap-4">
+<p>Here you can export the <i>{{vocab}}</i> vocabulary into two formats:</p>
+<ul>
+  <li><code>JSON</code>: Export vocabulary data in <a class="link" href="https://www.rfc-editor.org/info/rfc8259/">JSON</a> format. Terms and keys are sorted alphabetically and the output is written to be human-readable. This is a good format to backup a vocabulary as there exists tools to load the vocabulary from such a file.</li>
+  <li class="mt-4"><code>CSV</code>: Export vocabulary data as a <a class="link" href="https://www.rfc-editor.org/info/rfc4180/">CSV</a> file. Notes and other lists are combined into a single column, separated by semicolon (;).</li>
+</ul>
+</div>
+{% endblock help_modal %}
 
 {% block content %}
 <div class="flex flex-col px-6">
@@ -32,7 +41,7 @@
 	<input type="radio" name="export-types" />
 	<div class="collapse-title font-semibold"><code>CSV</code></div>
 	<div class="collapse-content text-sm">
-	  <p>Export vocabulary data as a <code>CSV</code> file. Notes are combined into a single column, separated by semicolon (;).</p>
+	  <p>Export vocabulary data as a <code>CSV</code> file. Lists are combined into a single column, separated by semicolon (;).</p>
 	  <div class="flex flex-row justify-end w-full mt-2">
 	    <button class="btn" type="submit" name="action" value="csv">Export CSV</button>
 	  </div>
