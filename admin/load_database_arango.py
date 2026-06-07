@@ -113,25 +113,38 @@ def vocab_get_info(vocab_file):
     return info
     
 def reset_database():
-    
+
+    # Get list of vocabulary json files
     vocab_files = glob.glob('vocabs/*.json')
 
+    # Delete and recreate the database
     rootpass = getpass('Arango root password:')
     dbpass = getpass('Set DB password:')
 
     sysdb = get_db('_system', 'root', rootpass)
     delete_database(sysdb)
     create_database(sysdb, dbpass)
-        
+
+    # Fetch the new DB
     db = get_db(DB_NAME, DB_USER, dbpass)
+
+    # Add users collection
     add_user_collection("users.json", db)
 
+    # Get summary info from vocabulary json files
     vertex_collections = []
+    vocabularies = []
     for vocab_file in vocab_files:
         info = vocab_get_info(vocab_file)
+        info['_key'] = term2key(info['abbreviation'])
+        vocabularies.append(info)
         vertex_collections.append(info['abbreviation'])
 
+    # Create a collection with vocabulary metadata
+    vs = db.create_collection('vocabularies')
+    vs.import_bulk(vocabularies)
 
+    # Create graph DB
     edge_definitions = [
         {# term -> term links 
             'edge_collection': 'link',
@@ -151,11 +164,12 @@ def reset_database():
     ]
 
     G = db.create_graph(GRAPH_NAME, edge_definitions=edge_definitions)
-    
+
+    # Load and link the vocabularies
     for vocab_file in vocab_files:
         load_data(G, vocab_file)
 
-    
+        
 def relink(G, t1):
     '''
     Recreate the links from this item's definition and notes out.
@@ -179,7 +193,18 @@ def relink(G, t1):
         if t2 is not None:
             LINK.insert({'_from':t1['_id'], '_to':t2['_id']})
 
-
+class Tag:
+    def __init__(self, **data):
+        self.targets = set()
+        self.data = {
+            'name':data['name'],
+            'description':data.get('description',''),
+            'n':data['name'], # TODO for Arango graph view (temporary)
+        }
+    def add_target(self, t):
+        self.targets.add(t)
+    
+            
 def load_data(G, vocab_file):
 
     with open(vocab_file) as fp:
@@ -187,7 +212,7 @@ def load_data(G, vocab_file):
 
     info = data['info']
     terms = data['terms']
-    name = info['abbreviation']
+    name = term2key(info['abbreviation'])
     
     
     TERM = G.vertex_collection(name)
@@ -195,7 +220,10 @@ def load_data(G, vocab_file):
     LINK = G.edge_collection('link')
     TAGGED = G.edge_collection('tagged')
 
-    tags = {}
+    if info['editable']:
+        tags = {}
+        for t in data.get('tags',[]):
+            tags[t['name']] = Tag(**t)
 
     dbterms = []
     for term in terms:
@@ -219,21 +247,22 @@ def load_data(G, vocab_file):
             # TODO temporary renaming may remove cluster and status in future
             for cat in ['cluster', 'status']:
                 if len(term.get(cat,''))>0:
-                    name = cat+'.'+term2key(term[cat])
+                    name = cat+'.'+term[cat]
                     if name not in tags:
-                        tags[name] = []
-                    tags[name].append(dbterm['_key'])
+                        tags[name] = Tag(name=name)
+                    tags[name].add_target(dbterm['_key'])
                 
         dbterms.append(dbterm)
-        
+
     TERM.insert_many(dbterms)
 
-    # Attach tags 
-    for tag, ts in tags.items():
-        c = TAG.insert({'_key':tag, 'name':tag, 'n':tag}) # TODO 'n' for Arango graph view
-        for t in ts:
-            t2 = TERM.get(t)
-            TAGGED.insert({'_from':c['_id'], '_to':t2['_id']})
+    if info['editable']:
+        # Attach tags 
+        for t in tags.values():
+            c = TAG.insert(t.data)
+            for target in t.targets:
+                t2 = TERM.get(target)
+                TAGGED.insert({'_from':c['_id'], '_to':t2['_id']})
 
     # Link terms
     for t1 in TERM.all():
