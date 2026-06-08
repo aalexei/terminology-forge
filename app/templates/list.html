@@ -54,11 +54,11 @@
 {% block content %}
 <ul class="list w-full">
   {% for t in terms %}
-  <li id="{{ t.key_ }}" class="list-row w-full bg-base-100 scroll-mt-20">
-    <input type="checkbox" class="checkbox" name="selected" value="{{ t.key_ }}" />
+  <li id="{{ t.key }}" class="list-row w-full bg-base-100 scroll-mt-20">
+    <input type="checkbox" class="checkbox" name="selected" value="{{ t.key }}" />
     <div>
       <div class="flex flex-row w-full">
-	<a href="/vocab/{{vocab}}/term/{{t.key_}}" class="flex-1 listjs-term font-bold">
+	<a href="/vocab/{{vocab}}/term/{{t.key}}" class="flex-1 listjs-term font-bold">
 	  {{ t.term }}
 	  {% if t.synonyms|length > 0 %}
 	  / {{ t.synonyms|join(' / ') }}

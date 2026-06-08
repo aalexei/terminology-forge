@@ -3,11 +3,11 @@
 {% block main_menu %}
 <li><a href="/">Home</a></li>
 <li class="menu-title">Actions</li>
-<li><a href="/vocab/{{vocab}}/edit/{{ term.key_ }}">Edit</a></li>
+<li><a href="/vocab/{{vocab}}/edit/{{ term.key }}">Edit</a></li>
 {% endblock main_menu %}
 	  
 {% block nav_end %}
-<a class="btn btn-outline" href="/vocab/{{vocab}}/edit/{{ term['key'] }}">Edit</a>
+<a class="btn btn-outline" href="/vocab/{{vocab}}/edit/{{ term.key }}">Edit</a>
 {% endblock nav_end %}
 
 {% block nav_middle %}
@@ -23,7 +23,7 @@
 {% block content %}
 <div class="flex flex-col px-6">
 
-  <a href="/vocab/{{vocab}}/list#{{ term.key_ }}">
+  <a href="/vocab/{{vocab}}/list#{{ term.key }}">
     <h1 class="text-2xl">
       {{ term.term }}
       {% if term.synonyms|length > 0 %}
@@ -77,7 +77,7 @@
 	<tbody>
 	  <tr>
             <th><div class="tooltip tooltip-right" data-tip="Unique key">Key</div></th>
-            <td>{{ term.key_ }}</td>
+            <td>{{ term.key }}</td>
 	  </tr>
 	  {% if term.src is not none %}
 	  <tr>
@@ -103,8 +103,8 @@
       <h2 class="font-bold">Tags:</h2>
       <fieldset class="fieldset">
 	<input type="text" class="input" placeholder="Set tags" name="tags"
-	       value="{% for tag in term._tags %}{{ tag['name'] }}; {% endfor %}" hx-post="/settags" hx-target="#response" hx-include="#tid" />
-	<input type="hidden" id="tid" name="tid" value="{{ term.key_ }}" />
+	       value="{% for tag in term._tags %}{{ tag['name'] }}{% if not loop.last %}; {% endif %}{% endfor %}" hx-post="/settags" hx-target="#response" hx-include="#tid" />
+	<input type="hidden" id="tid" name="tid" value="{{ term.key }}" />
 	<input type="hidden" id="vocab" name="vocab" value="{{ vocab }}" />
 	<p class="label" id="target">Tags should be separated by semi-colon (;)</p>
 	<p class="label" id="response"></p>
