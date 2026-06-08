@@ -8,6 +8,9 @@ from getpass import getpass
 
 from arango import ArangoClient
 
+sys.path.append("..")
+from app.db import schema
+
 DB_NAME = 'TFDB'
 DB_USER = 'tfuser'
 GRAPH_NAME = 'TFG'
@@ -109,7 +112,7 @@ def vocab_get_info(vocab_file):
     with open(vocab_file) as fp:
         data = json.load(fp)
 
-    info = data['info']
+    info = schema.Vocabulary(**data['info'])
     return info
     
 def reset_database():
@@ -136,9 +139,8 @@ def reset_database():
     vocabularies = []
     for vocab_file in vocab_files:
         info = vocab_get_info(vocab_file)
-        info['_key'] = term2key(info['abbreviation'])
-        vocabularies.append(info)
-        vertex_collections.append(info['abbreviation'])
+        vocabularies.append(info.model_dump())
+        vertex_collections.append(info.key)
 
     # Create a collection with vocabulary metadata
     vs = db.create_collection('vocabularies')
@@ -196,13 +198,11 @@ def relink(G, t1):
 class Tag:
     def __init__(self, **data):
         self.targets = set()
-        self.data = {
-            'name':data['name'],
-            'description':data.get('description',''),
-            'n':data['name'], # TODO for Arango graph view (temporary)
-        }
+        self.data = schema.Tag(**data)
     def add_target(self, t):
         self.targets.add(t)
+    def model_dump(self):
+        return self.data.model_dump(exclude_unset=True)
     
             
 def load_data(G, vocab_file):
@@ -210,39 +210,27 @@ def load_data(G, vocab_file):
     with open(vocab_file) as fp:
         data = json.load(fp)
 
-    info = data['info']
+    vocab = schema.Vocabulary(**data['info'])
     terms = data['terms']
-    name = term2key(info['abbreviation'])
-    
+    name = vocab.key
     
     TERM = G.vertex_collection(name)
     TAG = G.vertex_collection('tag')
     LINK = G.edge_collection('link')
     TAGGED = G.edge_collection('tagged')
 
-    if info['editable']:
+    if vocab.editable:
         tags = {}
         for t in data.get('tags',[]):
             tags[t['name']] = Tag(**t)
 
     dbterms = []
     for term in terms:
-        dbterm = {
-            '_key': term['key'],
-            'term': term['term'],
-            'n': term['key'], # TODO for Arango graph view (temporary)
-            'definition': term['definition'],
-            'source': term['source'],
-            'section': term['section'],
-            'context': term['context'],
-            'synonyms': term['synonyms'],
-            'notes': term['notes'],
-            'src': term['src'],
-            }
+        dbterm = schema.Term(**term)
         
-        if info['editable']:
-            dbterm['log'] = term.get('log', [])
-            dbterm['rev'] = term.get('rev', 1)
+        if vocab.editable:
+            dbterm.log = term.get('log', [])
+            dbterm.rev = term.get('rev', 1)
 
             # TODO temporary renaming may remove cluster and status in future
             for cat in ['cluster', 'status']:
@@ -250,16 +238,16 @@ def load_data(G, vocab_file):
                     name = cat+'.'+term[cat]
                     if name not in tags:
                         tags[name] = Tag(name=name)
-                    tags[name].add_target(dbterm['_key'])
+                    tags[name].add_target(dbterm.key)
                 
-        dbterms.append(dbterm)
+        dbterms.append(dbterm.model_dump())
 
     TERM.insert_many(dbterms)
 
-    if info['editable']:
+    if vocab.editable:
         # Attach tags 
         for t in tags.values():
-            c = TAG.insert(t.data)
+            c = TAG.insert(t.model_dump())
             for target in t.targets:
                 t2 = TERM.get(target)
                 TAGGED.insert({'_from':c['_id'], '_to':t2['_id']})

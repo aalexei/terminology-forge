@@ -1,20 +1,23 @@
-from pydantic import BaseModel, Field, PrivateAttr, ConfigDict
+from pydantic import BaseModel, Field, PrivateAttr, ConfigDict, AliasChoices
 from typing import Optional, Union, List, Dict, Any
 from arangoasync.database import StandardDatabase
 
 class DocumentModel(BaseModel):
     """
-    Base ArangodDocument model.
+    Base Arango document model.
     """
     model_config = ConfigDict(serialize_by_alias=True)
-    key_: str = Field(alias="_key")
-    #rev_: Optional[str] = Field(alias="_rev")
-
+    key: str = Field(default=None,
+                     serialization_alias="_key", # Arando model
+                     validation_alias=AliasChoices('_key', 'key'), # accept arango or json
+                     pattern=r"^[a-zA-Z0-9_\-.@+=]+$" # restrict to valid arango keys
+                     )
     
 class EdgeModel(BaseModel):
     """
     Base Arango edge model.
     """
+    model_config = ConfigDict(serialize_by_alias=True)
     from_: Union[str, DocumentModel] = Field(alias="_from")
     to_: Union[str, DocumentModel] = Field(alias="_to")
 
@@ -40,18 +43,32 @@ class Term(DocumentModel):
     context: str
     section: str
 
-    src: str | None = None
-    rev: int | None = None
-    log: List[str] | None = None
-
-    # Optional private keys with dynamic info on term
-    #tags_: List[dict] | None = Field(None, exclude=True)
-    #links_: List[dict] | None = Field(None, exclude=True)
+    # Optional development fields
+    src: str = ""
+    rev: int = 1
+    log: List[str] = []
 
 class Tag(DocumentModel):
     """
     A tag
     """
     name: str
+    description: str = ""
+
+class Vocabulary(DocumentModel):
+    """
+    Info for a vocabulary
+    """
+    name: str
     description: str
+    editable: bool
+
+
+# TODO this should be a link    
+class Comment(DocumentModel):
+    """
+    A comment by a user on a term
+    """
+    comment: str
+    timestamp: float
     

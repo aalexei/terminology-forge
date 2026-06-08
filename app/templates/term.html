@@ -103,10 +103,10 @@
       <h2 class="font-bold">Tags:</h2>
       <fieldset class="fieldset">
 	<input type="text" class="input" placeholder="Set tags" name="tags"
-	       value="{% for tag in term._tags %}{{ tag['name'] }} {% endfor %}" hx-post="/settags" hx-target="#response" hx-include="#tid" />
+	       value="{% for tag in term._tags %}{{ tag['name'] }}; {% endfor %}" hx-post="/settags" hx-target="#response" hx-include="#tid" />
 	<input type="hidden" id="tid" name="tid" value="{{ term.key_ }}" />
 	<input type="hidden" id="vocab" name="vocab" value="{{ vocab }}" />
-	<p class="label" id="target">Tags should be space separated</p>
+	<p class="label" id="target">Tags should be separated by semi-colon (;)</p>
 	<p class="label" id="response"></p>
       </fieldset>
     </div>
