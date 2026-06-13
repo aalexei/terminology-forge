@@ -1,5 +1,5 @@
 import re
-from db.schema import Term
+from db import schema
 
 
 def linkify(so, links, vocab, context):
@@ -96,7 +96,7 @@ class TermService:
         FOR t IN @@coll
           LET tags = (
             FOR v IN INBOUND t._id tagged
-            RETURN {"_id":v._id, "name":v.name} 
+            RETURN {"_id":v._id, "name":v.name, "description":v.description} 
             )
           LET links = (
             FOR v IN ANY t._id link
@@ -112,7 +112,7 @@ class TermService:
         terms = []
         async with cursor as ctx:
             async for t in ctx:
-                T = Term(**t["term"])
+                T = schema.Term(**t["term"])
                 extend_term(T, t["tags"], t["links"], self.collection)
                 terms.append(T)
                 
@@ -136,7 +136,13 @@ class TermService:
         )
         async with cursor as ctx:
             async for t in ctx:
-                T = Term(**t["term"])
+                T = schema.Term(**t["term"])
                 extend_term(T, t["tags"], t["links"], self.collection, context="term")
                 
         return T
+
+    async def get_vocab_info(self, vocab):
+        vocabularies = self.db.collection("vocabularies")
+        infodata = await vocabularies.get(vocab)
+        info = schema.Vocabulary(**infodata)
+        return info

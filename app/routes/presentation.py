@@ -40,12 +40,12 @@ async def vocab_list(request, vocab, user, filtr=""):
     
     term_service = TermService(request.app.state.client.db, vocab)
     terms = await term_service.get_terms(filtr)
-    
+    vocab_info = await term_service.get_vocab_info(vocab)
     context = {
         "user": user,
         "terms": terms,
         "filter": filtr,
-        "vocab": vocab,
+        "vocab_info": vocab_info,
     }
     return templates.TemplateResponse(request=request, name="list.html", context=context)
 
@@ -55,10 +55,11 @@ async def show_term(vocab: str, tid: str, request: Request, user=Depends(auth_us
     term_service = TermService(request.app.state.client.db, vocab)
 
     term = await term_service.get_term(tid)
+    vocab_info = await term_service.get_vocab_info(vocab)
     
     context = {
         "user": user,
-        "vocab": vocab,
+        "vocab_info": vocab_info,
         "term": term,
     }
     return templates.TemplateResponse(request=request, name="term.html", context=context)

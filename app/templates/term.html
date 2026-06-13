@@ -3,15 +3,15 @@
 {% block main_menu %}
 <li><a href="/">Home</a></li>
 <li class="menu-title">Actions</li>
-<li><a href="/vocab/{{vocab}}/edit/{{ term.key }}">Edit</a></li>
+<li><a href="/vocab/{{vocab_info.key}}/edit/{{ term.key }}">Edit</a></li>
 {% endblock main_menu %}
 	  
 {% block nav_end %}
-<a class="btn btn-outline" href="/vocab/{{vocab}}/edit/{{ term.key }}">Edit</a>
+<a class="btn btn-outline" href="/vocab/{{vocab_info.key}}/edit/{{ term.key }}">Edit</a>
 {% endblock nav_end %}
 
 {% block nav_middle %}
-<span>{{vocab}}</span>
+<span class="tooltip tooltip-bottom" data-tip="{{ vocab_info.name }}">{{vocab_info.key}}</span>
 {% endblock nav_middle %}
 
 {% block user_menu %}
@@ -23,7 +23,7 @@
 {% block content %}
 <div class="flex flex-col px-6">
 
-  <a href="/vocab/{{vocab}}/list#{{ term.key }}">
+  <a href="/vocab/{{vocab_info.key}}/list#{{ term.key }}">
     <h1 class="text-2xl">
       {{ term.term }}
       {% if term.synonyms|length > 0 %}
@@ -105,7 +105,7 @@
 	<input type="text" class="input" placeholder="Set tags" name="tags"
 	       value="{% for tag in term._tags %}{{ tag['name'] }}{% if not loop.last %}; {% endif %}{% endfor %}" hx-post="/settags" hx-target="#response" hx-include="#tid" />
 	<input type="hidden" id="tid" name="tid" value="{{ term.key }}" />
-	<input type="hidden" id="vocab" name="vocab" value="{{ vocab }}" />
+	<input type="hidden" id="vocab" name="vocab" value="{{ vocab_info.key }}" />
 	<p class="label" id="target">Tags should be separated by semi-colon (;)</p>
 	<p class="label" id="response"></p>
       </fieldset>
