@@ -63,6 +63,12 @@ class Vocabulary(DocumentModel):
     description: str
     editable: bool
 
+    def is_editable(self, user):
+        """
+        Is this vocabulary editable by user
+        """
+        return self.editable and self.key in user.editor
+            
 
 # TODO this should be a link    
 class Comment(DocumentModel):

@@ -17,10 +17,10 @@
 
 {% block main_menu %}
 <li><a href="/">Home</a></li>
-<li class="menu-title">Actions</li>
+<li class="menu-title">Actions:</li>
 <li><span onclick="document.querySelectorAll('input[type=checkbox]').forEach(el => el.checked = false);">Clear selection</span></li>
 <li><span onclick="main_modal.showModal()">Set tags on selected</span></li>
-<li><a href="/vocab/{{vocab_info.key}}/export">Export</a></li>
+<li><a href="/vocab/{{vocab_info.key}}/export">Export vocabulary</a></li>
 {% endblock main_menu %}
 
 {% block nav_middle %}

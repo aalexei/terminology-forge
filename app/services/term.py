@@ -85,7 +85,7 @@ class TermService:
 
     collection = None
     
-    def __init__(self, db, vocab):
+    def __init__(self, db, vocab=''):
         self.db = db
         self.collection = vocab
 
@@ -146,3 +146,22 @@ class TermService:
         infodata = await vocabularies.get(vocab)
         info = schema.Vocabulary(**infodata)
         return info
+
+    async def get_vocabs(self):
+
+        query = """
+        FOR v IN vocabularies
+        RETURN v
+        """
+
+        cursor = await self.db.aql.execute(
+            query
+        )
+        vocabs = []
+        async with cursor as ctx:
+            async for v in ctx:
+                V = schema.Vocabulary(**v)
+                vocabs.append(V)
+                
+        return vocabs
+

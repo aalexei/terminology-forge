@@ -16,9 +16,11 @@ templates = Jinja2Templates(directory="app/templates")
 @router.get("/", response_class=HTMLResponse)
 async def home(request: Request,
                user=Depends(auth_user)):
-
+    term_service = TermService(request.app.state.client.db)
+    vocabs = await term_service.get_vocabs()
     context = {
         "user": user,
+        "vocabs": vocabs,
     }
     return templates.TemplateResponse(request=request, name="home.html", context=context)
 

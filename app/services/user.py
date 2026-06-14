@@ -14,7 +14,6 @@ class UserService:
             uid = None
         else:
             data = cursor.pop()
-            print('DATA', data)
             uid = data['_id']
         await cursor.close()
         return uid
