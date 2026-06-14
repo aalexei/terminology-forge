@@ -1,5 +1,7 @@
 import re
+import json
 from db import schema
+
 
 
 def linkify(so, links, vocab, context):
@@ -99,7 +101,7 @@ class TermService:
             RETURN {"_id":v._id, "name":v.name, "description":v.description} 
             )
           LET links = (
-            FOR v IN ANY t._id link
+            FOR v IN OUTBOUND t._id link
             RETURN {"_id":v._id, "term":v.term} 
             )
         RETURN { "term":t, "tags":tags, "links":links }
@@ -165,3 +167,34 @@ class TermService:
                 
         return vocabs
 
+    async def get_graph_elements(self):
+
+        query = """
+        FOR t IN @@coll
+          LET tags = (
+            FOR v IN INBOUND t._id tagged
+            RETURN {"_id":v._id, "name":v.name, "description":v.description} 
+            )
+          LET links = (
+            FOR v IN OUTBOUND t._id link
+            RETURN {"_id":v._id, "term":v.term} 
+            )
+        RETURN { "term":t, "tags":tags, "links":links }
+        """
+        cursor = await self.db.aql.execute(
+            query,
+            bind_vars={"@coll": self.collection},
+        )
+        
+        elements = { 'nodes':[], 'edges':[] }
+        async with cursor as ctx:
+            async for t in ctx:
+                elements['nodes'].append({
+                    'data': {'id': t['term']['_id'], 'n':t['term']['term']}
+                    })
+                for lnk in t['links']:
+                    elements['edges'].append({
+                        'data': {'source': t['term']['_id'], 'target':lnk['_id'], 'n':'link'}
+                    })
+
+        return json.dumps(elements)

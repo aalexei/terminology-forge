@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.33.1/cytoscape.min.js"></script>
+<script src="https://unpkg.com/layout-base/layout-base.js"></script>
+<script src="https://unpkg.com/cose-base/cose-base.js"></script>
+<!-- <script src="https://unpkg.com/webcola/WebCola/cola.min.js"></script> -->
+<script src="https://cdn.jsdelivr.net/npm/cytoscape-fcose@2.2.0/cytoscape-fcose.min.js"></script>
+<script src="https://unpkg.com/webcola/WebCola/cola.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/cytoscape-cola@2.5.1/cytoscape-cola.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/cytoscape-dagre@4.0.0/dist/cytoscape-dagre.min.js"></script>
+<!-- <script src="/static/js/cytoscape-cola.js"></script> -->
+<!-- <script src="/static/js/cytoscape-fcose.js"></script> -->
+<script>
+  // Expose cola to window so the extension can find it
+  cytoscapeCola(cytoscape, window.cola); 
+</script>
+<style>
+/* #cy { */
+/*     float:left; */
+/*     width: 98%; */
+/*     height: 98%; */
+/*     display: block; */
+/*     border: 1px solid #cccccc; */
+/* } */
+</style>
+{% endblock %}
+
+
+{% block main_modal %}
+<fieldset class="fieldset w-full">
+  <input type="text" class="input w-full" placeholder="Add and remove tags" name="action" value="" />
+  <p class="label">Add with +tag or just tag and remove with -tag</p>
+</fieldset>
+<button type="submit" class="btn">Set</button>
+<span class="btn" onclick="main_modal.close()">Cancel</span>
+{% endblock main_modal %}
+
+
+{% block main_menu %}
+<li><a href="/">Home</a></li>
+<li class="menu-title">Actions:</li>
+<li><span onclick="document.querySelectorAll('input[type=checkbox]').forEach(el => el.checked = false);">Clear selection</span></li>
+<li><span onclick="main_modal.showModal()">Set tags on selected</span></li>
+<li><a href="/vocab/{{vocab.key}}/export">Export vocabulary</a></li>
+{% endblock main_menu %}
+
+{% block nav_middle %}
+<!-- Use name of filtr as filter is a python keyword -->
+<span class="tooltip tooltip-bottom" data-tip="{{ vocab.name }}">{{vocab.key}}</span>
+<input id="filter" name="filtr" type="text" placeholder="Filter" class="input input-bordered w-24 md:w-auto search navbar-center text-base-content ml-5" value="{{ filter }}" />
+{% endblock nav_middle %}
+
+{% block nav_end %}
+<ul class="menu menu-horizontal px-1">
+  <li>
+    <details>
+      <summary>Sort</summary>
+      <ul class="bg-neutral text-neutral-content rounded-t-none p-2">
+	<li><a class="sort" data-sort="listjs-term">Term</a></li>
+	<li><a class="sort" data-sort="listjs-cluster">Cluster</a></li>
+	<li><a class="sort" data-sort="listjs-status">Status</a></li>
+      </ul>
+    </details>
+  </li>
+</ul>
+{% endblock nav_end %}
+
+{% block user_menu %}
+  <li><i>{{ user.github }}</i></li>
+  <li><a href="/logout">Logout</a></li>
+{% endblock user_menu %}
+
+  {% block content %}
+  <div id="cy" class="w-full h-screen"></div>
+{% endblock %}
+
+{% block body_bottom %}
+  <script type="text/javascript">
+    //cytoscape.use( cola );
+    var cy = cytoscape({
+	container: document.getElementById('cy'),
+	elements: {{elements | safe}},
+	style: [
+	    {
+		selector: 'node',
+		style: {
+		    'label': 'data(n)',
+		    'shape': 'round-rectangle',
+		    'font-size': 6,
+                    'width':'60px',
+                    'text-wrap':'wrap',
+                    'text-max-width':'50px',
+                    'text-outline-width': 0,
+                    'text-halign':'center',
+                    'text-valign':'center',
+		    'color':'black'
+		}
+	    },
+	    {
+		'selector': 'edge',
+		'style': {
+		    'target-arrow-shape': 'triangle',
+                    'curve-style': 'bezier',
+                    // 'text-rotation':'autorotate',
+                    // 'label':'data(n)',
+                    // 'text-wrap':'wrap',
+                    // 'color':'white',
+                    'width':3
+                    // 'font-size':4
+		}
+	    },
+	],
+	// layout: {
+	//     name: 'cola',
+	//     animate:false,
+	//     maxSimulationTime: 4000,
+	//     // nodeSeparation: 100,
+	//     // nodeRepulsion: 5*4500,
+	//    // gravity: 0.15,
+	//    // fixedNodeConstraint:fixed,
+	//    // fit:false
+	// },
+	layout: {
+	    name: 'fcose',
+	    animate:false,
+	    idealEdgeLength: 100,
+	    nodeSeparation: 50,
+	    nodeRepulsion: 500000,
+	    gravity: 1,
+	    gravityRange: 5,
+	   // fixedNodeConstraint:fixed,
+	   // fit:false
+	},
+	// layout: {
+	//     name: 'dagre',
+	//     animate:false,
+	// }
+
+    });
+  </script>
+{% endblock %}

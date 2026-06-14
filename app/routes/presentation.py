@@ -26,12 +26,12 @@ async def home(request: Request,
 
 
 @router.get("/vocab/{vocab}/list", response_class=HTMLResponse)
-async def root_get(vocab: str,
+async def vocab_get(vocab: str,
                    request: Request,
                    user=Depends(auth_user)):
     return await vocab_list(request, vocab, user)
 @router.post("/vocab/{vocab}/list", response_class=HTMLResponse)
-async def root_post(vocab: str,
+async def vocab_post(vocab: str,
                     request: Request,
                     filtr: Annotated[str, Form()] = "",
                     user=Depends(auth_user)):
@@ -50,6 +50,21 @@ async def vocab_list(request, vocab, user, filtr=""):
         "filter": filtr,
     }
     return templates.TemplateResponse(request=request, name="list.html", context=context)
+
+@router.get("/vocab/{vocab}/graph", response_class=HTMLResponse)
+async def vocab_graph(vocab: str,
+                   request: Request,
+                   user=Depends(auth_user)):
+    term_service = TermService(request.app.state.client.db, vocab)
+    elements = await term_service.get_graph_elements()
+    vocabobj = await term_service.get_vocab_info(vocab)
+    context = {
+        "user": user,
+        "vocab": vocabobj,
+        "elements": elements,
+    }
+    return templates.TemplateResponse(request=request, name="graph.html", context=context)
+
 
 @router.get("/vocab/{vocab}/term/{tid}", response_class=HTMLResponse)
 async def show_term(vocab: str, tid: str, request: Request, user=Depends(auth_user)):
