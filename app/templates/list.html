@@ -20,12 +20,12 @@
 <li class="menu-title">Actions:</li>
 <li><span onclick="document.querySelectorAll('input[type=checkbox]').forEach(el => el.checked = false);">Clear selection</span></li>
 <li><span onclick="main_modal.showModal()">Set tags on selected</span></li>
-<li><a href="/vocab/{{vocab_info.key}}/export">Export vocabulary</a></li>
+<li><a href="/vocab/{{vocab.key}}/export">Export vocabulary</a></li>
 {% endblock main_menu %}
 
 {% block nav_middle %}
 <!-- Use name of filtr as filter is a python keyword -->
-<span class="tooltip tooltip-bottom" data-tip="{{ vocab_info.name }}">{{vocab_info.key}}</span>
+<span class="tooltip tooltip-bottom" data-tip="{{ vocab.name }}">{{vocab.key}}</span>
 <input id="filter" name="filtr" type="text" placeholder="Filter" class="input input-bordered w-24 md:w-auto search navbar-center text-base-content ml-5" value="{{ filter }}" />
 {% endblock nav_middle %}
 
@@ -58,7 +58,7 @@
     <input type="checkbox" class="checkbox" name="selected" value="{{ t.key }}" />
     <div>
       <div class="flex flex-row w-full">
-	<a href="/vocab/{{vocab_info.key}}/term/{{t.key}}" class="flex-1 listjs-term font-bold">
+	<a href="/vocab/{{vocab.key}}/term/{{t.key}}" class="flex-1 listjs-term font-bold">
 	  {{ t.term }}
 	  {% if t.synonyms|length > 0 %}
 	  / {{ t.synonyms|join(' / ') }}

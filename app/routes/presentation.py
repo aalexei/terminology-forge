@@ -35,19 +35,19 @@ async def root_post(vocab: str,
                     request: Request,
                     filtr: Annotated[str, Form()] = "",
                     user=Depends(auth_user)):
-    return await vocab_list(request,vocab, user, filtr=filtr)
+    return await vocab_list(request, vocab, user, filtr=filtr)
 async def vocab_list(request, vocab, user, filtr=""):
 
     # Every user has read access to all vocabs
     
     term_service = TermService(request.app.state.client.db, vocab)
     terms = await term_service.get_terms(filtr)
-    vocab_info = await term_service.get_vocab_info(vocab)
+    vocabobj = await term_service.get_vocab_info(vocab)
     context = {
         "user": user,
+        "vocab": vocabobj,
         "terms": terms,
         "filter": filtr,
-        "vocab_info": vocab_info,
     }
     return templates.TemplateResponse(request=request, name="list.html", context=context)
 
@@ -57,11 +57,11 @@ async def show_term(vocab: str, tid: str, request: Request, user=Depends(auth_us
     term_service = TermService(request.app.state.client.db, vocab)
 
     term = await term_service.get_term(tid)
-    vocab_info = await term_service.get_vocab_info(vocab)
+    vocabobj = await term_service.get_vocab_info(vocab)
     
     context = {
         "user": user,
-        "vocab_info": vocab_info,
+        "vocab": vocabobj,
         "term": term,
     }
     return templates.TemplateResponse(request=request, name="term.html", context=context)
@@ -69,9 +69,10 @@ async def show_term(vocab: str, tid: str, request: Request, user=Depends(auth_us
 @router.get("/vocab/{vocab}/export", response_class=HTMLResponse)
 async def export(vocab: str, request: Request, user=Depends(auth_user)):
 
+    vocabobj = await term_service.get_vocab_info(vocab)
     context = {
         "user": user,
-        "vocab": vocab,
+        "vocab": vocabobj,
     }
     return templates.TemplateResponse(request=request, name="export.html", context=context)
 
@@ -80,7 +81,8 @@ async def export_post(vocab: str, request: Request, action: Annotated[str, Form(
 
     term_service = TermService(request.app.state.client.db, vocab)
     terms = await term_service.get_terms()
-    
+    vocabobj = await term_service.get_vocab_info(vocab)
+
     export_data = []
     for item in terms:
         out = {}
