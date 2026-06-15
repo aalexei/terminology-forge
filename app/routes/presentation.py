@@ -24,6 +24,17 @@ async def home(request: Request,
     }
     return templates.TemplateResponse(request=request, name="home.html", context=context)
 
+@router.get("/vocab/{vocab}/digest", response_class=HTMLResponse)
+async def vocab_digest(vocab: str,
+                   request: Request,
+                   user=Depends(auth_user)):
+    term_service = TermService(request.app.state.client.db, vocab)
+    vocabobj = await term_service.get_vocab_info(vocab)
+    context = {
+        "user": user,
+        "vocab": vocabobj,
+    }
+    return templates.TemplateResponse(request=request, name="digest.html", context=context)
 
 @router.get("/vocab/{vocab}/list", response_class=HTMLResponse)
 async def vocab_get(vocab: str,
