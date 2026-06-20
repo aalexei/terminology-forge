@@ -76,6 +76,20 @@ async def vocab_graph(vocab: str,
     }
     return templates.TemplateResponse(request=request, name="graph.html", context=context)
 
+@router.get("/vocab/{vocab}/graph2", response_class=HTMLResponse)
+async def vocab_graph2(vocab: str,
+                   request: Request,
+                   user=Depends(auth_user)):
+    term_service = TermService(request.app.state.client.db, vocab)
+    elements = await term_service.get_graph_elements()
+    vocabobj = await term_service.get_vocab_info(vocab)
+    context = {
+        "user": user,
+        "vocab": vocabobj,
+        "elements": elements,
+    }
+    return templates.TemplateResponse(request=request, name="graph2.html", context=context)
+
 
 @router.get("/vocab/{vocab}/term/{tid}", response_class=HTMLResponse)
 async def show_term(vocab: str, tid: str, request: Request, user=Depends(auth_user)):

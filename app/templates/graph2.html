@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/sigma.js/2.4.0/sigma.min.js"></script> -->
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/graphology/0.25.4/graphology.umd.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/graphology-library@0.8.0/browser.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/graphology-layout-forceatlas2@0.10.1/index.min.js"></script> -->
+<script type="importmap">
+      {
+        "imports": {
+          "sigma": "https://cdnjs.cloudflare.com/ajax/libs/sigma.js/3.0.0/sigma.min.js",
+          "graphology": "https://cdn.jsdelivr.net/npm/graphology@0.26.0/dist/graphology.umd.min.js",
+          "graphologyLibrary": "https://cdn.jsdelivr.net/npm/graphology-library/dist/graphology-library.min.js"
+        }
+      } 
+    </script>
+{% endblock %}
+
+
+{% block main_modal %}
+<fieldset class="fieldset w-full">
+  <input type="text" class="input w-full" placeholder="Add and remove tags" name="action" value="" />
+  <p class="label">Add with +tag or just tag and remove with -tag</p>
+</fieldset>
+<button type="submit" class="btn">Set</button>
+<span class="btn" onclick="main_modal.close()">Cancel</span>
+{% endblock main_modal %}
+
+
+{% block main_menu %}
+<li><a href="/">Home</a></li>
+<li class="menu-title">Actions:</li>
+<li><span onclick="document.querySelectorAll('input[type=checkbox]').forEach(el => el.checked = false);">Clear selection</span></li>
+<li><span onclick="main_modal.showModal()">Set tags on selected</span></li>
+<li><a href="/vocab/{{vocab.key}}/export">Export vocabulary</a></li>
+{% endblock main_menu %}
+
+{% block nav_middle %}
+<!-- Use name of filtr as filter is a python keyword -->
+<span class="tooltip tooltip-bottom" data-tip="{{ vocab.name }}">{{vocab.key}}</span>
+<input id="filter" name="filtr" type="text" placeholder="Filter" class="input input-bordered w-24 md:w-auto search navbar-center text-base-content ml-5" value="{{ filter }}" />
+{% endblock nav_middle %}
+
+{% block nav_end %}
+<ul class="menu menu-horizontal px-1">
+  <li>
+    <details>
+      <summary>Sort</summary>
+      <ul class="bg-neutral text-neutral-content rounded-t-none p-2">
+	<li><a class="sort" data-sort="listjs-term">Term</a></li>
+	<li><a class="sort" data-sort="listjs-cluster">Cluster</a></li>
+	<li><a class="sort" data-sort="listjs-status">Status</a></li>
+      </ul>
+    </details>
+  </li>
+</ul>
+{% endblock nav_end %}
+
+{% block user_menu %}
+  <li><i>{{ user.github }}</i></li>
+  <li><a href="/logout">Logout</a></li>
+{% endblock user_menu %}
+
+  {% block content %}
+  <div id="container"  class="w-full h-screen"></div>
+{% endblock %}
+
+  {% block body_bottom %}
+  <script type="module">
+    import * as sigma from 'sigma';
+    import 'graphology'; // has no exports, import all
+    import 'graphologyLibrary'; // has no exports, import all
+
+    var data = {{ elements | safe}};
+    var nodes = data['nodes'];
+    var edges = data['edges'];
+    // Create a graphology graph
+    const graph = new graphology.Graph();
+   
+    for (let i =0; i < nodes.length ; i++) {
+	graph.addNode(
+	    nodes[i]['data']['id'],
+	    {
+		label:nodes[i]['data']['n'],
+		size:10,
+		x: Math.random(),
+		y: Math.random()
+	    }
+	);
+    }
+    for (let i =0; i < edges.length ; i++) {
+	graph.addEdge(
+	    edges[i]['data']['source'],
+	    edges[i]['data']['target'],
+	    {
+		type: "arrow",
+		size: 2,
+	    }
+	);
+    }
+    const settings = graphologyLibrary.layoutForceAtlas2.inferSettings(graph);
+    graphologyLibrary.layoutForceAtlas2.assign(graph, {
+      iterations: 200,
+	settings: {
+	    ...settings,
+	    gravity: .5,
+	    scalingRatio: 100,
+	}
+    });
+    
+    const sigmaInstance = new Sigma(graph, document.getElementById("container"),
+				    {
+					labelColor: { color: "#aaa" },
+				    },
+				   );
+    </script>
+  </script>
+{% endblock %}
