@@ -176,19 +176,84 @@
 
     });
 
+    /* ── Downstream traversal with loop detection ──
+       Walks directed edges (source → target) from the selected node using an
+       iterative DFS. Tracks visited node IDs to break cycles immediately when
+       a node that is already in the current path is encountered again.
+       Collects every reachable downstream node and the edges that connect them,
+       then highlights that subgraph while fading everything else.              */
+    function collectDownstream(startNode) {
+	const visitedNodes = new Set(); // all nodes reached (across any path)
+	const activeEdges  = [];        // edges that form the highlighted paths
+
+	// Stack entries: { node, pathSet } where pathSet is the ancestor set for
+	// this specific DFS branch — used to detect back-edges (loops).
+	const stack = [{ node: startNode, pathSet: new Set([startNode.id()]) }];
+
+	while (stack.length) {
+	    const { node, pathSet } = stack.pop();
+	    visitedNodes.add(node.id());
+
+	    const outEdges = node.outgoers('edge'); // only directed outgoing edges
+	    outEdges.forEach(edge => {
+		const target = edge.target();
+		const targetId = target.id();
+
+		activeEdges.push(edge);
+
+		if (pathSet.has(targetId)) {
+		    // Loop detected — do not recurse further down this branch
+		    return;
+		}
+
+		if (!visitedNodes.has(targetId)) {
+		    // New node — push with an extended path set for this branch
+		    stack.push({ node: target, pathSet: new Set([...pathSet, targetId]) });
+		}
+	    });
+	}
+	
+	return { visitedNodes, activeEdges };
+    }
+
+    function applyFocus(node) {
+	const { visitedNodes, activeEdges } = collectDownstream(node);
+
+	// Fade everything first
+	cy.elements().addClass('faded');
+
+	// Un-fade & highlight the selected node
+	node.removeClass('faded');
+
+	// Un-fade & highlight all downstream nodes
+	visitedNodes.forEach(id => {
+	    cy.getElementById(id).removeClass('faded');
+	});
+
+	// Highlight traversed edges
+	activeEdges.forEach(edge => {
+	    edge.removeClass('faded');
+	    edge.addClass('highlighted');
+	});
+    }
+    
     cy.on('tap', 'node', evt => {
 	const node = evt.target;
 	cy.$(':selected').unselect();
 	node.select();
 
-	cy.elements().addClass('faded');
-	node.removeClass('faded');
-	node.connectedEdges().removeClass('faded').addClass('highlighted');
-	node.neighborhood().nodes().removeClass('faded');
+      applyFocus(node);
+	<!-- cy.elements().addClass('faded'); -->
+	<!-- node.removeClass('faded'); -->
+	<!-- node.connectedEdges().removeClass('faded').addClass('highlighted'); -->
+	<!-- node.neighborhood().nodes().removeClass('faded'); -->
 
 	cy.animate({ center: { eles: node }, zoom: Math.max(cy.zoom(), 1.2) }, { duration: 300 });
     });
 
+
+
+    
     cy.on('tap', evt => {
 	if (evt.target === cy) {
 	    cy.$(':selected').unselect();
