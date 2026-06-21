@@ -70,7 +70,6 @@ class Vocabulary(DocumentModel):
         return self.editable and self.key in user.editor
             
 
-# TODO this should be a link    
 class Comment(DocumentModel):
     """
     A comment by a user on a term

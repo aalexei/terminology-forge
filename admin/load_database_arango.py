@@ -153,11 +153,11 @@ def reset_database():
             'from_vertex_collections':  vertex_collections,
             'to_vertex_collections':  vertex_collections,
         },
-        {# vocab1/term -> vocab2/term
-            'edge_collection': 'related',
-            'from_vertex_collections':  vertex_collections,
-            'to_vertex_collections':  vertex_collections,
-        },
+        # {# vocab1/term -> vocab2/term
+        #     'edge_collection': 'related',
+        #     'from_vertex_collections':  vertex_collections,
+        #     'to_vertex_collections':  vertex_collections,
+        # },
         {# tag -> term
             'edge_collection': 'tagged',
             'from_vertex_collections': ['tag'],
@@ -186,14 +186,24 @@ def relink(G, t1):
         LINK.delete(link['_id'])
 
     # Reform links from definition and notes
-    targets = set()
-    targets.update(LinkedText(t1['definition']).links())
-    for n in t1['notes']:
-        targets.update(LinkedText(n).links())
-    for target in targets:
+    def add_link(t1, target, context):
         t2 = TERM.get(target)
         if t2 is not None:
-            LINK.insert({'_from':t1['_id'], '_to':t2['_id']})
+            LINK.insert({'_from':t1['_id'], '_to':t2['_id'], 'context': context})
+    for target in LinkedText(t1['definition']).links():
+        add_link(t1,target,'def')
+    for n in t1['notes']:
+        for target in LinkedText(n).links():
+            add_link(t1,target,'note')
+    
+    # targets = set()
+    # targets.update([(lnk,'def') for lnk in LinkedText(t1['definition']).links()])
+    # for n in t1['notes']:
+    #     targets.update(LinkedText(n).links())
+    # for target in targets:
+    #     t2 = TERM.get(target)
+    #     if t2 is not None:
+    #         LINK.insert({'_from':t1['_id'], '_to':t2['_id']})
 
 class Tag:
     def __init__(self, **data):
