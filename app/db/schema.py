@@ -30,6 +30,8 @@ class User(DocumentModel):
     admin: bool
     email: str
     editor: List[str]
+    admin: List[str]
+    root: bool
 
 class Term(DocumentModel):
     """
@@ -43,11 +45,22 @@ class Term(DocumentModel):
     context: str
     section: str
 
-    # Optional development fields
-    src: str = ""
+    # Development fields
     rev: int = 1
-    log: List[str] = []
+    
+class Link(EdgeModel):
+    """
+    A link between terms
+    """
+    context: str
 
+class Comment(EdgeModel):
+    """
+    A comment by a user on a term
+    """
+    comment: str
+    timestamp: float
+    
 class Tag(DocumentModel):
     """
     A tag
@@ -69,11 +82,25 @@ class Vocabulary(DocumentModel):
         """
         return self.editable and self.key in user.editor
             
-
-class Comment(DocumentModel):
-    """
-    A comment by a user on a term
-    """
-    comment: str
-    timestamp: float
     
+class Log(DocumentModel):
+    """
+    Log of changes
+    """
+    timestamp: float
+    summary: str
+    user: str
+    term: str
+
+class Task(DocumentModel):
+    """
+    A task
+    """
+    name: str
+    description: str = ""
+
+class Work(EdgeModel):
+    """
+    A work item on a task
+    """
+    content: str = ""
