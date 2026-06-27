@@ -114,64 +114,146 @@ def vocab_get_info(vocab_file):
 
     info = schema.Vocabulary(**data['info'])
     return info
+
+
+class Tag:
+    def __init__(self, **data):
+        self.targets = set()
+        self.data = schema.Tag(**data)
+    def add_target(self, t):
+        self.targets.add(t)
+    def model_dump(self):
+        return self.data.model_dump(exclude_unset=True)
+    
     
 def reset_database():
 
-    # Get list of vocabulary json files
-    vocab_files = glob.glob('vocabs/*.json')
-
-    # Delete and recreate the database
+    # Get credentials
     rootpass = getpass('Arango root password:')
     dbpass = getpass('Set DB password:')
-
     sysdb = get_db('_system', 'root', rootpass)
+
+    # Delete and recreate the database
     delete_database(sysdb)
     create_database(sysdb, dbpass)
 
-    # Fetch the new DB
+    # Fetch the newly created DB
     db = get_db(DB_NAME, DB_USER, dbpass)
 
     # Add users collection
     add_user_collection("users.json", db)
 
-    # Get summary info from vocabulary json files
-    vertex_collections = []
-    vocabularies = []
+    # Create a graph
+    graph = db.create_graph(GRAPH_NAME)
+    
+    # Create a collection for vocabulary metadata
+    vocabularies = db.create_collection('vocabularies')
+    
+    # Create a log collection
+    db.create_collection('log')
+    
+    # Get list of vocabulary json files
+    vocab_files = glob.glob('vocabs/*.json')
+
+    # For the graph we will need the names of all the vocabularies
+    # it is easier to traverse the files twice
+    editable_vocabulary_names = []
+    all_vocabulary_names = []
     for vocab_file in vocab_files:
-        info = vocab_get_info(vocab_file)
-        vocabularies.append(info.model_dump())
-        vertex_collections.append(info.key)
+        with open(vocab_file) as fp:
+            data = json.load(fp)
 
-    # Create a collection with vocabulary metadata
-    vs = db.create_collection('vocabularies')
-    vs.import_bulk(vocabularies)
+        # Validate the vocab info
+        vocab_info = schema.Vocabulary(**data['info'])
+        all_vocabulary_names.append(vocab_info.key)
+        if vocab_info.editable:
+             editable_vocabulary_names.append(vocab_info.key)
 
-    # Create graph DB
-    edge_definitions = [
-        {# term -> term links 
-            'edge_collection': 'link',
-            'from_vertex_collections':  vertex_collections,
-            'to_vertex_collections':  vertex_collections,
-        },
-        # {# vocab1/term -> vocab2/term
-        #     'edge_collection': 'related',
-        #     'from_vertex_collections':  vertex_collections,
-        #     'to_vertex_collections':  vertex_collections,
-        # },
-        {# tag -> term
-            'edge_collection': 'tagged',
-            'from_vertex_collections': ['tag'],
-            'to_vertex_collections':  vertex_collections,
-        }
-    ]
+    # A single 'tagged' link type for simplicity: tag --(tagged)-> term
+    tagged = graph.create_edge_definition(
+        edge_collection='tagged',
+        from_vertex_collections=[n+'_tag' for n in editable_vocabulary_names],
+        to_vertex_collections=editable_vocabulary_names
+    )
+    
+    # A single 'work' link type for simplicity: task --(work)-> term
+    work = graph.create_edge_definition(
+        edge_collection='work',
+        from_vertex_collections=[n+'_task' for n in editable_vocabulary_names],
+        to_vertex_collections=editable_vocabulary_names
+    )
 
-    G = db.create_graph(GRAPH_NAME, edge_definitions=edge_definitions)
+    # A 'comment' link type: user --(comment)-> term
+    comment = graph.create_edge_definition(
+        edge_collection='comment',
+        from_vertex_collections=['users'],
+        to_vertex_collections=editable_vocabulary_names
+    )
+    
+    # A single 'link' link type to connect terms: term --(link)-> term
+    link = graph.create_edge_definition(
+        edge_collection='link',
+        from_vertex_collections=editable_vocabulary_names,
+        to_vertex_collections=all_vocabulary_names
+    )
 
-    # Load and link the vocabularies
+    # Now traverse files again building up the database
     for vocab_file in vocab_files:
-        load_data(G, vocab_file)
+        with open(vocab_file) as fp:
+            data = json.load(fp)
+
+        # Validate the vocab info
+        vocab_info = schema.Vocabulary(**data['info'])
+        vocab_name = vocab_info.key
+
+        # Add the info to vocabularies collection
+        vocabularies.insert(vocab_info.model_dump())
+        
+        # Get terms collection for vocab
+        terms = graph.vertex_collection(vocab_name)
+
+        # Collect tags
+        tag_links = {}
+
+        # Collect tags explicitly listed in vocab file 
+        for tag in data.get('tags',[]):
+            tag_links[tag['name']] = Tag(**tag)
 
         
+        for t in data['terms']:
+            # Validate term
+            T = schema.Term(**t)
+            
+            # Add the term to the db
+            terms.insert(T.model_dump())
+
+            # TMP: collect tags in cluster and status fields
+            for cat in ['cluster', 'status']:
+                if len(t.get(cat,''))>0:
+                    name = cat+'.'+t[cat]
+                    if name not in tag_links:
+                        tag_links[name] = Tag(name=name)
+                    tag_links[name].add_target(t['key'])
+
+        for t in terms.all():
+            relink(graph,t)
+        
+        if vocab_info.editable:
+            tags_name = vocab_name+'_tag'
+            tags = graph.vertex_collection(tags_name)
+
+            for t in tag_links.values():
+                tag = tags.insert(t.data.model_dump(exclude_unset=True))
+                
+                for key in t.targets:
+                    target = terms.get(key)
+                    tagged.insert({'_from':tag['_id'], '_to':target['_id']})
+
+            tasks = graph.vertex_collection(vocab_info.key+'_task')
+
+    # TODO load and link comments
+    # TODO load and link tasks
+
 def relink(G, t1):
     '''
     Recreate the links from this item's definition and notes out.
@@ -196,75 +278,58 @@ def relink(G, t1):
         for target in LinkedText(n).links():
             add_link(t1,target,'note')
     
-    # targets = set()
-    # targets.update([(lnk,'def') for lnk in LinkedText(t1['definition']).links()])
-    # for n in t1['notes']:
-    #     targets.update(LinkedText(n).links())
-    # for target in targets:
-    #     t2 = TERM.get(target)
-    #     if t2 is not None:
-    #         LINK.insert({'_from':t1['_id'], '_to':t2['_id']})
 
-class Tag:
-    def __init__(self, **data):
-        self.targets = set()
-        self.data = schema.Tag(**data)
-    def add_target(self, t):
-        self.targets.add(t)
-    def model_dump(self):
-        return self.data.model_dump(exclude_unset=True)
-    
             
-def load_data(G, vocab_file):
+# def load_data(G, vocab_file):
 
-    with open(vocab_file) as fp:
-        data = json.load(fp)
+#     with open(vocab_file) as fp:
+#         data = json.load(fp)
 
-    vocab = schema.Vocabulary(**data['info'])
-    terms = data['terms']
-    name = vocab.key
+#     vocab = schema.Vocabulary(**data['info'])
+#     terms = data['terms']
+#     name = vocab.key
     
-    TERM = G.vertex_collection(name)
-    TAG = G.vertex_collection('tag')
-    LINK = G.edge_collection('link')
-    TAGGED = G.edge_collection('tagged')
+#     TERM = G.vertex_collection(name)
+#     TAG = G.vertex_collection('tag')
+#     LINK = G.edge_collection('link')
+#     TAGGED = G.edge_collection('tagged')
 
-    if vocab.editable:
-        tags = {}
-        for t in data.get('tags',[]):
-            tags[t['name']] = Tag(**t)
+#     if vocab.editable:
+#         tags = {}
+#         for t in data.get('tags',[]):
+#             tags[t['name']] = Tag(**t)
 
-    dbterms = []
-    for term in terms:
-        dbterm = schema.Term(**term)
+#     dbterms = []
+#     for term in terms:
+#         dbterm = schema.Term(**term)
         
-        if vocab.editable:
-            dbterm.log = term.get('log', [])
-            dbterm.rev = term.get('rev', 1)
+#         if vocab.editable:
+#             dbterm.log = term.get('log', [])
+#             dbterm.rev = term.get('rev', 1)
 
-            # TODO temporary renaming may remove cluster and status in future
-            for cat in ['cluster', 'status']:
-                if len(term.get(cat,''))>0:
-                    name = cat+'.'+term[cat]
-                    if name not in tags:
-                        tags[name] = Tag(name=name)
-                    tags[name].add_target(dbterm.key)
+#             # TODO temporary renaming may remove cluster and status in future
+#             for cat in ['cluster', 'status']:
+#                 if len(term.get(cat,''))>0:
+#                     name = cat+'.'+term[cat]
+#                     if name not in tags:
+#                         tags[name] = Tag(name=name)
+#                     tags[name].add_target(dbterm.key)
                 
-        dbterms.append(dbterm.model_dump())
+#         dbterms.append(dbterm.model_dump())
 
-    TERM.insert_many(dbterms)
+#     TERM.insert_many(dbterms)
 
-    if vocab.editable:
-        # Attach tags 
-        for t in tags.values():
-            c = TAG.insert(t.model_dump())
-            for target in t.targets:
-                t2 = TERM.get(target)
-                TAGGED.insert({'_from':c['_id'], '_to':t2['_id']})
+#     if vocab.editable:
+#         # Attach tags 
+#         for t in tags.values():
+#             c = TAG.insert(t.model_dump())
+#             for target in t.targets:
+#                 t2 = TERM.get(target)
+#                 TAGGED.insert({'_from':c['_id'], '_to':t2['_id']})
 
-    # Link terms
-    for t1 in TERM.all():
-        relink(G, t1)
+#     # Link terms
+#     for t1 in TERM.all():
+#         relink(G, t1)
 
             
 if __name__ == "__main__":
