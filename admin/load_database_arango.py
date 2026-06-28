@@ -116,16 +116,6 @@ def vocab_get_info(vocab_file):
     return info
 
 
-# class Tag:
-#     def __init__(self, **data):
-#         self.targets = set()
-#         self.data = schema.Tag(**data)
-#     def add_target(self, t):
-#         self.targets.add(t)
-#     def model_dump(self):
-#         return self.data.model_dump(exclude_unset=True)
-    
-    
 def reset_database():
 
     # Get credentials
@@ -212,31 +202,15 @@ def reset_database():
         # Get terms collection for vocab
         terms = graph.vertex_collection(vocab_name)
 
-        # Collect tags
-        # tag_links = {}
-        
         for t in data['terms']:
             # Validate term
             T = schema.Term(**t)
-            
             # Add the term to the db
             terms.insert(T.model_dump())
-
-            # TMP: collect tags in cluster, status, and src fields
-            # for cat in ['cluster', 'status', 'src']:
-            #     if len(t.get(cat,''))>0:
-            #         name = cat+'.'+t[cat]
-            #         if name not in tag_links:
-            #             tag_links[name] = Tag(name=name)
-            #         tag_links[name].add_target(t['key'])
 
         for t in terms.all():
             relink(graph,t)
         
-        # Collect tags explicitly listed in vocab file 
-        # for tag in data.get('tags',[]):
-        #     tag_links[tag['name']] = Tag(**tag)
-
         if vocab_info.editable:
             tags_name = vocab_name+'_tag'
             tags = graph.vertex_collection(tags_name)
@@ -248,17 +222,11 @@ def reset_database():
                     target = terms.get(key)
                     tagged.insert({'_from':tag['_id'], '_to':target['_id']})
                     
-            # for t in tag_links.values():
-            #     tag = tags.insert(t.data.model_dump(exclude_unset=True))
-                
-            #     for key in t.targets:
-            #         target = terms.get(key)
-            #         tagged.insert({'_from':tag['_id'], '_to':target['_id']})
-
             tasks = graph.vertex_collection(vocab_info.key+'_task')
+            # TODO load and link tasks
 
-    # TODO load and link comments
-    # TODO load and link tasks
+            # TODO load and link comments
+            # TODO load log
 
 def relink(G, t1):
     '''
@@ -284,59 +252,6 @@ def relink(G, t1):
         for target in LinkedText(n).links():
             add_link(t1,target,'note')
     
-
-            
-# def load_data(G, vocab_file):
-
-#     with open(vocab_file) as fp:
-#         data = json.load(fp)
-
-#     vocab = schema.Vocabulary(**data['info'])
-#     terms = data['terms']
-#     name = vocab.key
-    
-#     TERM = G.vertex_collection(name)
-#     TAG = G.vertex_collection('tag')
-#     LINK = G.edge_collection('link')
-#     TAGGED = G.edge_collection('tagged')
-
-#     if vocab.editable:
-#         tags = {}
-#         for t in data.get('tags',[]):
-#             tags[t['name']] = Tag(**t)
-
-#     dbterms = []
-#     for term in terms:
-#         dbterm = schema.Term(**term)
-        
-#         if vocab.editable:
-#             dbterm.log = term.get('log', [])
-#             dbterm.rev = term.get('rev', 1)
-
-#             # TODO temporary renaming may remove cluster and status in future
-#             for cat in ['cluster', 'status']:
-#                 if len(term.get(cat,''))>0:
-#                     name = cat+'.'+term[cat]
-#                     if name not in tags:
-#                         tags[name] = Tag(name=name)
-#                     tags[name].add_target(dbterm.key)
-                
-#         dbterms.append(dbterm.model_dump())
-
-#     TERM.insert_many(dbterms)
-
-#     if vocab.editable:
-#         # Attach tags 
-#         for t in tags.values():
-#             c = TAG.insert(t.model_dump())
-#             for target in t.targets:
-#                 t2 = TERM.get(target)
-#                 TAGGED.insert({'_from':c['_id'], '_to':t2['_id']})
-
-#     # Link terms
-#     for t1 in TERM.all():
-#         relink(G, t1)
-
             
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
