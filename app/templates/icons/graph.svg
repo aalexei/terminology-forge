@@ -1,0 +1,11 @@
+<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <g id="SVGRepo_iconCarrier">
+  <circle class="a" cx="7" cy="16" r="2"></circle>
+	<circle class="a" cx="16" cy="6" r="3"></circle>
+	<circle class="a" cx="18" cy="18" r="4"></circle>
+	<circle class="a" cx="4" cy="4" r="2"></circle>
+	<line class="a" x1="14" x2="8.75774" y1="18" y2="16.95155"></line>
+	<line class="a" x1="16.95928" x2="18.2766" y1="8.83997" y2="14.01668"></line><line class="a" x1="6" x2="13.16407" y1="4" y2="5.02344"></line>
+	<path class="b" d="M6.7441,14.01668C7,14,4.35961,5.96728,4.35961,5.96728"></path>
+      </g>
+    </svg>
