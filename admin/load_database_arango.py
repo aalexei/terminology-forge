@@ -227,8 +227,8 @@ def reset_database():
             # Add the term to the db
             terms.insert(T.model_dump())
 
-            # TMP: collect tags in cluster and status fields
-            for cat in ['cluster', 'status']:
+            # TMP: collect tags in cluster, status, and src fields
+            for cat in ['cluster', 'status', 'src']:
                 if len(t.get(cat,''))>0:
                     name = cat+'.'+t[cat]
                     if name not in tag_links:

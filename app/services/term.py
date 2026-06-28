@@ -237,7 +237,7 @@ class TermService:
                 FOR tag IN @@coll
                   LET targets = (
                     FOR v IN OUTBOUND tag._id tagged
-                    RETURN v._id
+                    RETURN v._key
                   )
                 RETURN { "tag":tag, "targets":targets }
                 """
