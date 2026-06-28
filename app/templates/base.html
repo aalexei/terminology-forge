@@ -29,12 +29,12 @@
   {% block body_top %}{% endblock %}
   <div class="flex flex-col w-full h-full">
     <!-- navbar -->
-    <div class="navbar bg-neutral text-neutral-content shadow-md fixed top-0 z-50">
+    <div class="navbar bg-base-300 text-base-content shadow-md fixed top-0 z-50">
       <div class="flex-none">
 	<button class="btn btn-ghost" popovertarget="popover-main-menu" style="anchor-name:anchor-main-menu">
 	  TF
 	</button>
-	<ul class="dropdown menu w-52 rounded-box rounded-t-none bg-neutral  text-neutral-content shadow-sm"
+	<ul class="dropdown menu w-52 rounded-box rounded-t-none bg-base-300 shadow-sm"
   popover id="popover-main-menu" style="position-anchor:anchor-main-menu">
 	  {% block main_menu %}
 	  <li><a href="/">Home</a></li>
@@ -42,7 +42,7 @@
 	</ul>
       </div>
       <!--  -->
-      <div class="flex-1 ml-5">
+      <div class="flex-1 ml-5 bg-base-300 base-content">
 	{% block nav_middle %}
 	{% endblock nav_middle %}
       </div>
@@ -75,12 +75,12 @@
 	<!-- End theme controller -->
 	<!-- User menu -->
 	<button class="btn btn-ghost" popovertarget="popover-user-menu" style="anchor-name:anchor-user-menu">
-	  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 stroke-current">
+	  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 stroke-current fill-none">
 	    <path d="M5 21C5 17.134 8.13401 14 12 14C15.866 14 19 17.134 19 21M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
 	  </svg>
 	</button>
 	<!-- End user menu -->
-	<ul class="dropdown menu w-52 rounded-box rounded-t-none bg-neutral  text-neutral-content shadow-sm" popover id="popover-user-menu" style="position-anchor:anchor-user-menu">
+	<ul class="dropdown menu w-52 rounded-box rounded-t-none bg-base-300 shadow-sm" popover id="popover-user-menu" style="position-anchor:anchor-user-menu">
 	  {% block user_menu %}
 	  <li><i>Not Logged in</i></li>
 	  <li><a href="/">Log in</a></li>
