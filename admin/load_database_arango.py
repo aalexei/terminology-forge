@@ -17,9 +17,9 @@ GRAPH_NAME = 'TFG'
 DB_URL = "http://127.0.0.1:8529"
 
 class LinkedText:
-    '''
+    """
     Helper class for text with links
-    '''
+    """
     def __init__(self, text):
         self.text = text
 
@@ -41,18 +41,18 @@ class LinkedText:
         return re.sub(r'\[\[(.*?)\]\]', linkf, self.text)
 
 def term2key(term):
-    '''
+    """
     Convert term to canonical key
     valid characters: [a-z0-9_]
     term -> lowercase -> non (letters or numbers) to _
-    '''
+    """
     return re.sub(r"[^a-z0-9]","_",term.lower())
 
 
 def ensure_vertex_collection(G, name, reset=False):
-    '''
+    """
     Ensure graph "G" has vertex collection "name". Reset if requested.
-    '''
+    """
     if G.has_vertex_collection(name):
         collection = G.vertex_collection(name)
         if reset:
@@ -61,9 +61,9 @@ def ensure_vertex_collection(G, name, reset=False):
         collection = G.create_vertex_collection(name)
 
 def ensure_edge_collection(G, name, fromlist, tolist, reset=False):
-    '''
+    """
     Ensure graph "G" has edge collection "name". Reset if requested.
-    '''
+    """
     if not G.has_edge_definition(name):
         G.create_edge_definition(
             edge_collection=name,
@@ -76,16 +76,24 @@ def ensure_edge_collection(G, name, fromlist, tolist, reset=False):
 
 
 def get_db(dbname, dbuser, dbpass):
+    """
+    Convenience method to get database
+    """
     client = ArangoClient(hosts=DB_URL)
     db = client.db(dbname, username=dbuser, password=dbpass)
     return db
 
 def delete_database(sysdb):
-    # Delete the database if it exists
+    """
+    Delete the database DB_NAME if it exists
+    """
     if sysdb.has_database(DB_NAME):
         sysdb.delete_database(DB_NAME)
     
 def create_database(sysdb, dbpass):
+    """
+    Create a database
+    """
     if sysdb.has_database(DB_NAME):
         raise Exception("Database already exists, delete first.")
     
@@ -98,25 +106,36 @@ def create_database(sysdb, dbpass):
     sysdb.update_user(username=DB_USER, password=dbpass)
     
 def add_user_collection(userjsonpath, db):
+    """
+    Add the collection of users
+    """
 
     with open(userjsonpath) as fp:
         userlist = json.load(fp)
             
     # Create users collection and add users
     users = db.create_collection('users')
+    # TODO Validate the user info with schema.User
     users.import_bulk(userlist)
 
 
 def vocab_get_info(vocab_file):
+    """
+    Get the info structure from a json file
+    """
 
     with open(vocab_file) as fp:
         data = json.load(fp)
 
+    # Validate the info structure
     info = schema.Vocabulary(**data['info'])
     return info
 
 
 def reset_database():
+    """
+    Reset the database and reload all data
+    """
 
     # Get credentials
     rootpass = getpass('Arango root password:')
@@ -229,9 +248,9 @@ def reset_database():
             # TODO load log
 
 def relink(G, t1):
-    '''
+    """
     Recreate the links from this item's definition and notes out.
-    '''
+    """
     vcol = t1['_id'].split('/')[0]
     TERM = G.vertex_collection(vcol)
     LINK = G.edge_collection('link')
