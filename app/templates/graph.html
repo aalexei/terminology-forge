@@ -37,7 +37,7 @@
 
 {% block nav_middle %}
 <!-- Use name of filtr as filter is a python keyword -->
-<span class="tooltip tooltip-bottom" data-tip="{{ vocab.name }}">{{vocab.key}}</span>
+<a href="/vocab/{{ vocab.key }}/digest" class="btn btn-ghost"><span class="tooltip tooltip-bottom" data-tip="{{ vocab.name }}">{{vocab.key}}</span></a>
 <input id="filter" name="filtr" type="text" placeholder="Filter" class="input input-bordered w-24 md:w-auto search navbar-center text-base-content ml-5" value="{{ filter }}" />
 
   <button class="btn  btn-ghost" id="btn-fit" title="Fit to view">

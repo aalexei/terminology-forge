@@ -6,7 +6,7 @@
 {% endblock user_menu %}
 
 {% block nav_middle %}
-<span>{{vocab.key}}</span>
+<a href="/vocab/{{ vocab.key }}/digest" class="btn btn-ghost"><span class="tooltip tooltip-bottom" data-tip="{{ vocab.name }}">{{vocab.key}}</span></a>
 {% endblock nav_middle %}
   
 {% block help_modal %}

@@ -125,6 +125,7 @@ async def export_post(vocab: str, request: Request, action: Annotated[str, Form(
     vocabobj = await term_service.get_vocab_info(vocab)
     data = await term_service.export(action)
 
+    # TODO implement "all" toggle for editable vocabularies
     if action == "json":
         # Generate JSON in consistent and human-readable format for revision control
         data_str = json.dumps(data, sort_keys=True, indent=2)
@@ -132,6 +133,7 @@ async def export_post(vocab: str, request: Request, action: Annotated[str, Form(
         return PlainTextResponse(data_str, headers=headers)
     
     elif action == "csv":
+        # TODO move CSV export to term_service
         fp = io.StringIO()
         fieldnames = ['key', 'term', 'definition', 'section', 'source', 'rev', 'tags', 'status', 'cluster', 'src']
         csvwriter = csv.writer(fp, quoting=csv.QUOTE_NONNUMERIC)

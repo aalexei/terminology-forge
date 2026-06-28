@@ -266,7 +266,10 @@ class TermService:
                 }
     
             return export_data
-            
+
+        # TODO implement CSV export
+    
+        
         else:
             raise Exception()
     

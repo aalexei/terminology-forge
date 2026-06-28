@@ -14,7 +14,7 @@
 
 {% block nav_middle %}
 <!-- Use name of filtr as filter is a python keyword -->
-<span class="tooltip tooltip-bottom" data-tip="{{ vocab.name }}">{{vocab.key}}</span>
+<a href="/vocab/{{ vocab.key }}/digest" class="btn btn-ghost"><span class="tooltip tooltip-bottom" data-tip="{{ vocab.name }}">{{vocab.key}}</span></a>
 <!-- <input id="filter" name="filtr" type="text" placeholder="Filter" class="input input-bordered w-24 md:w-auto search navbar-center text-base-content ml-5" value="{{ filter }}" /> -->
 {% endblock nav_middle %}
 
@@ -27,6 +27,10 @@
 <div class="m-4">  
   <h1 class="text-2xl">{{ vocab.name }}</h1>
   <p class="">{{ vocab.description }}</p>
+  <div class="flex flex-row gap-10 mt-10">
+    <a href="/vocab/{{ vocab.key }}/list" class="btn">List</a>
+    <a href="/vocab/{{ vocab.key }}/graph" class="btn">Graph</a>
+  </div>
 </div>
 {% endblock content %}
 
