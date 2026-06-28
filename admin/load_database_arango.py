@@ -116,14 +116,14 @@ def vocab_get_info(vocab_file):
     return info
 
 
-class Tag:
-    def __init__(self, **data):
-        self.targets = set()
-        self.data = schema.Tag(**data)
-    def add_target(self, t):
-        self.targets.add(t)
-    def model_dump(self):
-        return self.data.model_dump(exclude_unset=True)
+# class Tag:
+#     def __init__(self, **data):
+#         self.targets = set()
+#         self.data = schema.Tag(**data)
+#     def add_target(self, t):
+#         self.targets.add(t)
+#     def model_dump(self):
+#         return self.data.model_dump(exclude_unset=True)
     
     
 def reset_database():
@@ -213,12 +213,7 @@ def reset_database():
         terms = graph.vertex_collection(vocab_name)
 
         # Collect tags
-        tag_links = {}
-
-        # Collect tags explicitly listed in vocab file 
-        for tag in data.get('tags',[]):
-            tag_links[tag['name']] = Tag(**tag)
-
+        # tag_links = {}
         
         for t in data['terms']:
             # Validate term
@@ -228,26 +223,37 @@ def reset_database():
             terms.insert(T.model_dump())
 
             # TMP: collect tags in cluster, status, and src fields
-            for cat in ['cluster', 'status', 'src']:
-                if len(t.get(cat,''))>0:
-                    name = cat+'.'+t[cat]
-                    if name not in tag_links:
-                        tag_links[name] = Tag(name=name)
-                    tag_links[name].add_target(t['key'])
+            # for cat in ['cluster', 'status', 'src']:
+            #     if len(t.get(cat,''))>0:
+            #         name = cat+'.'+t[cat]
+            #         if name not in tag_links:
+            #             tag_links[name] = Tag(name=name)
+            #         tag_links[name].add_target(t['key'])
 
         for t in terms.all():
             relink(graph,t)
         
+        # Collect tags explicitly listed in vocab file 
+        # for tag in data.get('tags',[]):
+        #     tag_links[tag['name']] = Tag(**tag)
+
         if vocab_info.editable:
             tags_name = vocab_name+'_tag'
             tags = graph.vertex_collection(tags_name)
-
-            for t in tag_links.values():
-                tag = tags.insert(t.data.model_dump(exclude_unset=True))
-                
-                for key in t.targets:
+            for t in data['tags']:
+                # Validate tag
+                T = schema.Tag(**t)
+                tag = tags.insert(T.model_dump(exclude_unset=True))
+                for key in t['targets']:
                     target = terms.get(key)
                     tagged.insert({'_from':tag['_id'], '_to':target['_id']})
+                    
+            # for t in tag_links.values():
+            #     tag = tags.insert(t.data.model_dump(exclude_unset=True))
+                
+            #     for key in t.targets:
+            #         target = terms.get(key)
+            #         tagged.insert({'_from':tag['_id'], '_to':target['_id']})
 
             tasks = graph.vertex_collection(vocab_info.key+'_task')
 
