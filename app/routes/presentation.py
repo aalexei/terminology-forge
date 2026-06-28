@@ -108,8 +108,10 @@ async def show_term(vocab: str, tid: str, request: Request, user=Depends(auth_us
 
 @router.get("/vocab/{vocab}/export", response_class=HTMLResponse)
 async def export(vocab: str, request: Request, user=Depends(auth_user)):
-
+    
+    term_service = TermService(request.app.state.client.db, vocab)
     vocabobj = await term_service.get_vocab_info(vocab)
+    
     context = {
         "user": user,
         "vocab": vocabobj,
@@ -120,28 +122,15 @@ async def export(vocab: str, request: Request, user=Depends(auth_user)):
 async def export_post(vocab: str, request: Request, action: Annotated[str, Form()] = "",  user=Depends(auth_user)):
 
     term_service = TermService(request.app.state.client.db, vocab)
-    terms = await term_service.get_terms()
     vocabobj = await term_service.get_vocab_info(vocab)
+    data = await term_service.export(action)
 
-    export_data = []
-    for item in terms:
-        out = {}
-        for k,v in item.model_dump().items():
-            if k[0] != '_':
-                # Don't export any temporary keys
-                out[k] = v
-            elif k == '_key':
-                out['key'] = v
-        export_data.append(out)
-    # sort terms on key
-    export_data.sort(key=lambda x:x['key'].lower()) 
-        
     if action == "json":
         # Generate JSON in consistent and human-readable format for revision control
-        data_str = json.dumps({'terms':export_data}, sort_keys=True, indent=2)
-        return PlainTextResponse(data_str,
-                            headers={"Content-Disposition": f"attachment; filename=qcvocab.json"}
-                            )
+        data_str = json.dumps(data, sort_keys=True, indent=2)
+        headers={"Content-Disposition": f"attachment; filename={vocabobj.key}.json"}
+        return PlainTextResponse(data_str, headers=headers)
+    
     elif action == "csv":
         fp = io.StringIO()
         fieldnames = ['key', 'term', 'definition', 'section', 'source', 'rev', 'tags', 'status', 'cluster', 'src']
@@ -157,8 +146,9 @@ async def export_post(vocab: str, request: Request, action: Annotated[str, Form(
                             headers={"Content-Disposition": f"attachment; filename=qcvocab.csv"}
                             )
 
-        
+    # TODO return a message to say successful
     context = {
+        "user": user,
+        "vocab": vocabobj,
     }
-    
     return templates.TemplateResponse(request=request, name="export.html", context=context)

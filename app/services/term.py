@@ -199,3 +199,74 @@ class TermService:
                         })
 
         return json.dumps(elements)
+
+    async def export(self, action, all=True):
+
+        if action == "json":
+
+            # Get vocabulary info
+            info_item = await self.get_vocab_info(self.collection)
+            info = info_item.model_dump(by_alias=False)
+
+            # Get all terms
+            terms = []
+            cursor = await self.db.aql.execute(
+                "FOR doc IN @@coll RETURN doc",
+                bind_vars={"@coll": self.collection},
+            )
+            async with cursor as ctx:
+                async for t in ctx:
+                    T = schema.Term(**t)
+                    T2 = T.model_dump(by_alias=False)
+                    if not info['editable'] and 'rev' in T2:
+                        del T2['rev']
+                    terms.append(T2)
+            terms.sort(key=lambda x:x['key'].lower())
+
+            if not info['editable'] or not all:
+                # Bundle everything together
+                export_data={
+                    'info': info,
+                    'terms': terms,
+                }
+            else:
+
+                # Get all tags and their targets
+                tags = []
+                query = """
+                FOR tag IN @@coll
+                  LET targets = (
+                    FOR v IN OUTBOUND tag._id tagged
+                    RETURN v._id
+                  )
+                RETURN { "tag":tag, "targets":targets }
+                """
+                cursor = await self.db.aql.execute(
+                    query,
+                    bind_vars={"@coll": self.collection+'_tag'},
+                )
+                async with cursor as ctx:
+                    async for t in ctx:
+                        T = schema.Tag(**t['tag'])
+                        T2 = T.model_dump(by_alias=False)
+                        T2['targets'] = t['targets']
+                        del T2['key']
+                        tags.append(T2)
+                tags.sort(key=lambda x:x['name'].lower())
+
+                # TODO tasks
+                # TODO logs
+                # TODO comments
+
+                # Bundle everything together
+                export_data={
+                    'info': info,
+                    'tags': tags,
+                    'terms': terms,
+                }
+    
+            return export_data
+            
+        else:
+            raise Exception()
+    
