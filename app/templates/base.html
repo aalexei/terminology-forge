@@ -29,12 +29,12 @@
   {% block body_top %}{% endblock %}
   <div class="flex flex-col w-full h-full">
     <!-- navbar -->
-    <div class="navbar bg-base-300 text-base-content shadow-md fixed top-0 z-50">
+    <div class="navbar bg-base-200 text-base-content shadow-md fixed top-0 z-50">
       <div class="flex-none">
 	<button class="btn btn-ghost" popovertarget="popover-main-menu" style="anchor-name:anchor-main-menu">
 	  TF
 	</button>
-	<ul class="dropdown menu w-52 rounded-box rounded-t-none bg-base-300 shadow-sm"
+	<ul class="dropdown menu w-52 rounded-box rounded-t-none bg-base-200 shadow-sm"
   popover id="popover-main-menu" style="position-anchor:anchor-main-menu">
 	  {% block main_menu %}
 	  <li><a href="/">Home</a></li>
@@ -42,7 +42,7 @@
 	</ul>
       </div>
       <!--  -->
-      <div class="flex-1 ml-5 bg-base-300 base-content">
+      <div class="flex-1 ml-5 bg-base-200 base-content">
 	{% block nav_middle %}
 	{% endblock nav_middle %}
       </div>
@@ -70,7 +70,7 @@
 	  <span class="size-6 stroke-current fill-none">{% include "icons/user.svg" %}</span>
 	</button>
 	<!-- End user menu -->
-	<ul class="dropdown menu w-52 rounded-box rounded-t-none bg-base-300 shadow-sm" popover id="popover-user-menu" style="position-anchor:anchor-user-menu">
+	<ul class="dropdown menu w-52 rounded-box rounded-t-none bg-base-200 shadow-sm" popover id="popover-user-menu" style="position-anchor:anchor-user-menu">
 	  {% block user_menu %}
 	  <li><i>Not Logged in</i></li>
 	  <li><a href="/">Log in</a></li>
