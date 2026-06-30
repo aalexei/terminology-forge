@@ -28,8 +28,14 @@
   <h1 class="text-2xl">{{ vocab.name }}</h1>
   <p class="">{{ vocab.description }}</p>
   <div class="flex flex-row gap-10 mt-10">
-    <a href="/vocab/{{ vocab.key }}/list" class="btn">List</a>
-    <a href="/vocab/{{ vocab.key }}/graph" class="btn">Graph</a>
+    <a href="/vocab/{{ vocab.key }}/list" class="btn">
+      <span class="size-6 stroke-current fill-none">{% include "icons/list.svg" %}</span>
+      List
+    </a>
+    <a href="/vocab/{{ vocab.key }}/graph" class="btn">
+      <span class="size-6 stroke-current fill-none">{% include "icons/graph.svg" %}</span>
+      Graph
+    </a>
   </div>
 </div>
 {% endblock content %}
