@@ -77,11 +77,15 @@
             <th><div class="tooltip tooltip-right" data-tip="Unique key">Key</div></th>
             <td>{{ term.key }}</td>
 	  </tr>
-	  {% if vocab.is_editable(user) %}
 	  <tr>
-            <th><div class="tooltip tooltip-right" data-tip="Informal source">src</div></th>
-            <td>{{ term.src }}</td>
+            <th><div class="tooltip tooltip-right" data-tip="Inward links">In</div></th>
+            <td>{{ term._indegree }}</td>
 	  </tr>
+	  <tr>
+            <th><div class="tooltip tooltip-right" data-tip="Outward links">Out</div></th>
+            <td>{{ term._outdegree }}</td>
+	  </tr>
+	  {% if vocab.is_editable(user) %}
 	  <tr>
             <th><div class="tooltip tooltip-right" data-tip="Revision">rev</div></th>
             <td>{{ term.rev }}</td>

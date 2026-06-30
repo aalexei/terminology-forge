@@ -104,7 +104,9 @@ class TermService:
             FOR v IN OUTBOUND t._id link
             RETURN {"_id":v._id, "term":v.term} 
             )
-        RETURN { "term":t, "tags":tags, "links":links }
+          LET indegree = LENGTH(FOR e IN INBOUND t._id link RETURN true)
+          LET outdegree = LENGTH(FOR e IN OUTBOUND t._id link RETURN true)
+        RETURN { "term":t, "tags":tags, "links":links, "indegree":indegree, "outdegree":outdegree }
         """
 
         cursor = await self.db.aql.execute(
@@ -116,6 +118,8 @@ class TermService:
             async for t in ctx:
                 T = schema.Term(**t["term"])
                 extend_term(T, t["tags"], t["links"], self.collection)
+                T._indegree = t["indegree"]
+                T._outdegree = t["outdegree"]
                 terms.append(T)
                 
         return terms
@@ -130,7 +134,9 @@ class TermService:
           FOR v IN OUTBOUND @tid link
             RETURN {"_id":v._id, "term":v.term} 
         )
-        RETURN {"term":DOCUMENT(@tid), "tags":tags, "links":links}
+        LET indegree = LENGTH(FOR e IN INBOUND @tid link RETURN true)
+        LET outdegree = LENGTH(FOR e IN OUTBOUND @tid link RETURN true)
+        RETURN {"term":DOCUMENT(@tid), "tags":tags, "links":links, "indegree":indegree, "outdegree":outdegree}
         """
         cursor = await self.db.aql.execute(
             query,
@@ -140,6 +146,8 @@ class TermService:
             async for t in ctx:
                 T = schema.Term(**t["term"])
                 extend_term(T, t["tags"], t["links"], self.collection, context="term")
+                T._indegree = t["indegree"]
+                T._outdegree = t["outdegree"]
                 
         return T
 

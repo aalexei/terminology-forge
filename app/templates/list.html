@@ -68,7 +68,7 @@
 	  {% for tag in t._tags %}
 	  <a href="#" class="badge badge-sm badge-soft badge-info tooltip" data-tip="{{ tag['description'] }}" onclick="addtofilter('@{{ tag['name'] }}')">@{{ tag['name'] }}</a>
 	  {% endfor %}
-	  <span class="badge badge-sm badge-soft tooltip badge-neutral" data-tip="# notes">{{ t.notes | length }}</span>
+	  <span class="badge badge-sm badge-soft tooltip badge-neutral" data-tip="degree">{{ t._indegree + t._outdegree }}</span>
 	</div>
       </div>
       <div class="list-col-wrap text-sm opacity-60 listjs-definition">
