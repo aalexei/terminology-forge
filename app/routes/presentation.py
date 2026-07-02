@@ -118,7 +118,7 @@ async def export(vocab: str, request: Request, user=Depends(auth_user)):
     }
     return templates.TemplateResponse(request=request, name="export.html", context=context)
 
-@router.post("/vocab/{vocab}/export")
+@router.post("/vocab/{vocab}/export", response_class=HTMLResponse)
 async def export_post(vocab: str, request: Request, action: Annotated[str, Form()] = "",  user=Depends(auth_user)):
 
     term_service = TermService(request.app.state.client.db, vocab)
@@ -154,3 +154,76 @@ async def export_post(vocab: str, request: Request, action: Annotated[str, Form(
         "vocab": vocabobj,
     }
     return templates.TemplateResponse(request=request, name="export.html", context=context)
+
+
+@router.get("/vocab/{vocab}/add", response_class=HTMLResponse)
+async def add_term(vocab: str, request: Request, user=Depends(auth_user)):
+    term_service = TermService(request.app.state.client.db, vocab)
+    vocabobj = await term_service.get_vocab_info(vocab)
+    
+    context = {
+        "user": user,
+        "vocab": vocabobj,
+    }
+    return templates.TemplateResponse(request=request, name="add.html", context=context)
+
+
+@router.post("/vocab/{vocab}/add", response_class=HTMLResponse)
+async def edit_term_post(vocab: str,
+                         request: Request,
+                         term: Annotated[str, Form()] = "",
+                         synonyms: Annotated[str, Form()] = "",
+                         definition: Annotated[str, Form()] = "",
+                         notes: Annotated[list, Form()] = "",
+                         log: Annotated[str, Form()] = "",
+                         user=Depends(auth_user)):
+
+    term_service = TermService(request.app.state.client.db, vocab)
+    vocabobj = await term_service.get_vocab_info(vocab)
+
+    breakpoint()
+    
+    notes2=[]
+    for n in notes:
+        if len(n.strip())>0:
+            notes2.append(n.strip())
+
+    key = term2key(term)
+    if key in ITEMS:
+        # return back most of the data in the form to have another go
+        context = {
+            "statuses": get_statuses(),
+            "clusters": get_clusters(),
+            "term": term,
+            "synonyms": synonyms,
+            "definition": definition,
+            "notes": notes2,
+            "cluster": cluster,
+            "src": src,
+            "alert":f"Term '{term}' with key {key} already defined",
+            "alert_type":"error",
+        }
+        return templates.TemplateResponse(request=request, name="add.html", context=context)
+
+    item = {
+        'key':key,
+        'term':term.strip(),
+        'synonyms':[s.strip() for s in synonyms.split(';') if len(s)>0],
+        'definition':definition.strip(),
+        'notes':notes2,
+        'log':[log_entry(log)],
+        'source':'',
+        'rev':1, # set a revision
+        }
+
+    ITEMS[key] = item
+    
+    context = {
+        "statuses": get_statuses(),
+        "clusters": get_clusters(),
+        "cluster": cluster,
+        "src": src,
+        "alert":f"Added '{term}'.",
+        "alert_type":"success",
+    }
+    return templates.TemplateResponse(request=request, name="add.html", context=context)
