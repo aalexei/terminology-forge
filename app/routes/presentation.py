@@ -164,6 +164,7 @@ async def add_term(vocab: str, request: Request, user=Depends(auth_user)):
     context = {
         "user": user,
         "vocab": vocabobj,
+        "tags": "status.propose",
     }
     return templates.TemplateResponse(request=request, name="add.html", context=context)
 
@@ -175,6 +176,8 @@ async def edit_term_post(vocab: str,
                          synonyms: Annotated[str, Form()] = "",
                          definition: Annotated[str, Form()] = "",
                          notes: Annotated[list, Form()] = "",
+                         tags: Annotated[str, Form()] = "",
+                         comment: Annotated[str, Form()] = "",
                          log: Annotated[str, Form()] = "",
                          user=Depends(auth_user)):
 
