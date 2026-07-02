@@ -6,9 +6,12 @@
 
 {% block main_menu %}
 <li><a href="/">Home</a></li>
+<li><a href="/vocab/{{ vocab.key }}/list">List</a></li>
+<li><a href="/vocab/{{ vocab.key }}/graph">Graph</a></li>
 <li class="menu-title">Actions:</li>
 <!-- <li><span onclick="document.querySelectorAll('input[type=checkbox]').forEach(el => el.checked = false);">Clear selection</span></li> -->
 <!-- <li><span onclick="main_modal.showModal()">Set tags on selected</span></li> -->
+<li><a href="/vocab/{{ vocab.key }}/add">Add term</a></li>
 <li><a href="/vocab/{{vocab.key}}/export">Export vocabulary</a></li>
 {% endblock main_menu %}
 

@@ -2,20 +2,12 @@
 
 {% block main_menu %}
 <li><a href="/">Home</a></li>
+<li><a href="/vocab/{{ vocab.key }}/list">List</a></li>
+<li><a href="/vocab/{{ vocab.key }}/graph">Graph</a></li>
 {% endblock main_menu %}
 
-
-{% block body_top %}
-<!-- <form method="post" action="/vocab/{{ vocab.key }}/add"> -->
-{% endblock body_top %}
-  
-{% block body_bottom %}
-<!-- </form> -->
-{% endblock body_bottom %}
-
-
 {% block nav_middle %}
-<!-- <button type="submit" class="btn btn-outline">Save</button> -->
+  <h1 class="text-xl">Add new term to <i>{{ vocab.key }}</i></h1>
 {% endblock nav_middle %}
 
 {% block user_menu %}
@@ -27,42 +19,53 @@
 {% block content %}
 <form method="post" action="/vocab/{{ vocab.key }}/add">
 <div class="flex flex-col px-6 w-full">
-  <h1 class="text-xl">Add new term</h1>
   
   <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-full border p-4">
     <legend class="fieldset-legend">Term</legend>
     
-    <label class="label">Term</label>
-    <input type="text" name="term" class="input w-full" placeholder="Preferred Term" value="{{ term }}" />
+    <label class="label">Term (required)</label>
+    <input type="text" name="term" class="input w-full" placeholder="Preferred Term" value="{{ term }}" required />
+    <p class="label">The term itself.</p>
 
-    <label class="label">Synonyms</label>
+    <label class="label">Synonyms (optional)</label>
     <input type="text" name="synonyms" class="input w-full" placeholder="Synonyms (optional)" value="{{ synonyms }}" />
-    <p class="label">Separate with semi-colon ";" </p>
+    <p class="label">Separate with semi-colon ";".</p>
   </fieldset>
 
   <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-full border p-4">
-    <legend class="fieldset-legend">Definition</legend>
+    <legend class="fieldset-legend">Definition (optional)</legend>
     <textarea name="definition" class="textarea h-40 w-full" placeholder="Add definition">{{ definition }}</textarea>
-    <p class="label">Use [[key]] or [[key][display]] notation for links. </p>
+    <p class="label">Use [[key]] or [[key][display]] notation for links.</p>
   </fieldset>
 
   
   <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-full border p-4">
-    <legend class="fieldset-legend">Term notes</legend>
+    <legend class="fieldset-legend">Term notes (optional)</legend>
     {% for n in notes %}
     <label class="label">Note {{ loop.index }}</label>
     <input name="notes" type="text" class="input w-full" placeholder="Type here" value="{{ n }}" />
     {% endfor %}
-    <label class="label">New Note</label>
+    <label class="label">New Note.</label>
     <input name="notes" type="text" class="input w-full" placeholder="Add new note here" value="{{ n }}" />
+    <p class="label">Formal terminology note. Use [[key]] or [[key][display]] notation for links.</p>
   </fieldset>
 
   <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-full border p-4">
-    <legend class="fieldset-legend">Log</legend>
+    <legend class="fieldset-legend">Context</legend>
+    
+    <label class="label">Tags (optional)</label>
+    <input name="tags" type="text" class="input w-full" placeholder="Type here" value="{{ tags }}"/>
+    <p class="label">Set the initial tags. Suggest include "status.propose".</p>
+
+    <label class="label">Comment (optional)</label>
+    <input name="comment" type="text" class="input w-full" placeholder="Type here" value="{{ comment }}"/>
+    <p class="label">Attach a comment from you.</p>
+    
+    <label class="label">Log (required)</label>
     <input type="text" name="log" class="input w-full" placeholder="Reason for changes" required value="Adding new term" />
     <p class="label">Give a summary of changes for the item's log.</p>
   </fieldset>
-
+ 
 <button type="submit" class="btn mt-4 mb-4">Save</button>
 
 </div>
