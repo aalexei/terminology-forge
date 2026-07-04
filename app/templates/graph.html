@@ -92,18 +92,72 @@
 
   {% block content %}
   <div id="cy" class="w-full h-screen"></div>
-{% endblock %}
+
+  <!-- ── Detail panel (always visible, fixed right) ── -->
+<div id="detail-panel" class="bg-base-200 border border-base-content/15 rounded-xl fixed top-[72px] right-2 w-48 flex flex-col overflow-hidden" style="max-height: calc(100vh - 88px);">
+
+  <div class="overflow-y-auto flex-1 p-3 flex flex-col gap-3">
+
+    <!-- Empty state -->
+    <div id="empty-state" class="flex flex-col items-center justify-center gap-2 py-8 text-base-content/25">
+      <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="5" cy="12" r="3"/><circle cx="19" cy="5" r="2"/><circle cx="19" cy="19" r="2"/>
+        <line x1="7" y1="11.5" x2="17" y2="6.5"/><line x1="7" y1="12.5" x2="17" y2="17.5"/>
+      </svg>
+      <p class="text-[11px] text-center">Select a node<br/>to inspect it</p>
+    </div>
+
+    <!-- Node details -->
+    <div id="node-details" class="hidden flex-col gap-2.5">
+
+      <!-- Title -->
+      <div>
+        <h2 id="panel-title" class="text-sm font-semibold truncate">—</h2>
+        <p id="panel-type" class="text-[11px] text-base-content/40 mt-0.5"></p>
+      </div>
+
+      <div class="divider my-0"></div>
+
+      <!-- Description -->
+      <p id="prop-desc" class="text-[11px]  text-base-content/45">—</p>
+
+      <!-- Tags -->
+      <div id="prop-tags" class="flex flex-wrap gap-1"></div>
+
+      <div class="divider my-0"></div>
+
+      <!-- Connections -->
+      <div>
+        <p class="text-[10px] uppercase tracking-widest text-base-content/30 mb-1">Links (<span id="conn-count">0</span>)</p>
+        <div id="conn-list" class="flex flex-col"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+{% endblock content %}
 
 {% block body_bottom %}
-  <script type="text/javascript">
+<script type="text/javascript">
+  const PANEL_WIDTH = 48*4 + 16; // panel w-48 = 224px + 16px right margin
+
+  const elements = {{elements | safe}};
+
+  const nodeData = elements.nodes.reduce((dict, item) => {
+      dict[item.data.id] = item.data;
+      return dict;
+  }, {});
+  
     var cy = cytoscape({
 	container: document.getElementById('cy'),
-	elements: {{elements | safe}},
+	elements: elements,
 	style: [
 	    {
 		selector: 'node',
 		style: {
-		    'label': 'data(n)',
+		    'label': 'data(term)',
 		    'shape': 'round-rectangle',
 		    'font-size': 6,
                     'width':'60px',
@@ -139,7 +193,7 @@
 		}
 	    },
 	    {
-		selector: 'edge:selected, edge.highlighted',
+		selector: 'edge.highlighted',
 		style: {
 		    'line-color': '#388bfd',
 		    'target-arrow-color': '#388bfd',
@@ -148,7 +202,7 @@
 	    },
 	    {
 		selector: '.faded',
-		style: { 'opacity': 0.2 }
+		style: { 'opacity': 0.15 }
 	    }
 	],
 	layout: {
@@ -224,7 +278,8 @@
 
 	// Fade everything first
 	cy.elements().addClass('faded');
-
+	cy.elements().removeClass('highlighted');
+	
 	// Un-fade & highlight the selected node
 	node.removeClass('faded');
 
@@ -239,28 +294,107 @@
 	    edge.addClass('highlighted');
 	});
     }
-    
+
+
+/* ── Panel-aware centering ──
+   The usable graph area is the full viewport minus the panel on the right.
+   We shift the rendered centre-point left by half the panel width so the
+   node lands visually centred in the remaining space.                      */
+function centerOnNode(node) {
+  const zoom    = Math.max(cy.zoom(), 1.2);
+  const pos     = node.renderedPosition();   // current rendered position
+  const vpW     = cy.width();
+  const vpH     = cy.height();
+  // available canvas width (left of panel)
+  const usableW = vpW - PANEL_WIDTH;
+  // target rendered centre of the usable area
+  const targetX = usableW / 2;
+  const targetY = vpH / 2;
+  // how much we need to pan (in rendered px)
+  const panX = targetX - pos.x;
+  const panY = targetY - pos.y;
+
+  cy.animate({
+    pan:  { x: cy.pan().x + panX, y: cy.pan().y + panY },
+    zoom: zoom,
+  }, { duration: 350, easing: 'ease-in-out-cubic' });
+}
+  
+function centerOnNodeById(id) {
+  const node = cy.getElementById(id);
+  if (node.length) centerOnNode(node);
+}
+
+/* ── Show node details ── */
+function showPanel(node) {
+  const id = node.id();
+  const d  = nodeData[id];
+  if (!d) return;
+
+  document.getElementById('panel-title').textContent    = d.term;
+  // document.getElementById('panel-type').textContent     = `${d.type} · ${id}`;
+  // document.getElementById('prop-type-val').textContent  = d.type;
+  // document.getElementById('prop-weight').textContent    = d.weight;
+  // document.getElementById('prop-status').innerHTML      = `<span class="${statusBadgeClass(d.status)}">${d.status}</span>`;
+  document.getElementById('prop-desc').textContent      = d.definition;
+
+  document.getElementById('prop-tags').innerHTML = d.tags
+    .map(t => `<span class="badge badge-xs badge-outline badge-info">${t.name}</span>`)
+    .join('');
+
+  const neighbors = node.neighborhood().nodes();
+  document.getElementById('conn-count').textContent = neighbors.length;
+  document.getElementById('conn-list').innerHTML = neighbors.map(nb => {
+    const nd = nodeData[nb.id()];
+    return `
+      <div class="flex items-center gap-1.5 py-1 cursor-pointer hover:text-base-content transition-colors text-base-content/60 conn-item" data-id="${nb.id()}">
+        <span class="w-1.5 h-1.5 rounded-full bg-info/60 flex-shrink-0"></span>
+        <span class="text-[11px] truncate flex-1">${nd ? nd.term : nb.id()}</span>
+      </div>`;
+  }).join('');
+
+  document.querySelectorAll('.conn-item').forEach(el => {
+    el.addEventListener('click', () => {
+      const target = cy.getElementById(el.dataset.id);
+      if (target.length) {
+        cy.$(':selected').unselect();
+        target.select();
+        showPanel(target);
+        applyFocus(target);
+        centerOnNode(target);
+      }
+    });
+  });
+
+  document.getElementById('empty-state').classList.add('hidden');
+  document.getElementById('node-details').classList.remove('hidden');
+  document.getElementById('node-details').classList.add('flex');
+}
+
+function resetPanel() {
+  document.getElementById('panel-title').textContent = 'No node selected';
+  // document.getElementById('panel-type').textContent  = 'Click a node to inspect it';
+  // document.getElementById('empty-state').classList.remove('hidden');
+  document.getElementById('node-details').classList.add('hidden');
+  document.getElementById('node-details').classList.remove('flex');
+}
+
+  
     cy.on('tap', 'node', evt => {
 	const node = evt.target;
 	cy.$(':selected').unselect();
 	node.select();
 
-      applyFocus(node);
-	<!-- cy.elements().addClass('faded'); -->
-	<!-- node.removeClass('faded'); -->
-	<!-- node.connectedEdges().removeClass('faded').addClass('highlighted'); -->
-	<!-- node.neighborhood().nodes().removeClass('faded'); -->
-
-	cy.animate({ center: { eles: node }, zoom: Math.max(cy.zoom(), 1.2) }, { duration: 300 });
+	applyFocus(node);
+	showPanel(node);
+	centerOnNode(node);
     });
 
-
-
-    
     cy.on('tap', evt => {
 	if (evt.target === cy) {
 	    cy.$(':selected').unselect();
 	    cy.elements().removeClass('faded highlighted');
+	    resetPanel();
 	}
     });
 
@@ -274,6 +408,7 @@
     document.getElementById('btn-layout').addEventListener('click',
 							   () => {
   cy.layout({ name: 'fcose', padding: 80, nodeRepulsion: 8000, idealEdgeLength: 120, animate: true, animationDuration: 1000, randomize: true }).run();
-});
+							   });
+  
   </script>
 {% endblock %}

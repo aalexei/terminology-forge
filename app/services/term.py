@@ -187,7 +187,8 @@ class TermService:
             FOR v,e IN OUTBOUND t._id link
             RETURN {"_id":v._id, "term":v.term, "context":e.context} 
             )
-        RETURN { "term":t, "tags":tags, "links":links }
+
+        RETURN { "term":t, "tags":tags, "links":links}
         """
         cursor = await self.db.aql.execute(
             query,
@@ -198,13 +199,19 @@ class TermService:
         async with cursor as ctx:
             async for t in ctx:
                 elements['nodes'].append({
-                    'data': {'id': t['term']['_id'], 'n':t['term']['term']}
-                    })
+                    'data': {
+                        'id': t['term']['_id'],
+                        'term':t['term']['term'],
+                        'definition':t['term']['definition'],
+                        'tags': t['tags'],
+                    }})
                 for lnk in t['links']:
                     if lnk['context'] == 'def':
                         elements['edges'].append({
-                            'data': {'source': t['term']['_id'], 'target':lnk['_id'], 'n':'link'}
-                        })
+                            'data': {
+                                'source': t['term']['_id'],
+                                'target':lnk['_id'],
+                            }})
 
         return json.dumps(elements)
 
