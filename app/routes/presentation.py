@@ -232,8 +232,10 @@ async def add_term_post(vocab: str,
     
     await term_service.add_term(item)
     # TODO tags
-    # TODO log
     # TODO comment
+    
+    await term_service.add_log(user, f"{vocab}/{item.key}", item.rev, log)
+    # TODO improve log .. strings or objects
     
     context = {
         "user": user,
@@ -297,7 +299,8 @@ async def edit_term_post(vocab: str,
     # TODO Seems fragile to have to set everything and del term
     
     await term_service.update_term(item)
-    # TODO log
+    
+    await term_service.add_log(user, f"{vocab}/{item.key}", item.rev, log)
 
     term = await term_service.get_term(tid)
 

@@ -1,5 +1,6 @@
 import re
 import json
+import time
 from db import schema
 
 def term2key(term):
@@ -216,6 +217,19 @@ class TermService:
         # TODO go off preferences instead of hard-coded TFG
         graph = self.db.graph('TFG')
         await relink(graph, TERM)
+        
+    async def add_log(self, user, tid, rev, summary):
+        log = self.db.collection("log")
+
+        entry = schema.Log(
+                timestamp = time.time(),
+                summary = summary,
+                user = user.github,
+                term = tid,
+                rev = rev
+                )
+
+        await log.insert(entry.model_dump(exclude_unset=True))
 
         
     async def get_vocab_info(self, vocab):

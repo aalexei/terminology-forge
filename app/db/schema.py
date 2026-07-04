@@ -91,6 +91,7 @@ class Log(DocumentModel):
     summary: str
     user: str
     term: str
+    rev: int
 
 class Task(DocumentModel):
     """
