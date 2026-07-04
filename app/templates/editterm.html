@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block body_top %}
+<form method="post" action="/editterm/{{ item['key'] }}">
+{% endblock body_top %}
+{% block body_bottom %}
+</form>
+{% endblock body_bottom %}
+
+{% block nav_end %}
+<button type="submit" class="btn btn-outline">Save</button>
+{% endblock nav_end %}
+
+
+{% block content %}
+<div class="flex flex-col px-6">
+  <h1 class="text-2xl">Edit term for <a class="link" href="/term/{{ item['key'] }}">{{ item['key']}}</a></h1>
+
+  <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-full border p-4">
+    <legend class="fieldset-legend">Term</legend>
+    <input type="text" name="{{ item['key'] }}" class="input w-full" required value="{{ item['term'] }}" />
+    <p class="label">Changing the term may affect how cross links from other terms to this one are formatted. </p>
+  </fieldset>
+
+  
+  <h2 class="text-xl mt-4">Links to {{ item['key'] }}</h2>
+  <p class="opacity-60">Edit the displayed text links below so that they are consistent and grammatically correct. Links that are just a key, i.e. [[{{ item['key'] }}]], should not be changed. Saving will apply changes to all affected terms.</p>  
+  <ul class="list list-disc w-full gap-2 mt-2 ml-4">
+    {% for r in refs %}
+    <li class="w-full">
+      <label class="label">{{ r.context }} in <a class="link" href="/term/{{ r.key }}">{{ r.term }}</a></label>
+      <textarea type="textarea" name="link--{{ r.key }}--{{ r.context }}" class="textarea text-left w-full">{{ r.src }}</textarea>
+    </li>
+    {% endfor %}
+  </ul>
+
+  <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-full border p-4 mt-4">
+    <legend class="fieldset-legend">Log</legend>
+    <input type="text" name="log" class="input w-full" placeholder="Reason for changes" required value="" />
+    <p class="label">Give a summary of changes for the item's log.</p>
+  </fieldset>
+
+
+</div>
+{% endblock %}

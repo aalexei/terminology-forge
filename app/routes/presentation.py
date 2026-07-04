@@ -181,7 +181,7 @@ async def add_term(vocab: str, request: Request, user=Depends(auth_user)):
 
 # ---------------------------------------------------
 @router.post("/vocab/{vocab}/add", response_class=HTMLResponse)
-async def edit_term_post(vocab: str,
+async def add_term_post(vocab: str,
                          request: Request,
                          term: Annotated[str, Form()] = "",
                          synonyms: Annotated[str, Form()] = "",
@@ -230,15 +230,91 @@ async def edit_term_post(vocab: str,
         section = ''
     )
     
-    # item = {
-    #     "_key": key,
-    #     "term": term.strip(),
-    #     "synonyms": [s.strip() for s in synonyms.split(';') if len(s)>0],
-    #     "definition": definition.strip(),
-    #     "notes": notes2,
-    #     "rev": 1, # set a revision
-    #     }
+    await term_service.add_term(item)
+    # TODO tags
+    # TODO log
+    # TODO comment
+    
+    context = {
+        "user": user,
+        "vocab": vocabobj,
+        "tags": tags,
+        "alert":f"Added '{term}'.",
+        "alert_type":"success",
+    }
+    return templates.TemplateResponse(request=request, name="add.html", context=context)
 
+# ---------------------------------------------------
+@router.get("/vocab/{vocab}/edit/{tid}", response_class=HTMLResponse)
+async def edit_term(vocab: str, tid: str, request: Request, user=Depends(auth_user)):
+    term_service = TermService(request.app.state.client.db, vocab)
+    vocabobj = await term_service.get_vocab_info(vocab)
+    term = await term_service.get_term(tid)
+
+    context = {
+        "user": user,
+        "vocab": vocabobj,
+        "term": term,
+    }
+    return templates.TemplateResponse(request=request, name="edit.html", context=context)
+
+
+# ---------------------------------------------------
+@router.post("/vocab/{vocab}/edit/{itd}", response_class=HTMLResponse)
+async def edit_term_post(vocab: str,
+                         tid: str,
+                         request: Request,
+                         term: Annotated[str, Form()] = "",
+                         synonyms: Annotated[str, Form()] = "",
+                         definition: Annotated[str, Form()] = "",
+                         section: Annotated[str, Form()] = "",
+                         source: Annotated[str, Form()] = "",
+                         notes: Annotated[list, Form()] = "",
+                         # tags: Annotated[str, Form()] = "",
+                         # comment: Annotated[str, Form()] = "",
+                         log: Annotated[str, Form()] = "",
+                         rev: Annotated[int, Form()] = 1,
+                         user=Depends(auth_user)):
+
+    term_service = TermService(request.app.state.client.db, vocab)
+    vocabobj = await term_service.get_vocab_info(vocab)
+    term = await term_service.get_term(tid)
+
+    notes2=[]
+    for n in notes:
+        if len(n.strip())>0:
+            notes2.append(n.strip())
+
+    breakpoint()
+            
+    if await term_service.has_term(key):
+        # return back most of the data in the form to have another go
+        context = {
+            "user": user,
+            "vocab": vocabobj,
+            "term": term,
+            "synonyms": synonyms,
+            "definition": definition,
+            "notes": notes2,
+            "comment": comment,
+            "tags": tags,
+            "log": log,
+            "alert":f"Term '{term}' with key '{key}' already defined",
+            "alert_type":"error",
+        }
+        return templates.TemplateResponse(request=request, name="add.html", context=context)
+
+    item = schema.Term(
+        key = key,
+        term = term.strip(),
+        synonyms = [s.strip() for s in synonyms.split(';') if len(s)>0],
+        definition = definition.strip(),
+        notes = notes2,
+        source = '',
+        context = '',
+        section = ''
+    )
+    
     await term_service.add_term(item)
     # TODO tags
     # TODO log

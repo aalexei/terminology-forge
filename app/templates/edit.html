@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block main_menu %}
+<li><a href="/">Home</a></li>
+<li class="menu-title">Actions:</li>
+<li><a href="/vocab/{{vocab.key}}/term/{{ term.key }}">View term</a></li>
+{% endblock main_menu %}
+
+
+{% block nav_middle %}
+<a href="/vocab/{{ vocab.key }}/digest" class="btn btn-ghost"><span class="tooltip tooltip-bottom" data-tip="{{ vocab.name }}">{{vocab.key}}</span></a>
+{% endblock nav_middle %}
+
+
+{% block user_menu %}
+  <li><i>{{ user.github }}</i></li>
+  <li><a href="/logout">Logout</a></li>
+{% endblock user_menu %}
+
+  
+{% block content %}
+<form method="post" action="/vocab/{{vocab.key}}/edit/{{ term.key }}">
+<div class="flex flex-col px-6 w-full">
+  <div class="stats shadow">
+    <div class="stat">
+      <div class="stat-title">Term</div>
+      <div class="stat-value">{{ term.term }}</div>
+    </div>
+    <div class="stat">
+      <div class="stat-title">Revision</div>
+      <div class="stat-value">{{ term.rev }}</div>
+    </div>
+</div>
+
+
+  <input type="hidden" name="rev" value="{{ term.rev }}" />
+  <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-full border p-4">
+    <legend class="fieldset-legend">Term</legend>
+    
+    <label class="label">Term</label>
+    <div class="flex flex-row gap-4 items-center">
+      <span class="text-lg">{{ term.term }}</span>
+      <a class="btn" href="/vocab/{{vocab.key}}/editterm/{{ term.key }}">Edit term</a>
+    </div>
+    <label class="label">Synonyms</label>
+    <input type="text" name="synonyms" class="input w-full" placeholder="Synonyms (optional)" value="{{ term.synonyms | join('; ') }}" />
+    <p class="label">Separate with semi-colon ";".</p>
+  </fieldset>
+
+  <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-full border p-4">
+    <legend class="fieldset-legend">Definition</legend>
+    <textarea name="definition" class="textarea h-40 w-full" placeholder="Definition">{{ term.definition }}</textarea>
+    <p class="label">Use [[key]] or [[key][display]] notation for links. </p>
+  </fieldset>
+
+  <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-full border p-4">
+    <legend class="fieldset-legend">Other Parameters</legend>
+    
+    <label class="label">Key</label>
+    <div class="flex flex-row gap-4 items-center">
+      <span class="text-lg">{{ term.key }}</span>
+      <a class="btn" href="/vocab/{{vocab.key}}/editkey/{{ term.key }}">Edit key</a>
+    </div>
+
+    <label class="label">Section</label>
+    <input name="section" type="text" class="input w-full" placeholder="Type here" value="{{ term.section }}" />
+
+    <label class="label">Source</label>
+    <input name="source" type="text" class="input w-full" placeholder="Type here" value="{{ term.source }}" />
+
+  </fieldset>
+  
+  <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-full border p-4">
+    <legend class="fieldset-legend">Term notes</legend>
+    {% for n in term.notes %}
+    <label class="label">Note {{ loop.index }}</label>
+    <input name="notes" type="text" class="input w-full" placeholder="Type here" value="{{ n }}" />
+    {% endfor %}
+    <label class="label">New Note</label>
+    <input name="notes" type="text" class="input w-full" placeholder="Add new note here" value="{{ n }}" />
+  </fieldset>
+
+  <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-full border p-4">
+    <legend class="fieldset-legend">Log</legend>
+    <input type="text" name="log" class="input w-full" placeholder="Reason for changes" required value="" />
+    <p class="label">Give a summary of changes for the term's log.</p>
+  </fieldset>
+
+  <button type="submit" class="btn mt-4 mb-4">Save</button>
+
+</div>
+</form>
+
+{% endblock %}
