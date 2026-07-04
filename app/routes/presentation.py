@@ -5,14 +5,16 @@ from typing import Annotated, Union
 from loguru import logger
 from core.security import auth_user
 from core import exceptions
+from db import schema
 from services.user import UserService
-from services.term import TermService
+from services.term import TermService, term2key
 import json
 
 router = APIRouter()
 
 templates = Jinja2Templates(directory="app/templates")
 
+# ---------------------------------------------------
 @router.get("/", response_class=HTMLResponse)
 async def home(request: Request,
                user=Depends(auth_user)):
@@ -24,6 +26,7 @@ async def home(request: Request,
     }
     return templates.TemplateResponse(request=request, name="home.html", context=context)
 
+# ---------------------------------------------------
 @router.get("/vocab/{vocab}/digest", response_class=HTMLResponse)
 async def vocab_digest(vocab: str,
                    request: Request,
@@ -36,6 +39,7 @@ async def vocab_digest(vocab: str,
     }
     return templates.TemplateResponse(request=request, name="digest.html", context=context)
 
+# ---------------------------------------------------
 @router.get("/vocab/{vocab}/list", response_class=HTMLResponse)
 async def vocab_get(vocab: str,
                    request: Request,
@@ -62,6 +66,7 @@ async def vocab_list(request, vocab, user, filtr=""):
     }
     return templates.TemplateResponse(request=request, name="list.html", context=context)
 
+# ---------------------------------------------------
 @router.get("/vocab/{vocab}/graph", response_class=HTMLResponse)
 async def vocab_graph(vocab: str,
                    request: Request,
@@ -76,6 +81,7 @@ async def vocab_graph(vocab: str,
     }
     return templates.TemplateResponse(request=request, name="graph.html", context=context)
 
+# ---------------------------------------------------
 @router.get("/vocab/{vocab}/graph2", response_class=HTMLResponse)
 async def vocab_graph2(vocab: str,
                    request: Request,
@@ -91,6 +97,7 @@ async def vocab_graph2(vocab: str,
     return templates.TemplateResponse(request=request, name="graph2.html", context=context)
 
 
+# ---------------------------------------------------
 @router.get("/vocab/{vocab}/term/{tid}", response_class=HTMLResponse)
 async def show_term(vocab: str, tid: str, request: Request, user=Depends(auth_user)):
 
@@ -106,6 +113,7 @@ async def show_term(vocab: str, tid: str, request: Request, user=Depends(auth_us
     }
     return templates.TemplateResponse(request=request, name="term.html", context=context)
 
+# ---------------------------------------------------
 @router.get("/vocab/{vocab}/export", response_class=HTMLResponse)
 async def export(vocab: str, request: Request, user=Depends(auth_user)):
     
@@ -118,6 +126,7 @@ async def export(vocab: str, request: Request, user=Depends(auth_user)):
     }
     return templates.TemplateResponse(request=request, name="export.html", context=context)
 
+# ---------------------------------------------------
 @router.post("/vocab/{vocab}/export", response_class=HTMLResponse)
 async def export_post(vocab: str, request: Request, action: Annotated[str, Form()] = "",  user=Depends(auth_user)):
 
@@ -156,6 +165,7 @@ async def export_post(vocab: str, request: Request, action: Annotated[str, Form(
     return templates.TemplateResponse(request=request, name="export.html", context=context)
 
 
+# ---------------------------------------------------
 @router.get("/vocab/{vocab}/add", response_class=HTMLResponse)
 async def add_term(vocab: str, request: Request, user=Depends(auth_user)):
     term_service = TermService(request.app.state.client.db, vocab)
@@ -169,6 +179,7 @@ async def add_term(vocab: str, request: Request, user=Depends(auth_user)):
     return templates.TemplateResponse(request=request, name="add.html", context=context)
 
 
+# ---------------------------------------------------
 @router.post("/vocab/{vocab}/add", response_class=HTMLResponse)
 async def edit_term_post(vocab: str,
                          request: Request,
@@ -184,48 +195,59 @@ async def edit_term_post(vocab: str,
     term_service = TermService(request.app.state.client.db, vocab)
     vocabobj = await term_service.get_vocab_info(vocab)
 
-    breakpoint()
-    
     notes2=[]
     for n in notes:
         if len(n.strip())>0:
             notes2.append(n.strip())
 
     key = term2key(term)
-    if key in ITEMS:
+    
+    if await term_service.has_term(key):
         # return back most of the data in the form to have another go
         context = {
-            "statuses": get_statuses(),
-            "clusters": get_clusters(),
+            "user": user,
+            "vocab": vocabobj,
             "term": term,
             "synonyms": synonyms,
             "definition": definition,
             "notes": notes2,
-            "cluster": cluster,
-            "src": src,
-            "alert":f"Term '{term}' with key {key} already defined",
+            "comment": comment,
+            "tags": tags,
+            "log": log,
+            "alert":f"Term '{term}' with key '{key}' already defined",
             "alert_type":"error",
         }
         return templates.TemplateResponse(request=request, name="add.html", context=context)
 
-    item = {
-        'key':key,
-        'term':term.strip(),
-        'synonyms':[s.strip() for s in synonyms.split(';') if len(s)>0],
-        'definition':definition.strip(),
-        'notes':notes2,
-        'log':[log_entry(log)],
-        'source':'',
-        'rev':1, # set a revision
-        }
+    item = schema.Term(
+        key = key,
+        term = term.strip(),
+        synonyms = [s.strip() for s in synonyms.split(';') if len(s)>0],
+        definition = definition.strip(),
+        notes = notes2,
+        source = '',
+        context = '',
+        section = ''
+    )
+    
+    # item = {
+    #     "_key": key,
+    #     "term": term.strip(),
+    #     "synonyms": [s.strip() for s in synonyms.split(';') if len(s)>0],
+    #     "definition": definition.strip(),
+    #     "notes": notes2,
+    #     "rev": 1, # set a revision
+    #     }
 
-    ITEMS[key] = item
+    await term_service.add_term(item)
+    # TODO tags
+    # TODO log
+    # TODO comment
     
     context = {
-        "statuses": get_statuses(),
-        "clusters": get_clusters(),
-        "cluster": cluster,
-        "src": src,
+        "user": user,
+        "vocab": vocabobj,
+        "tags": tags,
         "alert":f"Added '{term}'.",
         "alert_type":"success",
     }

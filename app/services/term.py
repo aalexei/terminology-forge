@@ -2,6 +2,13 @@ import re
 import json
 from db import schema
 
+def term2key(term):
+    """
+    Convert term to canonical key
+    valid characters: [a-z0-9_]
+    term -> lowercase -> non (letters or numbers) to _
+    """
+    return re.sub(r"[^a-z0-9]","_",term.lower())
 
 
 def linkify(so, links, vocab, context):
@@ -83,6 +90,32 @@ def extend_term(term, tags, links, vocab, context='list'):
     return term
 
 
+async def relink(G, t1):
+    """
+    Recreate the links from this item's definition and notes out.
+    """
+    vcol = t1['_id'].split('/')[0]
+    TERM = G.vertex_collection(vcol)
+    LINK = G.edge_collection('link')
+
+    # Delete existing links
+    existing_links = await LINK.edges(t1['_id'], direction='out')
+    existing_links = existing_links['edges']
+    for link in existing_links:
+        await LINK.delete(link['_id'])
+
+    # Reform links from definition and notes
+    async def add_link(t1, target, context):
+        t2 = await TERM.get(target)
+        if t2 is not None:
+            await LINK.insert({'_from':t1['_id'], '_to':t2['_id'], 'context': context})
+    for target in LinkedText(t1['definition']).links():
+        await add_link(t1,target,'def')
+    for n in t1['notes']:
+        for target in LinkedText(n).links():
+            await add_link(t1,target,'note')
+
+
 class TermService:
 
     collection = None
@@ -124,6 +157,7 @@ class TermService:
                 
         return terms
 
+    
     async def get_term(self, tid):
         query = """
         LET tags = (
@@ -151,12 +185,27 @@ class TermService:
                 
         return T
 
+    
+    async def has_term(self, tid):
+        terms = self.db.collection(self.collection)
+        return await terms.has(tid) 
+
+    async def add_term(self, term):
+        terms = self.db.collection(self.collection)
+        await terms.insert(term.model_dump(by_alias=True))
+        TERM = await terms.get(term.key)
+        # TODO go off preferences instead of hard-coded TFG
+        graph = self.db.graph('TFG')
+        await relink(graph, TERM)
+        
+    
     async def get_vocab_info(self, vocab):
         vocabularies = self.db.collection("vocabularies")
         infodata = await vocabularies.get(vocab)
         info = schema.Vocabulary(**infodata)
         return info
 
+    
     async def get_vocabs(self):
 
         query = """
@@ -175,6 +224,7 @@ class TermService:
                 
         return vocabs
 
+    
     async def get_graph_elements(self):
 
         query = """
@@ -217,6 +267,7 @@ class TermService:
 
         return json.dumps(elements)
 
+    
     async def export(self, action, all=True):
 
         if action == "json":
