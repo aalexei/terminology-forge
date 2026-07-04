@@ -190,15 +190,34 @@ class TermService:
         terms = self.db.collection(self.collection)
         return await terms.has(tid) 
 
+    
     async def add_term(self, term):
         terms = self.db.collection(self.collection)
         await terms.insert(term.model_dump(by_alias=True))
+        
+        # Relink
         TERM = await terms.get(term.key)
         # TODO go off preferences instead of hard-coded TFG
         graph = self.db.graph('TFG')
         await relink(graph, TERM)
+
         
-    
+    async def update_term(self, term):
+        terms = self.db.collection(self.collection)
+
+        # Adjust the data removing what we don't want to update
+        term_data = term.model_dump(by_alias=True)
+        del term_data['term']
+        
+        await terms.update(term_data)
+
+        # Relink
+        TERM = await terms.get(term.key)
+        # TODO go off preferences instead of hard-coded TFG
+        graph = self.db.graph('TFG')
+        await relink(graph, TERM)
+
+        
     async def get_vocab_info(self, vocab):
         vocabularies = self.db.collection("vocabularies")
         infodata = await vocabularies.get(vocab)

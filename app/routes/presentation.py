@@ -239,7 +239,7 @@ async def add_term_post(vocab: str,
         "user": user,
         "vocab": vocabobj,
         "tags": tags,
-        "alert":f"Added '{term}'.",
+        "alert": f"Added '{term}'.",
         "alert_type":"success",
     }
     return templates.TemplateResponse(request=request, name="add.html", context=context)
@@ -260,7 +260,7 @@ async def edit_term(vocab: str, tid: str, request: Request, user=Depends(auth_us
 
 
 # ---------------------------------------------------
-@router.post("/vocab/{vocab}/edit/{itd}", response_class=HTMLResponse)
+@router.post("/vocab/{vocab}/edit/{tid}", response_class=HTMLResponse)
 async def edit_term_post(vocab: str,
                          tid: str,
                          request: Request,
@@ -268,63 +268,44 @@ async def edit_term_post(vocab: str,
                          synonyms: Annotated[str, Form()] = "",
                          definition: Annotated[str, Form()] = "",
                          section: Annotated[str, Form()] = "",
+                         context: Annotated[str, Form()] = "",
                          source: Annotated[str, Form()] = "",
                          notes: Annotated[list, Form()] = "",
-                         # tags: Annotated[str, Form()] = "",
-                         # comment: Annotated[str, Form()] = "",
                          log: Annotated[str, Form()] = "",
                          rev: Annotated[int, Form()] = 1,
                          user=Depends(auth_user)):
 
     term_service = TermService(request.app.state.client.db, vocab)
     vocabobj = await term_service.get_vocab_info(vocab)
-    term = await term_service.get_term(tid)
 
     notes2=[]
     for n in notes:
         if len(n.strip())>0:
             notes2.append(n.strip())
 
-    breakpoint()
-            
-    if await term_service.has_term(key):
-        # return back most of the data in the form to have another go
-        context = {
-            "user": user,
-            "vocab": vocabobj,
-            "term": term,
-            "synonyms": synonyms,
-            "definition": definition,
-            "notes": notes2,
-            "comment": comment,
-            "tags": tags,
-            "log": log,
-            "alert":f"Term '{term}' with key '{key}' already defined",
-            "alert_type":"error",
-        }
-        return templates.TemplateResponse(request=request, name="add.html", context=context)
-
     item = schema.Term(
-        key = key,
-        term = term.strip(),
+        key = tid,
+        term = '', # Not actually updated
         synonyms = [s.strip() for s in synonyms.split(';') if len(s)>0],
         definition = definition.strip(),
         notes = notes2,
-        source = '',
-        context = '',
-        section = ''
+        source = source,
+        context = context,
+        section = section
     )
+
+    # TODO Seems fragile to have to set everything and del term
     
-    await term_service.add_term(item)
-    # TODO tags
+    await term_service.update_term(item)
     # TODO log
-    # TODO comment
-    
+
+    term = await term_service.get_term(tid)
+
     context = {
         "user": user,
         "vocab": vocabobj,
-        "tags": tags,
-        "alert":f"Added '{term}'.",
+        "term": term,
+        "alert": f"Updated '{term.key}'.",
         "alert_type":"success",
     }
-    return templates.TemplateResponse(request=request, name="add.html", context=context)
+    return templates.TemplateResponse(request=request, name="edit.html", context=context)
