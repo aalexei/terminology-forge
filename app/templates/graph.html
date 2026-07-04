@@ -70,33 +70,19 @@
     </button>
 {% endblock nav_middle %}
 
-{% block nav_end %}
-<ul class="menu menu-horizontal px-1">
-  <li>
-    <details>
-      <summary>Sort</summary>
-      <ul class="bg-neutral text-neutral-content rounded-t-none p-2">
-	<li><a class="sort" data-sort="listjs-term">Term</a></li>
-	<li><a class="sort" data-sort="listjs-cluster">Cluster</a></li>
-	<li><a class="sort" data-sort="listjs-status">Status</a></li>
-      </ul>
-    </details>
-  </li>
-</ul>
-{% endblock nav_end %}
 
 {% block user_menu %}
-  <li><i>{{ user.github }}</i></li>
-  <li><a href="/logout">Logout</a></li>
+<li><i>{{ user.github }}</i></li>
+<li><a href="/logout">Logout</a></li>
 {% endblock user_menu %}
 
-  {% block content %}
-  <div id="cy" class="w-full h-screen"></div>
+{% block content %}
+<div id="cy" class="w-full h-screen"></div>
 
-  <!-- ── Detail panel (always visible, fixed right) ── -->
-<div id="detail-panel" class="bg-base-200 border border-base-content/15 rounded-xl fixed top-[72px] right-2 w-48 flex flex-col overflow-hidden" style="max-height: calc(100vh - 88px);">
+<!-- ── Detail panel (always visible, fixed right) ── -->
+<div id="detail-panel" class="bg-base-200 border border-base-content/15 rounded-xl fixed top-[72px] right-2 w-48 flex flex-col overflow-hidden" style="max-height: calc(100vh - 72px);">
 
-  <div class="overflow-y-auto flex-1 p-3 flex flex-col gap-3">
+  <div class="overflow-y-auto flex-1 p-3 flex flex-col">
 
     <!-- Empty state -->
     <div id="empty-state" class="flex flex-col items-center justify-center gap-2 py-8 text-base-content/25">
@@ -108,7 +94,7 @@
     </div>
 
     <!-- Node details -->
-    <div id="node-details" class="hidden flex-col gap-2.5">
+    <div id="node-details" class="hidden flex-col gap-1">
 
       <!-- Title -->
       <div>
@@ -121,22 +107,18 @@
       <!-- Description -->
       <p id="prop-desc" class="text-[11px]  text-base-content/45">—</p>
 
+      <div class="divider my-0"></div>
       <!-- Tags -->
       <div id="prop-tags" class="flex flex-wrap gap-1"></div>
 
       <div class="divider my-0"></div>
 
       <!-- Connections -->
-      <div>
-        <p class="text-[10px] uppercase tracking-widest text-base-content/30 mb-1">Links (<span id="conn-count">0</span>)</p>
-        <div id="conn-list" class="flex flex-col"></div>
-      </div>
+      <div id="conn-list" class="flex flex-col"></div>
 
     </div>
   </div>
 </div>
-
-
 {% endblock content %}
 
 {% block body_bottom %}
@@ -150,265 +132,248 @@
       return dict;
   }, {});
   
-    var cy = cytoscape({
-	container: document.getElementById('cy'),
-	elements: elements,
-	style: [
-	    {
-		selector: 'node',
-		style: {
-		    'label': 'data(term)',
-		    'shape': 'round-rectangle',
-		    'font-size': 6,
-                    'width':'60px',
-                    'text-wrap':'wrap',
-                    'text-max-width':'50px',
-                    'text-outline-width': 0,
-                    'text-halign':'center',
-                    'text-valign':'center',
-		    'color':'black'
-		}
-	    },
-	    {
-		selector: 'node:selected',
-		style: {
-		    // 'background-color': '#1c2330',
-		    'border-color': '#f78166',
-		    'border-width': 2.5,
-		    'color': '#f0f6fc',
-		}
-	    },
-	    {
-		selector: 'edge',
-		style: {
-		    'target-arrow-shape': 'triangle',
-                    'curve-style': 'bezier',
-                    // 'text-rotation':'autorotate',
-                    // 'label':'data(n)',
-                    // 'text-wrap':'wrap',
-                    // 'color':'white',
-                    'width':3,
-                    // 'font-size':4
-		    'opacity': 0.7,
-		}
-	    },
-	    {
-		selector: 'edge.highlighted',
-		style: {
-		    'line-color': '#388bfd',
-		    'target-arrow-color': '#388bfd',
-		    'opacity': 1,
-		}
-	    },
-	    {
-		selector: '.faded',
-		style: { 'opacity': 0.15 }
-	    }
-	],
-	layout: {
-	    name: 'fcose',
-	    animate: false,
-	    idealEdgeLength: 120,
-	    nodeSeparation: 50,
-	    nodeRepulsion: 50000,
-	    gravity: 1,
-	    gravityRange: 5,
-	},
-	// layout: {
-	//     name: 'cola',
-	//     animate:false,
-	//     maxSimulationTime: 4000,
-	//     // nodeSeparation: 100,
-	//     // nodeRepulsion: 5*4500,
-	//    // gravity: 0.15,
-	//    // fixedNodeConstraint:fixed,
-	//    // fit:false
-	// },
-	// layout: {
-	//     name: 'dagre',
-	//     animate:false,
-	// },
-	minZoom: 0.1,
-	maxZoom: 5,
+  var cy = cytoscape({
+      container: document.getElementById('cy'),
+      elements: elements,
+      style: [
+	  {
+	      selector: 'node',
+	      style: {
+		  'label': 'data(term)',
+		  'shape': 'round-rectangle',
+		  'font-size': 6,
+                  'width':'60px',
+                  'text-wrap':'wrap',
+                  'text-max-width':'50px',
+                  'text-outline-width': 0,
+                  'text-halign':'center',
+                  'text-valign':'center',
+		  'color':'black'
+	      }
+	  },
+	  {
+	      selector: 'node:selected',
+	      style: {
+		  // 'background-color': '#1c2330',
+		  'border-color': '#f78166',
+		  'border-width': 2.5,
+		  'color': '#f0f6fc',
+	      }
+	  },
+	  {
+	      selector: 'edge',
+	      style: {
+		  'target-arrow-shape': 'triangle',
+                  'curve-style': 'bezier',
+                  // 'text-rotation':'autorotate',
+                  // 'label':'data(n)',
+                  // 'text-wrap':'wrap',
+                  // 'color':'white',
+                  'width':3,
+                  // 'font-size':4
+		  'opacity': 0.7,
+	      }
+	  },
+	  {
+	      selector: 'edge.highlighted',
+	      style: {
+		  'line-color': '#388bfd',
+		  'target-arrow-color': '#388bfd',
+		  'opacity': 1,
+	      }
+	  },
+	  {
+	      selector: '.faded',
+	      style: { 'opacity': 0.15 }
+	  }
+      ],
+      layout: {
+	  name: 'fcose',
+	  animate: false,
+	  idealEdgeLength: 120,
+	  nodeSeparation: 50,
+	  nodeRepulsion: 50000,
+	  gravity: 1,
+	  gravityRange: 5,
+      },
+      // layout: {
+      //     name: 'cola',
+      //     animate:false,
+      //     maxSimulationTime: 4000,
+      //     // nodeSeparation: 100,
+      //     // nodeRepulsion: 5*4500,
+      //    // gravity: 0.15,
+      //    // fixedNodeConstraint:fixed,
+      //    // fit:false
+      // },
+      // layout: {
+      //     name: 'dagre',
+      //     animate:false,
+      // },
+      minZoom: 0.1,
+      maxZoom: 5,
+  });
 
-    });
+  /* Downstream traversal with loop detection */
+  function collectDownstream(startNode) {
+      const visitedNodes = new Set(); // all nodes reached (across any path)
+      const activeEdges  = [];        // edges that form the highlighted paths
 
-    /* ── Downstream traversal with loop detection ──
-       Walks directed edges (source → target) from the selected node using an
-       iterative DFS. Tracks visited node IDs to break cycles immediately when
-       a node that is already in the current path is encountered again.
-       Collects every reachable downstream node and the edges that connect them,
-       then highlights that subgraph while fading everything else.              */
-    function collectDownstream(startNode) {
-	const visitedNodes = new Set(); // all nodes reached (across any path)
-	const activeEdges  = [];        // edges that form the highlighted paths
+      // Stack entries: { node, pathSet } where pathSet is the ancestor set for
+      // this specific DFS branch — used to detect back-edges (loops).
+      const stack = [{ node: startNode, pathSet: new Set([startNode.id()]) }];
 
-	// Stack entries: { node, pathSet } where pathSet is the ancestor set for
-	// this specific DFS branch — used to detect back-edges (loops).
-	const stack = [{ node: startNode, pathSet: new Set([startNode.id()]) }];
+      while (stack.length) {
+	  const { node, pathSet } = stack.pop();
+	  visitedNodes.add(node.id());
 
-	while (stack.length) {
-	    const { node, pathSet } = stack.pop();
-	    visitedNodes.add(node.id());
+	  const outEdges = node.outgoers('edge'); // only directed outgoing edges
+	  outEdges.forEach(edge => {
+	      const target = edge.target();
+	      const targetId = target.id();
 
-	    const outEdges = node.outgoers('edge'); // only directed outgoing edges
-	    outEdges.forEach(edge => {
-		const target = edge.target();
-		const targetId = target.id();
+	      activeEdges.push(edge);
 
-		activeEdges.push(edge);
+	      if (pathSet.has(targetId)) {
+		  // Loop detected — do not recurse further down this branch
+		  return;
+	      }
 
-		if (pathSet.has(targetId)) {
-		    // Loop detected — do not recurse further down this branch
-		    return;
-		}
-
-		if (!visitedNodes.has(targetId)) {
-		    // New node — push with an extended path set for this branch
-		    stack.push({ node: target, pathSet: new Set([...pathSet, targetId]) });
-		}
-	    });
-	}
+	      if (!visitedNodes.has(targetId)) {
+		  // New node — push with an extended path set for this branch
+		  stack.push({ node: target, pathSet: new Set([...pathSet, targetId]) });
+	      }
+	  });
+      }
 	
-	return { visitedNodes, activeEdges };
-    }
+      return { visitedNodes, activeEdges };
+  }
 
-    function applyFocus(node) {
-	const { visitedNodes, activeEdges } = collectDownstream(node);
+  function applyFocus(node) {
+      const { visitedNodes, activeEdges } = collectDownstream(node);
 
-	// Fade everything first
-	cy.elements().addClass('faded');
-	cy.elements().removeClass('highlighted');
+      // Fade everything first
+      cy.elements().addClass('faded');
+      cy.elements().removeClass('highlighted');
 	
-	// Un-fade & highlight the selected node
-	node.removeClass('faded');
+      // Un-fade & highlight the selected node
+      node.removeClass('faded');
 
-	// Un-fade & highlight all downstream nodes
-	visitedNodes.forEach(id => {
-	    cy.getElementById(id).removeClass('faded');
-	});
+      // Un-fade & highlight all downstream nodes
+      visitedNodes.forEach(id => {
+	  cy.getElementById(id).removeClass('faded');
+      });
 
-	// Highlight traversed edges
-	activeEdges.forEach(edge => {
-	    edge.removeClass('faded');
-	    edge.addClass('highlighted');
-	});
-    }
+      // Highlight traversed edges
+      activeEdges.forEach(edge => {
+	  edge.removeClass('faded');
+	  edge.addClass('highlighted');
+      });
+  }
 
 
-/* ── Panel-aware centering ──
-   The usable graph area is the full viewport minus the panel on the right.
-   We shift the rendered centre-point left by half the panel width so the
-   node lands visually centred in the remaining space.                      */
-function centerOnNode(node) {
-  const zoom    = Math.max(cy.zoom(), 1.2);
-  const pos     = node.renderedPosition();   // current rendered position
-  const vpW     = cy.width();
-  const vpH     = cy.height();
-  // available canvas width (left of panel)
-  const usableW = vpW - PANEL_WIDTH;
-  // target rendered centre of the usable area
-  const targetX = usableW / 2;
-  const targetY = vpH / 2;
-  // how much we need to pan (in rendered px)
-  const panX = targetX - pos.x;
-  const panY = targetY - pos.y;
+  /* Panel-aware centering */
+  function centerOnNode(node) {
+      const zoom    = Math.max(cy.zoom(), 1.2);
+      const pos     = node.renderedPosition();   // current rendered position
+      const vpW     = cy.width();
+      const vpH     = cy.height();
+      // available canvas width (left of panel)
+      const usableW = vpW - PANEL_WIDTH;
+      // target rendered centre of the usable area
+      const targetX = usableW / 2;
+      const targetY = vpH / 2;
+      // how much we need to pan (in rendered px)
+      const panX = targetX - pos.x;
+      const panY = targetY - pos.y;
 
-  cy.animate({
-    pan:  { x: cy.pan().x + panX, y: cy.pan().y + panY },
-    zoom: zoom,
-  }, { duration: 350, easing: 'ease-in-out-cubic' });
-}
+      cy.animate({
+	  pan:  { x: cy.pan().x + panX, y: cy.pan().y + panY },
+	  zoom: zoom,
+      }, { duration: 350, easing: 'ease-in-out-cubic' });
+  }
   
-function centerOnNodeById(id) {
-  const node = cy.getElementById(id);
-  if (node.length) centerOnNode(node);
-}
+  function centerOnNodeById(id) {
+      const node = cy.getElementById(id);
+      if (node.length) centerOnNode(node);
+  }
 
-/* ── Show node details ── */
-function showPanel(node) {
-  const id = node.id();
-  const d  = nodeData[id];
-  if (!d) return;
+  /* ── Show node details ── */
+  function showPanel(node) {
+      const id = node.id();
+      const d  = nodeData[id];
+      if (!d) return;
 
-  document.getElementById('panel-title').textContent    = d.term;
-  // document.getElementById('panel-type').textContent     = `${d.type} · ${id}`;
-  // document.getElementById('prop-type-val').textContent  = d.type;
-  // document.getElementById('prop-weight').textContent    = d.weight;
-  // document.getElementById('prop-status').innerHTML      = `<span class="${statusBadgeClass(d.status)}">${d.status}</span>`;
-  document.getElementById('prop-desc').textContent      = d.definition;
+      document.getElementById('panel-title').innerHTML = `<a href='/vocab/{{ vocab.key }}/term/${d.key}'>${d.term}</a>`;
+      document.getElementById('prop-desc').innerHTML = d.definition_html;
 
-  document.getElementById('prop-tags').innerHTML = d.tags
-    .map(t => `<span class="badge badge-xs badge-outline badge-info">${t.name}</span>`)
-    .join('');
+      document.getElementById('prop-tags').innerHTML = d.tags
+	  .map(t => `<span class="badge badge-xs badge-outline">${t.name}</span>`)
+	  .join('');
 
-  const neighbors = node.neighborhood().nodes();
-  document.getElementById('conn-count').textContent = neighbors.length;
-  document.getElementById('conn-list').innerHTML = neighbors.map(nb => {
-    const nd = nodeData[nb.id()];
-    return `
+      const neighbors = node.neighborhood().nodes();
+      document.getElementById('conn-list').innerHTML = neighbors.map(nb => {
+	  const nd = nodeData[nb.id()];
+	  return `
       <div class="flex items-center gap-1.5 py-1 cursor-pointer hover:text-base-content transition-colors text-base-content/60 conn-item" data-id="${nb.id()}">
         <span class="w-1.5 h-1.5 rounded-full bg-info/60 flex-shrink-0"></span>
         <span class="text-[11px] truncate flex-1">${nd ? nd.term : nb.id()}</span>
       </div>`;
-  }).join('');
+      }).join('');
 
-  document.querySelectorAll('.conn-item').forEach(el => {
-    el.addEventListener('click', () => {
-      const target = cy.getElementById(el.dataset.id);
-      if (target.length) {
-        cy.$(':selected').unselect();
-        target.select();
-        showPanel(target);
-        applyFocus(target);
-        centerOnNode(target);
-      }
-    });
+      document.querySelectorAll('.conn-item').forEach(el => {
+	  el.addEventListener('click', () => {
+	      const target = cy.getElementById(el.dataset.id);
+	      if (target.length) {
+		  cy.$(':selected').unselect();
+		  target.select();
+		  showPanel(target);
+		  applyFocus(target);
+		  centerOnNode(target);
+	      }
+	  });
+      });
+
+      document.getElementById('empty-state').classList.add('hidden');
+      document.getElementById('node-details').classList.remove('hidden');
+      document.getElementById('node-details').classList.add('flex');
+  }
+
+  function resetPanel() {
+      document.getElementById('panel-title').textContent = 'No node selected';
+      document.getElementById('empty-state').classList.remove('hidden');
+      document.getElementById('node-details').classList.add('hidden');
+      document.getElementById('node-details').classList.remove('flex');
+  }
+
+  cy.on('tap', 'node', evt => {
+      const node = evt.target;
+      cy.$(':selected').unselect();
+      node.select();
+      applyFocus(node);
+      showPanel(node);
+      centerOnNode(node);
   });
 
-  document.getElementById('empty-state').classList.add('hidden');
-  document.getElementById('node-details').classList.remove('hidden');
-  document.getElementById('node-details').classList.add('flex');
-}
+  cy.on('tap', evt => {
+      if (evt.target === cy) {
+	  cy.$(':selected').unselect();
+	  cy.elements().removeClass('faded highlighted');
+	  resetPanel();
+      }
+  });
 
-function resetPanel() {
-  document.getElementById('panel-title').textContent = 'No node selected';
-  // document.getElementById('panel-type').textContent  = 'Click a node to inspect it';
-  // document.getElementById('empty-state').classList.remove('hidden');
-  document.getElementById('node-details').classList.add('hidden');
-  document.getElementById('node-details').classList.remove('flex');
-}
-
-  
-    cy.on('tap', 'node', evt => {
-	const node = evt.target;
-	cy.$(':selected').unselect();
-	node.select();
-
-	applyFocus(node);
-	showPanel(node);
-	centerOnNode(node);
-    });
-
-    cy.on('tap', evt => {
-	if (evt.target === cy) {
-	    cy.$(':selected').unselect();
-	    cy.elements().removeClass('faded highlighted');
-	    resetPanel();
-	}
-    });
-
-    // --- Toolbar buttons ---
-    document.getElementById('btn-fit').addEventListener('click',
-							() => cy.fit(undefined, 60));
-    document.getElementById('btn-zoom-in').addEventListener('click',
-	() => cy.zoom({ level: cy.zoom() * 1.3, renderedPosition: { x: cy.width()/2, y: cy.height()/2 } }));
-    document.getElementById('btn-zoom-out').addEventListener('click',
-							     () => cy.zoom({ level: cy.zoom() / 1.3, renderedPosition: { x: cy.width()/2, y: cy.height()/2 } }));
-    document.getElementById('btn-layout').addEventListener('click',
-							   () => {
+  // --- Toolbar buttons ---
+  document.getElementById('btn-fit').addEventListener('click',
+						      () => cy.fit(undefined, 60));
+  document.getElementById('btn-zoom-in').addEventListener('click',
+							  () => cy.zoom({ level: cy.zoom() * 1.3, renderedPosition: { x: cy.width()/2, y: cy.height()/2 } }));
+  document.getElementById('btn-zoom-out').addEventListener('click',
+							   () => cy.zoom({ level: cy.zoom() / 1.3, renderedPosition: { x: cy.width()/2, y: cy.height()/2 } }));
+  document.getElementById('btn-layout').addEventListener('click',
+							 () => {
   cy.layout({ name: 'fcose', padding: 80, nodeRepulsion: 8000, idealEdgeLength: 120, animate: true, animationDuration: 1000, randomize: true }).run();
-							   });
+							 });
   
-  </script>
+</script>
 {% endblock %}

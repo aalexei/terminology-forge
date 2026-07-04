@@ -201,8 +201,10 @@ class TermService:
                 elements['nodes'].append({
                     'data': {
                         'id': t['term']['_id'],
+                        'key': t['term']['_key'],
                         'term':t['term']['term'],
                         'definition':t['term']['definition'],
+                        'definition_html':LinkedText(t['term']['definition']).linkify(t['links'], self.collection, "term"),
                         'tags': t['tags'],
                     }})
                 for lnk in t['links']:
