@@ -4,7 +4,8 @@
 <li><a href="/">Home</a></li>
 {% if vocab.is_editable(user) %}
 <li class="menu-title">Actions:</li>
-<li><a href="/vocab/{{vocab.key}}/edit/{{ term.key }}">Edit</a></li>
+<li><a href="/vocab/{{ vocab.key }}/edit/{{ term.key }}">Edit</a></li>
+<li><a href="/vocab/{{ vocab.key }}/tasks">Tasks</a></li>
 {% endif %}
 {% endblock main_menu %}
 	  

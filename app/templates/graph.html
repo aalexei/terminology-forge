@@ -31,10 +31,15 @@
 <li><a href="/">Home</a></li>
 <li><a href="/vocab/{{ vocab.key }}/digest">Digest</a></li>
 <li><a href="/vocab/{{ vocab.key }}/list">List</a></li>
+{% if vocab.is_editable(user) %}
+<li><a href="/vocab/{{ vocab.key }}/tasks">Tasks</a></li>
+{% endif %}
 <li class="menu-title">Actions:</li>
+{% if vocab.is_editable(user) %}
 <li><span onclick="document.querySelectorAll('input[type=checkbox]').forEach(el => el.checked = false);">Clear selection</span></li>
 <li><span onclick="main_modal.showModal()">Set tags on selected</span></li>
 <li><a href="/vocab/{{ vocab.key }}/add">Add term</a></li>
+{% endif %}
 <li><a href="/vocab/{{vocab.key}}/export">Export vocabulary</a></li>
 {% endblock main_menu %}
 

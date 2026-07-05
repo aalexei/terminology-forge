@@ -107,6 +107,41 @@ async def vocab_graph2(vocab: str,
 
 
 # ---------------------------------------------------
+@router.get("/vocab/{vocab}/tasks", response_class=HTMLResponse)
+async def vocab_tasks(vocab: str,
+                   request: Request,
+                   user=Depends(auth_user)):
+    term_service = TermService(request.app.state.client.db, vocab)
+    vocabobj = await term_service.get_vocab_info(vocab)
+    tasks = await term_service.get_tasks()
+    
+    context = {
+        "user": user,
+        "vocab": vocabobj,
+        "tasks": tasks,
+    }
+    return templates.TemplateResponse(request=request, name="tasks.html", context=context)
+
+# ---------------------------------------------------
+@router.get("/vocab/{vocab}/task/{tid}", response_class=HTMLResponse)
+async def vocab_tasks(vocab: str,
+                      tid: str,
+                   request: Request,
+                   user=Depends(auth_user)):
+    term_service = TermService(request.app.state.client.db, vocab)
+    vocabobj = await term_service.get_vocab_info(vocab)
+    works = await term_service.get_task_works(tid)
+    
+    context = {
+        "user": user,
+        "vocab": vocabobj,
+        "works": works,
+    }
+    return templates.TemplateResponse(request=request, name="task.html", context=context)
+
+
+
+# ---------------------------------------------------
 @router.get("/vocab/{vocab}/term/{tid}", response_class=HTMLResponse)
 async def show_term(vocab: str, tid: str, request: Request, user=Depends(auth_user)):
 

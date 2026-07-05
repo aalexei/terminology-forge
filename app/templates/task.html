@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block main_modal %}
+{% endblock main_modal %}
+
+
+{% block main_menu %}
+<li><a href="/">Home</a></li>
+<li><a href="/vocab/{{ vocab.key }}/digest">Digest</a></li>
+<li><a href="/vocab/{{ vocab.key }}/list">List</a></li>
+<li><a href="/vocab/{{ vocab.key }}/graph">Graph</a></li>
+<li><a href="/vocab/{{ vocab.key }}/tasks">Tasks</a></li>
+<li class="menu-title">Actions:</li>
+<li><a href="/vocab/{{ vocab.key }}/add">Add term</a></li>
+<li><a href="/vocab/{{vocab.key}}/export">Export vocabulary</a></li>
+{% endblock main_menu %}
+
+{% block nav_middle %}
+{% endblock nav_middle %}
+
+{% block user_menu %}
+  <li><i>{{ user.github }}</i></li>
+  <li><a href="/logout">Logout</a></li>
+{% endblock user_menu %}
+
+{% block content %}
+<div class="m-4 flex flex-col">  
+  <h1 class="text-2xl">Tasks {{ task.name }}</h1>
+  <div class="m-4">{{ task.description }}</div>
+
+  {% if task.locked %}
+  <span class="size-6 stroke-current fill-none">{% include "icons/locked.svg" %}</span>
+  {% else %}
+  <span class="size-6 stroke-current fill-none">{% include "icons/editable.svg" %}</span>
+  {% endif %}
+  
+  <ul class="list bg-base-100 rounded-box shadow-md">
+    {% for work in works %}
+    <li class="list-row">
+      <div>
+      </div>
+      <div>
+	  <div class="text-lg">
+	    {{ work.text }}
+	  </div>
+	  <div>
+	    {{ work._target }}
+	  </div>
+      </div>
+    </li>
+    {% endfor %}
+</div>
+{% endblock content %}
+

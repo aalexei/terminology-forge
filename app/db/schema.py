@@ -106,6 +106,7 @@ class Task(DocumentModel):
     """
     name: str
     description: str = ""
+    locked: bool = False
 
     
 class Work(EdgeModel):

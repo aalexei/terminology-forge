@@ -392,4 +392,14 @@ class TermService:
         
         else:
             raise Exception()
-    
+
+        
+    async def get_tasks(self):
+        
+        tasks = []
+        cursor = await self.db.aql.execute(
+            "FOR t IN @@coll RETURN t",
+            bind_vars={"@coll": f"{self.collection}_task"})
+        async for task in cursor:
+            tasks.append(schema.Task(**task))
+        return tasks 
