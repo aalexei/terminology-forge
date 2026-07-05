@@ -112,17 +112,21 @@
       </fieldset>
     </div>
 
-    {% if term.log is not none %}
-    <div class="pt-4">
-      <h2 class="font-bold">Change Log:</h2>
-      <ol class="list-decimal ml-4">
-	{% for n in term.log %}
-	<li>
-	  {{ n['text'] }}
-	</li>
-	{% endfor %}
-      </ol>
-      {% if term.log|length == 0 %}
+    {% if log is not none %}
+    <div class="mt-4">
+    <h2 class="text-lg">Log of changes</h2>
+    {% for l in log %}
+    <ul class="list bg-base-100 rounded-box shadow-md">
+      <li class="list-row">
+	<div>{{ l['timestamp'] | ago }}</div>
+	<div>
+	  <div>{{ l['summary'] }}</div>
+	  </div>
+	<div>{{ l['user'] }}</div>
+      </li>
+    </ul>
+    {% endfor %}
+      {% if log|length == 0 %}
       <i>No Changes.</i>
       {% endif %}
     </div>

@@ -12,6 +12,7 @@ class DocumentModel(BaseModel):
                      validation_alias=AliasChoices('_key', 'key'), # accept arango or json
                      pattern=r"^[a-zA-Z0-9_\-.@+=]+$" # restrict to valid arango keys
                      )
+
     
 class EdgeModel(BaseModel):
     """
@@ -21,6 +22,7 @@ class EdgeModel(BaseModel):
     from_: Union[str, DocumentModel] = Field(alias="_from")
     to_: Union[str, DocumentModel] = Field(alias="_to")
 
+    
 class User(DocumentModel):
     """
     TF User
@@ -33,6 +35,7 @@ class User(DocumentModel):
     admin: List[str]
     root: bool
 
+    
 class Term(DocumentModel):
     """
     A term
@@ -47,6 +50,7 @@ class Term(DocumentModel):
 
     # Development fields
     rev: int = 1
+
     
 class Link(EdgeModel):
     """
@@ -54,12 +58,14 @@ class Link(EdgeModel):
     """
     context: str
 
+    
 class Comment(EdgeModel):
     """
     A comment by a user on a term
     """
     comment: str
     timestamp: float
+
     
 class Tag(DocumentModel):
     """
@@ -68,6 +74,7 @@ class Tag(DocumentModel):
     name: str
     description: str = ""
 
+    
 class Vocabulary(DocumentModel):
     """
     Info for a vocabulary
@@ -88,11 +95,11 @@ class Log(DocumentModel):
     Log of changes
     """
     timestamp: float
-    summary: str
     user: str
-    term: str
-    rev: int
+    target: str
+    summary: str
 
+    
 class Task(DocumentModel):
     """
     A task
@@ -100,6 +107,7 @@ class Task(DocumentModel):
     name: str
     description: str = ""
 
+    
 class Work(EdgeModel):
     """
     A work item on a task

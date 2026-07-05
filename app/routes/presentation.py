@@ -5,6 +5,7 @@ from typing import Annotated, Union
 from loguru import logger
 from core.security import auth_user
 from core import exceptions
+from core.util import ago
 from db import schema
 from services.user import UserService
 from services.term import TermService, term2key
@@ -13,6 +14,7 @@ import json
 router = APIRouter()
 
 templates = Jinja2Templates(directory="app/templates")
+templates.env.filters['ago'] = ago
 
 # ---------------------------------------------------
 @router.get("/", response_class=HTMLResponse)
@@ -26,6 +28,7 @@ async def home(request: Request,
     }
     return templates.TemplateResponse(request=request, name="home.html", context=context)
 
+
 # ---------------------------------------------------
 @router.get("/vocab/{vocab}/digest", response_class=HTMLResponse)
 async def vocab_digest(vocab: str,
@@ -33,11 +36,15 @@ async def vocab_digest(vocab: str,
                    user=Depends(auth_user)):
     term_service = TermService(request.app.state.client.db, vocab)
     vocabobj = await term_service.get_vocab_info(vocab)
+    log = await term_service.get_log(vocab)
+    
     context = {
         "user": user,
         "vocab": vocabobj,
+        "log": log,
     }
     return templates.TemplateResponse(request=request, name="digest.html", context=context)
+
 
 # ---------------------------------------------------
 @router.get("/vocab/{vocab}/list", response_class=HTMLResponse)
@@ -66,6 +73,7 @@ async def vocab_list(request, vocab, user, filtr=""):
     }
     return templates.TemplateResponse(request=request, name="list.html", context=context)
 
+
 # ---------------------------------------------------
 @router.get("/vocab/{vocab}/graph", response_class=HTMLResponse)
 async def vocab_graph(vocab: str,
@@ -80,6 +88,7 @@ async def vocab_graph(vocab: str,
         "elements": elements,
     }
     return templates.TemplateResponse(request=request, name="graph.html", context=context)
+
 
 # ---------------------------------------------------
 @router.get("/vocab/{vocab}/graph2", response_class=HTMLResponse)
@@ -105,13 +114,16 @@ async def show_term(vocab: str, tid: str, request: Request, user=Depends(auth_us
 
     term = await term_service.get_term(tid)
     vocabobj = await term_service.get_vocab_info(vocab)
-    
+    log = await term_service.get_log(f"{vocab}/{tid}")
+
     context = {
         "user": user,
         "vocab": vocabobj,
         "term": term,
+        "log": log,
     }
     return templates.TemplateResponse(request=request, name="term.html", context=context)
+
 
 # ---------------------------------------------------
 @router.get("/vocab/{vocab}/export", response_class=HTMLResponse)
@@ -125,6 +137,7 @@ async def export(vocab: str, request: Request, user=Depends(auth_user)):
         "vocab": vocabobj,
     }
     return templates.TemplateResponse(request=request, name="export.html", context=context)
+
 
 # ---------------------------------------------------
 @router.post("/vocab/{vocab}/export", response_class=HTMLResponse)
@@ -177,7 +190,6 @@ async def add_term(vocab: str, request: Request, user=Depends(auth_user)):
         "tags": "status.propose",
     }
     return templates.TemplateResponse(request=request, name="add.html", context=context)
-
 
 # ---------------------------------------------------
 @router.post("/vocab/{vocab}/add", response_class=HTMLResponse)
@@ -234,7 +246,7 @@ async def add_term_post(vocab: str,
     # TODO tags
     # TODO comment
     
-    await term_service.add_log(user, f"{vocab}/{item.key}", item.rev, log)
+    await term_service.add_log(user, f"{vocab}/{item.key}", log)
     # TODO improve log .. strings or objects
     
     context = {
@@ -245,6 +257,7 @@ async def add_term_post(vocab: str,
         "alert_type":"success",
     }
     return templates.TemplateResponse(request=request, name="add.html", context=context)
+
 
 # ---------------------------------------------------
 @router.get("/vocab/{vocab}/edit/{tid}", response_class=HTMLResponse)
@@ -300,7 +313,7 @@ async def edit_term_post(vocab: str,
     
     await term_service.update_term(item)
     
-    await term_service.add_log(user, f"{vocab}/{item.key}", item.rev, log)
+    await term_service.add_log(user, f"{vocab}/{item.key}", log)
 
     term = await term_service.get_term(tid)
 

@@ -218,20 +218,39 @@ class TermService:
         graph = self.db.graph('TFG')
         await relink(graph, TERM)
         
-    async def add_log(self, user, tid, rev, summary):
+    async def add_log(self, user, target, summary):
         log = self.db.collection("log")
 
         entry = schema.Log(
                 timestamp = time.time(),
-                summary = summary,
                 user = user.github,
-                term = tid,
-                rev = rev
+                target = target,
+                summary = summary,
                 )
 
         await log.insert(entry.model_dump(exclude_unset=True))
 
-        
+
+    async def get_log(self, target):
+        #log = self.db.collection("log")
+
+        # Execute the query
+        cursor = await self.db.aql.execute('''
+        FOR entry IN log 
+          FILTER STARTS_WITH(entry.target, @target) 
+          SORT entry.timestamp DESC
+          RETURN entry''',
+            bind_vars={"target": target}
+        )
+        entries = []
+        async for entry in cursor:
+            entries.append(entry)
+            
+        # async for entry in await log.find({"target": target}):
+        #     entries.append(schema.Log(**entry))
+        return entries 
+
+    
     async def get_vocab_info(self, vocab):
         vocabularies = self.db.collection("vocabularies")
         infodata = await vocabularies.get(vocab)
