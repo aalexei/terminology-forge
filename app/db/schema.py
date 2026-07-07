@@ -107,10 +107,11 @@ class Task(DocumentModel):
     name: str
     description: str = ""
     locked: bool = False
-
+    order: int = 0
     
 class Work(EdgeModel):
     """
     A work item on a task
     """
     content: str = ""
+    

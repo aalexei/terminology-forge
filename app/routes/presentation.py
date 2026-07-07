@@ -9,6 +9,7 @@ from core.util import ago
 from db import schema
 from services.user import UserService
 from services.term import TermService, term2key
+from services.task import TaskService
 import json
 
 router = APIRouter()
@@ -128,9 +129,9 @@ async def vocab_tasks(vocab: str,
                       tid: str,
                    request: Request,
                    user=Depends(auth_user)):
-    term_service = TermService(request.app.state.client.db, vocab)
+    task_service = TaskService(request.app.state.client.db, vocab)
     vocabobj = await term_service.get_vocab_info(vocab)
-    works = await term_service.get_task_works(tid)
+    works = await task_service.get_task_works(tid)
     
     context = {
         "user": user,
