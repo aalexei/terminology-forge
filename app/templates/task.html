@@ -24,31 +24,36 @@
 {% endblock user_menu %}
 
 {% block content %}
-<div class="m-4 flex flex-col">  
-  <h1 class="text-2xl">Tasks {{ task.name }}</h1>
+  <div class="m-4 flex flex-col">
+  <div class="flex flex-row gap-4">  
+    {% if task.locked %}
+    <span class="size-6 stroke-current fill-none">{% include "icons/locked.svg" %}</span>
+    {% else %}
+    <span class="size-6 stroke-current fill-none">{% include "icons/editable.svg" %}</span>
+    {% endif %}
+    <h1 class="text-2xl"> {{ task.name }} </h1>
+  </div>
   <div class="m-4">{{ task.description }}</div>
 
-  {% if task.locked %}
-  <span class="size-6 stroke-current fill-none">{% include "icons/locked.svg" %}</span>
-  {% else %}
-  <span class="size-6 stroke-current fill-none">{% include "icons/editable.svg" %}</span>
-  {% endif %}
-  
-  <ul class="list bg-base-100 rounded-box shadow-md">
+  <h2 class="text-lg">Works:</h2>
+
+  <div class="flex flex-col">
+    <div class="flex flex-row">
+      <div>Term</div>
+      <div>Work</div>
+    </div>
     {% for work in works %}
-    <li class="list-row">
+    <div class="flex flex-row">
       <div>
+	<a href="/vocab/{{vocab.key}}/term/{{work.termkey}}">{{ work.term }}</a>
       </div>
       <div>
-	  <div class="text-lg">
-	    {{ work.text }}
-	  </div>
-	  <div>
-	    {{ work._target }}
-	  </div>
+	{{  work.content }}
       </div>
-    </li>
+    </div>
     {% endfor %}
+  </div>
+  
 </div>
 {% endblock content %}
 

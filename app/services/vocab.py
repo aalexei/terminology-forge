@@ -117,7 +117,7 @@ async def relink(G, t1):
             await add_link(t1,target,'note')
 
 
-class TermService:
+class VocabService:
 
     collection = None
     
@@ -394,6 +394,7 @@ class TermService:
             raise Exception()
 
         
+    
     async def get_tasks(self):
         
         tasks = []
@@ -403,3 +404,27 @@ class TermService:
         async for task in cursor:
             tasks.append(schema.Task(**task))
         return tasks 
+
+    
+    async def get_task(self, tid):
+
+        tasks = self.db.collection(self.collection)
+        task = await tasks.get(f"{self.collection}/{tid}")
+        return task
+
+    
+    async def get_task_works(self, tid):
+        query = """
+        FOR t,e IN OUTBOUND @tid work
+          RETURN {"_id":e._id, "_to":e._to, "termkey":t._key, "content":e.content, "term":t.term} 
+        """
+        cursor = await self.db.aql.execute(
+            query,
+            bind_vars={"tid": f"{self.collection}_task/{tid}"},
+        )
+        works = []
+        async with cursor as ctx:
+            async for t in ctx:
+                works.append(t)
+
+        return works
