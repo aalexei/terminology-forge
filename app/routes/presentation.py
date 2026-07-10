@@ -154,12 +154,14 @@ async def show_term(vocab: str, tid: str, request: Request, user=Depends(auth_us
     term = await term_service.get_term(tid)
     vocabobj = await term_service.get_vocab_info(vocab)
     log = await term_service.get_log(f"{vocab}/{tid}")
+    works = await term_service.get_term_works(tid)
 
     context = {
         "user": user,
         "vocab": vocabobj,
         "term": term,
         "log": log,
+        "works": works,
     }
     return templates.TemplateResponse(request=request, name="term.html", context=context)
 

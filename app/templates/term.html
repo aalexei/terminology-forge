@@ -114,29 +114,27 @@
     </div>
 
 
+
   <h2 class="text-lg">Works:</h2>
 
-  <div class="overflow-x-auto">
-  <table class="table">
-    <thead>
-      <tr>
-        <th>Term</th>
-        <th>Work</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for work in works %}
-      <tr>
-        <td>
-	  <a href="/vocab/{{vocab.key}}/term/{{work.termkey}}">{{ work.term }}</a>
-	</td>
-        <td>
-	  <input type="text" class="input w-full" placeholder="Task work" value="{{  work.content }}" />
-	</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  <div class="flex flex-col">
+    <div class="flex flex-row">
+      <div>Task</div>
+      <div>Work</div>
+    </div>
+    {% for work in works %}
+    <div class="flex flex-row">
+      <div>
+	<a href="/vocab/{{vocab.key}}/task/{{work.taskkey}}">Task</a>
+      </div>
+      <div>
+	{{ work.description }}
+      </div>
+      <div>
+	{{ work.content }}
+      </div>
+    </div>
+    {% endfor %}
   </div>
 
 

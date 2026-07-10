@@ -428,3 +428,20 @@ class VocabService:
                 works.append(t)
 
         return works
+
+    
+    async def get_term_works(self, tid):
+        query = """
+        FOR t,e IN INBOUND @tid work
+          RETURN {"_id":e._id, "_from":e._from, "taskkey":t._key, "content":e.content} 
+        """
+        cursor = await self.db.aql.execute(
+            query,
+            bind_vars={"tid": f"{self.collection}/{tid}"},
+        )
+        works = []
+        async with cursor as ctx:
+            async for t in ctx:
+                works.append(t)
+
+        return works
