@@ -406,21 +406,26 @@ class VocabService:
         return tasks 
 
     
-    async def get_task(self, tid):
+    async def get_task(self, task_key):
 
-        tasks = self.db.collection(self.collection)
-        task = await tasks.get(f"{self.collection}/{tid}")
+        tasks = self.db.collection(f"{self.collection}_task")
+        task = await tasks.get(task_key)
         return task
 
     
-    async def get_task_works(self, tid):
+    async def get_task_works(self, task_key):
+        """
+        Get the works and terms linked to a task
+        """
         query = """
-        FOR t,e IN OUTBOUND @tid work
-          RETURN {"_id":e._id, "_to":e._to, "termkey":t._key, "content":e.content, "term":t.term} 
+        FOR term,e IN OUTBOUND @task_id work
+          RETURN { "term_key":term._key, "vocab":@vocab,
+                   "term_term":term.term, 
+                   "work_id":e._id,  "work_content":e.content } 
         """
         cursor = await self.db.aql.execute(
             query,
-            bind_vars={"tid": f"{self.collection}_task/{tid}"},
+            bind_vars={"task_id": f"{self.collection}_task/{task_key}", "vocab":self.collection},
         )
         works = []
         async with cursor as ctx:
@@ -430,14 +435,19 @@ class VocabService:
         return works
 
     
-    async def get_term_works(self, tid):
+    async def get_term_works(self, term_key):
+        """
+        Get the tasks and works linked to a term
+        """
         query = """
-        FOR t,e IN INBOUND @tid work
-          RETURN {"_id":e._id, "_from":e._from, "taskkey":t._key, "content":e.content} 
+        FOR task,e IN INBOUND @term_id work
+          RETURN { "task_key":task._key, "vocab":@vocab,
+                   "task_name":task.name, "task_description":task.description,
+                   "work_id":e._id,  "work_content":e.content } 
         """
         cursor = await self.db.aql.execute(
             query,
-            bind_vars={"tid": f"{self.collection}/{tid}"},
+            bind_vars={"term_id": f"{self.collection}/{term_key}", "vocab":self.collection},
         )
         works = []
         async with cursor as ctx:

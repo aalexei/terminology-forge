@@ -124,7 +124,7 @@ async def vocab_tasks(vocab: str,
 
 # ---------------------------------------------------
 @router.get("/vocab/{vocab}/task/{tid}", response_class=HTMLResponse)
-async def vocab_tasks(vocab: str,
+async def vocab_task(vocab: str,
                       tid: str,
                    request: Request,
                    user=Depends(auth_user)):

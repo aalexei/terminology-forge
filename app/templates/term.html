@@ -33,11 +33,13 @@
 
   
   <div class="p-4">
-    <h2 class="font-bold">Definition:</h2>
+    <h2 class="text-lg font-bold">Definition:</h2>
     {{ term._definition_html|safe }}
-
+    {% if term._definition_html|length == 0 %}
+      <i>No definition.</i>
+      {% endif %}
     <div class="pt-4">
-      <h2 class="font-bold">Notes:</h2>
+      <h2 class="text-lg font-bold">Notes:</h2>
       <ol class="list-decimal ml-4">
 	{% for n in term._notes_html %}
 	<li>
@@ -52,7 +54,7 @@
 
     <div class="pt-4 flex flex-row gap-4">
       <div>
-      <h2 class="font-bold">Formal:</h2>
+      <h2 class="text-lg font-bold">Formal:</h2>
       <table class="table-sm self-start table-zebra border border-base-content/5 bg-base-100">
 	<tbody>
 	  <tr>
@@ -71,7 +73,7 @@
       </table>
       </div>
       <div>
-<h2 class="font-bold">Structural:</h2>
+<h2 class="text-lg font-bold">Structural:</h2>
       <table class="table-sm self-start table-zebra border border-base-content/5 bg-base-100">
 	<tbody>
 	  <tr>
@@ -102,7 +104,7 @@
   
     {% if vocab.is_editable(user) %}
     <div class="pt-4">
-      <h2 class="font-bold">Tags:</h2>
+      <h2 class="text-lg font-bold">Tags:</h2>
       <fieldset class="fieldset">
 	<input type="text" class="input" placeholder="Set tags" name="tags"
 	       value="{% for tag in term._tags %}{{ tag['name'] }}{% if not loop.last %}; {% endif %}{% endfor %}" hx-post="/settags" hx-target="#response" hx-include="#tid" />
@@ -115,23 +117,26 @@
 
 
 
-  <h2 class="text-lg">Works:</h2>
+  <h2 class="text-lg font-bold">Tasks:</h2>
 
-  <div class="flex flex-col">
-    <div class="flex flex-row">
-      <div>Task</div>
-      <div>Work</div>
-    </div>
+  <div class="flex flex-col gap-4">
+    
     {% for work in works %}
-    <div class="flex flex-row">
-      <div>
-	<a href="/vocab/{{vocab.key}}/task/{{work.taskkey}}">Task</a>
-      </div>
-      <div>
-	{{ work.description }}
-      </div>
-      <div>
-	{{ work.content }}
+    <div class="card bg-base-100 w-full shadow-sm">
+      <div class="card-body">
+	<h2 class="card-title"><a href="/vocab/{{ work.vocab }}/task/{{ work.task_key }}">
+	    {{ work.task_name }}
+	  </a>
+	</h2>
+	<p>{{ work.task_description }}</p>
+	<fieldset class="fieldset">
+	  <textarea class="textarea w-full" placeholder="Content">{{ work.work_content }}</textarea>
+	  <div class="label">Enter or modify text and save.</div>
+	</fieldset>
+	<p></p>
+	<div class="card-actions justify-end">
+	  <button class="btn btn-primary">Save</button>
+	</div>
       </div>
     </div>
     {% endfor %}
@@ -140,9 +145,9 @@
 
     
     
-    {% if log is not none %}
-    <div class="mt-4">
-    <h2 class="text-lg">Log of changes</h2>
+  
+  <div class="mt-4">
+    <h2 class="text-lg font-bold">Log of changes</h2>
     {% for l in log %}
     <ul class="list bg-base-100 rounded-box shadow-md">
       <li class="list-row">
@@ -159,7 +164,7 @@
       {% endif %}
     </div>
     {% endif %}
-    {% endif %}
+   
     
 </div>
 {% endblock %}

@@ -35,24 +35,36 @@
   </div>
   <div class="m-4">{{ task.description }}</div>
 
-  <h2 class="text-lg">Works:</h2>
+  <h2 class="text-2xl font-bold">Works:</h2>
 
-  <div class="flex flex-col">
-    <div class="flex flex-row">
-      <div>Term</div>
-      <div>Work</div>
-    </div>
-    {% for work in works %}
-    <div class="flex flex-row">
-      <div>
-	<a href="/vocab/{{vocab.key}}/term/{{work.termkey}}">{{ work.term }}</a>
-      </div>
-      <div>
-	{{  work.content }}
-      </div>
-    </div>
-    {% endfor %}
+  <div class="overflow-x-auto w-full">
+    <table class="table">
+      <!-- head -->
+      <thead>
+	<tr>
+          <th></th>
+          <th>Term</th>
+          <th>Content</th>
+	</tr>
+      </thead>
+      <tbody>
+	{% for work in works %}
+	<tr>
+          <th>{{ loop.index }}</th>
+          <td>
+	    <a href="/vocab/{{ work.vocab }}/term/{{ work.term_key }}" class="link">
+	      {{ work.term_term }}
+	    </a>
+</td>
+          <td>
+	    {{  work.work_content }}
+	  </td>
+	</tr>
+	{% endfor %}
+      </tbody>
+    </table>
   </div>
+
   
 </div>
 {% endblock content %}
