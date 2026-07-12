@@ -123,21 +123,25 @@ TASKS = {
         'name': 'potentially related',
         'description': 'For the cluster terms, consider potentially related terms',
         'works': [],
+        'order': 1,
     },
     'AH': {
         'name': 'defining and differentiating',
         'description': 'For the cluster terms, consider key defining and differentiating characteristics ',
         'works': [],
+        'order': 2,
     },
     'AI': {
         'name': 'potential links',
         'description': 'From the list of terms, identify which appear to be key for the cluster',
         'works': [],
+        'order': 3,
     },
     'AJ': {
         'name': 'free comments',
         'description': '',
         'works': [],
+        'order': 4,
     },
 }
 
@@ -204,7 +208,7 @@ for row in sheet[4:2000]:
             if r[c] is not None:
                 work = {
                     'content': r[c],
-                    'term': key,
+                    'target': key,
                 }
                 TASKS[c]['works'].append(work)
             
@@ -216,7 +220,7 @@ for t in TAGS.values():
     t['targets'].sort()
 
 for t in TASKS.values():
-    t['works'].sort(key=lambda x:x['term'])
+    t['works'].sort(key=lambda x:x['target'])
     
 #print(terms)
 #print(TAGS)
