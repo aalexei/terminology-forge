@@ -192,8 +192,9 @@ for row in sheet[4:2000]:
         # Parse clusters in columns I..S as tags
         # TODO distinguish x and R?
         for c in ['I','J','K','L','M','N','O','P','Q','R','S']:
-            # Name of tag in row 3
-            TAGS[sheet[c+'3'].value]['targets'].append(key)
+            if r[c] is not None:
+                # Name of tag in row 3
+                TAGS[sheet[c+'3'].value]['targets'].append(key)
 
         # Parse wg9 state as a tag
         if r['AA'] is not None:
