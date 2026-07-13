@@ -431,6 +431,7 @@ class VocabService:
         """
         query = """
         FOR term,e IN OUTBOUND @task_id work
+          SORT term.term
           RETURN { "term_key":term._key, "vocab":@vocab,
                    "term_term":term.term, 
                    "work_id":e._id,  "work_content":e.content } 
@@ -453,8 +454,9 @@ class VocabService:
         """
         query = """
         FOR task,e IN INBOUND @term_id work
+          SORT task.order
           RETURN { "task_key":task._key, "vocab":@vocab,
-                   "task_name":task.name, "task_description":task.description,
+                   "task_name":task.name, "task_description":task.description, "task_order":task.order,
                    "work_id":e._id,  "work_content":e.content } 
         """
         cursor = await self.db.aql.execute(

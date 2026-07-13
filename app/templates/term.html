@@ -101,75 +101,64 @@
 	  {% endif %}
 	</tbody>
       </table>
-
-	
-      
       </div>
     </div>   
-  
+
+    
     {% if vocab.is_editable(user) %}
-    <div class="pt-4">
-      <h2 class="text-lg font-bold">Tags:</h2>
+<div class="divider mt-10">Tags</div>
+   <div class="mt-10">
       <fieldset class="fieldset">
-	<input type="text" class="input" placeholder="Set tags" name="tags"
-	       value="{% for tag in term._tags %}{{ tag['name'] }}{% if not loop.last %}; {% endif %}{% endfor %}" hx-post="/settags" hx-target="#response" hx-include="#tid" />
+	<input type="text" class="input w-full" placeholder="Set tags" name="tags"
+	       value="{% for tag in term._tags %}{{ tag['name'] }}{% if not loop.last %}  {% endif %}{% endfor %}" hx-post="/settags" hx-target="#response" hx-include="#tid" />
 	<input type="hidden" id="tid" name="tid" value="{{ term.key }}" />
 	<input type="hidden" id="vocab" name="vocab" value="{{ vocab.key }}" />
-	<p class="label" id="target">Tags should be separated by semi-colon (;)</p>
+	<p class="label" id="target">Tags should be separated by spaces</p>
 	<p class="label" id="response"></p>
       </fieldset>
     </div>
 
 
-
-  <h2 class="text-lg font-bold">Tasks:</h2>
-
+<div class="divider mt-10">Tasks</div>
   <div class="flex flex-col gap-4">
     
     {% for work in works %}
-    <div class="card bg-base-100 w-full shadow-sm">
-      <div class="card-body">
-	<h2 class="card-title"><a href="/vocab/{{ work.vocab }}/task/{{ work.task_key }}">
-	    {{ work.task_name }}
+    <div class="flex flex-col bg-base-100 w-full shadow-sm">
+      <div class="flex flex-row justify-between">
+	<h2 class="text-xl">
+	  <a href="/vocab/{{ work.vocab }}/task/{{ work.task_key }}">
+	    Task: <span class="text-secondary">{{ work.task_name }}</span>
 	  </a>
 	</h2>
-	<p>{{ work.task_description }}</p>
-	<fieldset class="fieldset">
-	  <textarea class="textarea w-full" placeholder="Content">{{ work.work_content }}</textarea>
-	  <div class="label">Enter or modify text and save.</div>
-	</fieldset>
-	<p></p>
-	<div class="card-actions justify-end">
-	  <button class="btn btn-primary">Save</button>
-	</div>
+	<button class="btn btn-primary">Save</button>
       </div>
+      <div>{{ work.task_description }}</div>
+      <fieldset class="fieldset">
+	<textarea class="textarea w-full" placeholder="Content">{{ work.work_content }}</textarea>
+	<div class="label">Enter or modify text and save.</div>
+      </fieldset>
     </div>
     {% endfor %}
   </div>
 
 
     
-    
-  
+<div class="divider mt-10">Log of changes</div>
   <div class="mt-4">
-    <h2 class="text-lg font-bold">Log of changes</h2>
-    {% for l in log %}
+    {% if log|length > 0 %}
     <ul class="list bg-base-100 rounded-box shadow-md">
+      {% for l in log %}
       <li class="list-row">
 	<div>{{ l['timestamp'] | ago }}</div>
-	<div>
-	  <div>{{ l['summary'] }}</div>
-	  </div>
+	<div>{{ l['summary'] }}</div>
 	<div>{{ l['user'] }}</div>
       </li>
+      {% endfor %}
     </ul>
-    {% endfor %}
-      {% if log|length == 0 %}
-      <i>No Changes.</i>
-      {% endif %}
-    </div>
+    {% else %}
+    <i>No Changes.</i>
     {% endif %}
-   
-    
+  </div>
+  {% endif %}	<!-- if editable -->
 </div>
 {% endblock %}

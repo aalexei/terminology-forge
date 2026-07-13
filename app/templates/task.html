@@ -31,7 +31,7 @@
     {% else %}
     <span class="size-6 stroke-current fill-none">{% include "icons/editable.svg" %}</span>
     {% endif %}
-    <h1 class="text-2xl"> {{ task.name }} </h1>
+    <h1 class="text-2xl">Task: <span class="text-secondary">{{ task.name }}</span></h1>
   </div>
   <div class="m-4">{{ task.description }}</div>
 
