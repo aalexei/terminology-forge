@@ -64,7 +64,7 @@
   {% for t in terms %}
   <li id="{{ t.key }}" class="list-row w-full bg-base-100 scroll-mt-20">
     <input type="checkbox" class="checkbox" name="selected" value="{{ t.key }}" />
-    <div>
+    <div class="flex flex-col gap-2">
       <div class="flex flex-row w-full">
 	<a href="/vocab/{{vocab.key}}/term/{{t.key}}" class="flex-1 listjs-term font-bold">
 	  {{ t.term }}
@@ -72,18 +72,18 @@
 	  / {{ t.synonyms|join(' / ') }}
 	  {% endif %}
 	</a>
-	<div class="flex flex-row flex-none gap-2 listjs-tag">
-	  {% for tag in t._tags %}
-	  <a href="#" class="badge badge-sm badge-soft badge-info tooltip" data-tip="{{ tag['description'] }}" onclick="addtofilter('@{{ tag['name'] }}')">{{ tag['name'] }}</a>
-	  {% endfor %}
-	  <span class="badge badge-sm badge-soft tooltip badge-neutral" data-tip="degree">{{ t._indegree + t._outdegree }}</span>
-	</div>
       </div>
       <div class="list-col-wrap text-sm opacity-60 listjs-definition">
 	{{ t._definition_html | safe }}
       </div>
+      <div class="flex flex-row flex-none flex-wrap gap-2 listjs-tag">
+	{% for tag in t._tags %}
+	<div href="#" class="badge badge-sm badge-soft badge-secondary tooltip whitespace-nowrap" data-tip="{{ tag['description'] }}" onclick="addtofilter('@{{ tag['name'] }}')">{{ tag['name'] }}</div>
+	{% endfor %}
+      </div>
     </div>
     <div>
+      	<span class="badge badge-sm badge-soft tooltip badge-neutral" data-tip="degree">{{ t._indegree + t._outdegree }}</span>
     </div>
   </li>
   {% endfor %}
