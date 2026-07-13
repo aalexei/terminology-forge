@@ -200,6 +200,7 @@ def reset_database():
     )
     
     # A single 'link' link type to connect terms: term --(link)-> term
+    # Different link types differentiated be 'context' field
     link = graph.create_edge_definition(
         edge_collection='link',
         from_vertex_collections=editable_vocabulary_names,
@@ -231,9 +232,10 @@ def reset_database():
             relink(graph,t)
         
         if vocab_info.editable:
+            
             tags_name = vocab_name+'_tag'
             tags = graph.vertex_collection(tags_name)
-            for t in data['tags']:
+            for t in data.get('tags',[]):
                 # Validate tag
                 T = schema.Tag(**t)
                 tag = tags.insert(T.model_dump(exclude_unset=True))
@@ -241,8 +243,15 @@ def reset_database():
                     target = terms.get(key)
                     tagged.insert({'_from':tag['_id'], '_to':target['_id']})
                     
-            tasks = graph.vertex_collection(vocab_info.key+'_task')
-            # TODO load and link tasks
+            tasks = graph.vertex_collection(vocab_name+'_task')
+            for t in data.get('tasks',[]):
+                # Validate task
+                T = schema.Task(**t)
+                task = tasks.insert(T.model_dump(exclude_unset=True))
+                for w in t['works']:
+                    key = w['target']
+                    target = terms.get(key)
+                    work.insert({'_from':task['_id'], '_to':target['_id'], 'content':w['content']})
 
             # TODO load and link comments
             # TODO load log
