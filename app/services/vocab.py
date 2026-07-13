@@ -217,7 +217,19 @@ class VocabService:
         # TODO go off preferences instead of hard-coded TFG
         graph = self.db.graph('TFG')
         await relink(graph, TERM)
+
+
+    async def get_tag_names(self):
         
+        tag_names = []
+        cursor = await self.db.aql.execute(
+            "FOR t IN @@coll RETURN t.name",
+            bind_vars={"@coll": f"{self.collection}_tag"})
+        async for tag in cursor:
+            tag_names.append(tag)
+        return tag_names
+    
+    
     async def add_log(self, user, target, summary):
         log = self.db.collection("log")
 

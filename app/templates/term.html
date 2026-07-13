@@ -2,6 +2,9 @@
 
 {% block main_menu %}
 <li><a href="/">Home</a></li>
+<li><a href="/vocab/{{ vocab.key }}/digest">Digest</a></li>
+<li><a href="/vocab/{{ vocab.key }}/list">List</a></li>
+<li><a href="/vocab/{{ vocab.key }}/graph">Graph</a></li>
 {% if vocab.is_editable(user) %}
 <li class="menu-title">Actions:</li>
 <li><a href="/vocab/{{ vocab.key }}/edit/{{ term.key }}">Edit</a></li>
@@ -34,10 +37,12 @@
   
   <div class="p-4">
     <h2 class="text-lg font-bold">Definition:</h2>
-    {{ term._definition_html|safe }}
+    <div class="flex flex-row">
+    <span>{{ term._definition_html|safe }}</span> 
     {% if term._definition_html|length == 0 %}
       <i>No definition.</i>
       {% endif %}
+      </div>
     <div class="pt-4">
       <h2 class="text-lg font-bold">Notes:</h2>
       <ol class="list-decimal ml-4">
