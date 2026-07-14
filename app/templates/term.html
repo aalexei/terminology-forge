@@ -110,9 +110,9 @@
    <div class="mt-10">
       <fieldset class="fieldset">
 	<input type="text" class="input w-full" placeholder="Set tags" name="tags"
-	       value="{% for tag in term._tags %}{{ tag['name'] }}{% if not loop.last %}  {% endif %}{% endfor %}" hx-post="/settags" hx-target="#response" hx-include="#tid" />
-	<input type="hidden" id="tid" name="tid" value="{{ term.key }}" />
-	<input type="hidden" id="vocab" name="vocab" value="{{ vocab.key }}" />
+	       value="{% for tag in term._tags %}{{ tag['name'] }}{% if not loop.last %}  {% endif %}{% endfor %}" hx-post="/x/settags" hx-target="#response" hx-include="#tag_key,#tag_vocab" />
+	<input type="hidden" id="tag_key" name="key" value="{{ term.key }}" />
+	<input type="hidden" id="tag_vocab" name="vocab" value="{{ vocab.key }}" />
 	<p class="label" id="target">Tags should be separated by spaces</p>
 	<p class="label" id="response"></p>
       </fieldset>

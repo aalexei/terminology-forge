@@ -167,6 +167,24 @@ async def show_term(vocab: str, tid: str, request: Request, user=Depends(auth_us
 
 
 # ---------------------------------------------------
+@router.post("/x/settags", response_class=HTMLResponse)
+async def set_tags(request: Request,
+                   key: Annotated[str, Form()],
+                   vocab: Annotated[str, Form()],
+                   tags: Annotated[str, Form()],
+                   user = Depends(auth_user)
+                   ):
+
+    # TODO set tag
+    vocab_service = VocabService(request.app.state.client.db, vocab)
+    tags = [t.strip() for t in tags.split()]
+    respose = await vocab_service.set_tags(key, tags)
+    
+    return HTMLResponse("<b>Saved!</b>")
+
+
+
+# ---------------------------------------------------
 @router.get("/vocab/{vocab}/export", response_class=HTMLResponse)
 async def export(vocab: str, request: Request, user=Depends(auth_user)):
     

@@ -220,6 +220,8 @@ class VocabService:
 
 
     async def get_tag_names(self):
+
+        # await school.edges("teach", "teachers/jon", direction="out")
         
         tag_names = []
         cursor = await self.db.aql.execute(
@@ -228,7 +230,52 @@ class VocabService:
         async for tag in cursor:
             tag_names.append(tag)
         return tag_names
+
     
+    async def set_tags(self, term_key, tag_names):
+
+        # TODO go off name in defaults
+        graph = self.db.graph("TFG")
+        
+        all_tag_names = await self.get_tag_names()
+        As = set(all_tag_names)
+
+        Ts = set(tag_names)
+        
+        # New tags and edges to create
+        Ns = Ts-As
+
+        term_id = f"{self.collection}/{term_key}"
+        
+        query = """
+        FOR v,e IN INBOUND @tid tagged
+          RETURN {"_id":e._id, "name":v.name} 
+        """
+        edges = []
+        cursor = await self.db.aql.execute(query, bind_vars={"tid": term_id})
+        async for e in cursor:
+            edges.append(e)
+
+        # Remove edges not in tag set Ts
+        for e in edges:
+            if e['name'] not in Ts:
+                await graph.delete_edge(e['_id'])
+
+        # New existing tags to link
+        tags = self.db.collection(self.collection+"_tag")
+        Es = set([e['name'] for e in edges])
+        Ls = Ts-Es-Ns
+        for tag_name in Ls:
+            matches = await tags.find({'name': tag_name})
+            tag = matches.pop()
+            await graph.link("tagged", tag['_id'], term_id)
+
+        for tag_name in Ns:
+            tag = await graph.insert_vertex(self.collection+"_tag", {"name": tag_name})
+            await graph.link("tagged", tag['_id'], term_id)
+            
+        return True
+
     
     async def add_log(self, user, target, summary):
         log = self.db.collection("log")
