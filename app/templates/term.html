@@ -134,7 +134,7 @@
       </div>
       <div>{{ work.task_description }}</div>
       <fieldset class="fieldset">
-	<textarea class="textarea w-full" placeholder="Content">{{ work.work_content }}</textarea>
+	<textarea class="textarea w-full" placeholder="Content">{{ work.work_content if work.work_content }}</textarea>
 	<div class="label">Enter or modify text and save.</div>
       </fieldset>
     </div>

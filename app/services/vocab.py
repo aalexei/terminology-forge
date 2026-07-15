@@ -506,6 +506,19 @@ class VocabService:
                    "task_name":task.name, "task_description":task.description, "task_order":task.order,
                    "work_id":e._id,  "work_content":e.content } 
         """
+        # Get tasks and include work if available
+        query = """
+        FOR t IN vgq_task
+        LET w = (
+          FOR e in work
+          FILTER e._from == t._id && e._to == @term_id
+          LIMIT 1
+          RETURN e
+        )[0]
+        RETURN { task_key:t._key, task_name:t.name, vocab:@vocab,
+                 task_description:t.description, task_order:t.order,
+                 work_id:w._id, work_content:w.content }
+        """
         cursor = await self.db.aql.execute(
             query,
             bind_vars={"term_id": f"{self.collection}/{term_key}", "vocab":self.collection},
@@ -514,5 +527,6 @@ class VocabService:
         async with cursor as ctx:
             async for t in ctx:
                 works.append(t)
-
+                
+        breakpoint()
         return works
