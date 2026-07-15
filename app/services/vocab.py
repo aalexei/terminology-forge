@@ -528,5 +528,4 @@ class VocabService:
             async for t in ctx:
                 works.append(t)
                 
-        breakpoint()
         return works
