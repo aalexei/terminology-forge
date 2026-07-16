@@ -113,29 +113,31 @@
 	       value="{% for tag in term._tags %}{{ tag['name'] }}{% if not loop.last %}  {% endif %}{% endfor %}" hx-post="/x/settags" hx-target="#response" hx-include="#tag_key,#tag_vocab" />
 	<input type="hidden" id="tag_key" name="key" value="{{ term.key }}" />
 	<input type="hidden" id="tag_vocab" name="vocab" value="{{ vocab.key }}" />
-	<p class="label" id="target">Tags should be separated by spaces</p>
+	<p class="label" id="target">Tags should be separated by spaces. Press return to save.</p>
 	<p class="label" id="response"></p>
       </fieldset>
     </div>
 
 
 <div class="divider mt-10">Tasks</div>
-  <div class="flex flex-col gap-4">
+  <div class="flex flex-col gap-10">
     
     {% for work in works %}
-    <div class="flex flex-col bg-base-100 w-full shadow-sm">
+    <div class="flex flex-col bg-base-100 w-full">
       <div class="flex flex-row justify-between">
 	<h2 class="text-xl">
-	  <a href="/vocab/{{ work.vocab }}/task/{{ work.task_key }}">
+	  <a href="/vocab/{{ vocab.key }}/task/{{ work.task_key }}">
 	    Task: <span class="text-secondary">{{ work.task_name }}</span>
 	  </a>
 	</h2>
-	<button class="btn btn-primary">Save</button>
+	<button class="btn btn-primary" hx-post="/x/vocab/{{ vocab.key }}/term/{{ term.key }}/task/{{ work.task_key }}/setwork" hx-target="#response{{ loop.index }}" hx-include="#work_id{{ loop.index }},#content{{ loop.index }}">Save</button>
       </div>
-      <div>{{ work.task_description }}</div>
+      <div class="mb-4">{{ work.task_description }}</div>
+      <input type="hidden" id="work_id{{ loop.index }}" name="work_id" value="{{ work.work_id }}" />
       <fieldset class="fieldset">
-	<textarea class="textarea w-full" placeholder="Add content">{{ work.work_content if work.work_content }}</textarea>
+	<textarea class="textarea w-full" name="content" id="content{{ loop.index }}" placeholder="Add content">{{ work.work_content if work.work_content }}</textarea>
 	<div class="label">Enter or modify text and save.</div>
+	<p class="label" id="response{{ loop.index }}"></p>
       </fieldset>
     </div>
     {% endfor %}

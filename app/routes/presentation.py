@@ -144,6 +144,28 @@ async def vocab_task(vocab: str,
     return templates.TemplateResponse(request=request, name="task.html", context=context)
 
 
+# ---------------------------------------------------
+@router.post("/x/vocab/{vocab}/term/{term_key}/task/{task_key}/setwork", response_class=HTMLResponse)
+async def set_work(vocab: str,
+                   term_key: str,
+                   task_key: str,
+                   request: Request,
+                   work_id: Annotated[str, Form()],
+                   content: Annotated[str, Form()],
+                   user = Depends(auth_user)
+                   ):
+
+    vocab_service = VocabService(request.app.state.client.db, vocab)
+    # respose = await vocab_service.set_tags(key, tags)
+    breakpoint()
+    # TODO set work, create edge if work_id='None', delete edge if content=''
+    # TODO log changes
+    
+    return HTMLResponse("<b>Saved!</b>")
+
+
+
+
 
 # ---------------------------------------------------
 @router.get("/vocab/{vocab}/term/{tid}", response_class=HTMLResponse)
@@ -175,7 +197,7 @@ async def set_tags(request: Request,
                    user = Depends(auth_user)
                    ):
 
-    # TODO set tag
+    # TODO fix up url to include vocab and term etc
     vocab_service = VocabService(request.app.state.client.db, vocab)
     tags = [t.strip() for t in tags.split()]
     respose = await vocab_service.set_tags(key, tags)

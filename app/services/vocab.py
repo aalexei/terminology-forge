@@ -458,7 +458,7 @@ class VocabService:
         
         tasks = []
         cursor = await self.db.aql.execute(
-            "FOR t IN @@coll RETURN t",
+            "FOR t IN @@coll SORT t.order RETURN t",
             bind_vars={"@coll": f"{self.collection}_task"})
         async for task in cursor:
             tasks.append(schema.Task(**task))
@@ -499,29 +499,23 @@ class VocabService:
         """
         Get the tasks and works linked to a term
         """
-        query = """
-        FOR task,e IN INBOUND @term_id work
-          SORT task.order
-          RETURN { "task_key":task._key, "vocab":@vocab,
-                   "task_name":task.name, "task_description":task.description, "task_order":task.order,
-                   "work_id":e._id,  "work_content":e.content } 
-        """
         # Get tasks and include work if available
         query = """
         FOR t IN vgq_task
-        LET w = (
-          FOR e in work
-          FILTER e._from == t._id && e._to == @term_id
-          LIMIT 1
-          RETURN e
-        )[0]
-        RETURN { task_key:t._key, task_name:t.name, vocab:@vocab,
+          SORT t.order
+          LET w = (
+            FOR e in work
+            FILTER e._from == t._id && e._to == @term_id
+            LIMIT 1
+            RETURN e
+          )[0]
+        RETURN { task_key:t._key, task_name:t.name,
                  task_description:t.description, task_order:t.order,
                  work_id:w._id, work_content:w.content }
         """
         cursor = await self.db.aql.execute(
             query,
-            bind_vars={"term_id": f"{self.collection}/{term_key}", "vocab":self.collection},
+            bind_vars={"term_id": f"{self.collection}/{term_key}"},
         )
         works = []
         async with cursor as ctx:
