@@ -126,6 +126,20 @@ class VocabService:
         self.collection = vocab
 
 
+    async def add_log(self, username, target, summary):
+        """
+        Add an entry to the log.
+        """
+        log = self.db.collection('log')
+        log_entry = schema.Log(
+            timestamp = time.time(),
+            user = username,
+            target = target,
+            summary = summary,
+        )
+        await log.insert(log_entry.model_dump(exclude_unset=True))
+
+
     async def get_terms(self, filtr=''):
 
         query = """
@@ -277,19 +291,6 @@ class VocabService:
         return True
 
     
-    async def add_log(self, user, target, summary):
-        log = self.db.collection("log")
-
-        entry = schema.Log(
-                timestamp = time.time(),
-                user = user.github,
-                target = target,
-                summary = summary,
-                )
-
-        await log.insert(entry.model_dump(exclude_unset=True))
-
-
     async def get_log(self, target):
         #log = self.db.collection("log")
 
@@ -523,3 +524,43 @@ class VocabService:
                 works.append(t)
                 
         return works
+
+
+    async def set_work(self, vocab, term_key, task_key, work_id, content, user):
+        """
+        Set work on task
+        """
+        content = content.strip()
+
+        work = self.db.collection("work")
+        response = ""
+        
+        if work_id == 'None':
+            # Create edge
+            # TODO what if edge was created in the mean time?
+            work_edge = {
+                "_from": f"{self.collection}_task/{task_key}",
+                "_to": f"{self.collection}/{term_key}",
+                "content": content,
+                }
+            await work.insert(work_edge)
+            response = "Created edge"
+            
+        elif len(content)==0:
+            # Delete edge
+            await work.delete(work_id)
+            response = "Edge deleted"
+            
+        else:
+            # Update edge
+            # TODO what if content was changed in the mean time?
+            await work.update({'_id':work_id, 'content':content})
+            response = "Content updated"
+
+        await self.add_log(
+            username = user.github,
+            target = f"{self.collection}/{term_key}",
+            summary = response,
+        )
+
+        return response
