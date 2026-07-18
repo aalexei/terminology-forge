@@ -44,22 +44,8 @@
     </a>
   </div>
   {% if vocab.is_editable(user) %}
-  <div class="m-4">
-    <h2 class="text-lg">Log of changes</h2>
-    {% for l in log %}
-    <ul class="list bg-base-100 rounded-box shadow-md">
-      <li class="list-row">
-	<div>{{ l['timestamp'] | ago }}</div>
-	<div>
-	  <div>{{ l['summary'] }}</div>
-	  <div class="text-xs uppercase font-semibold opacity-60">{{ l['target'] }}</div>
-	  </div>
-	<div>{{ l['user'] }}</div>
-      </li>
-    </ul>
-    {% endfor %}
-
-  </div>
+  <h2 class="text-lg">Log of changes</h2>
+  {% include "log_component.html" %}
   {% endif %}
 
 </div>

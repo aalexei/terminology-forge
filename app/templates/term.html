@@ -147,21 +147,9 @@
 
 
     
-<div class="divider mt-10">Log of changes</div>
+  <div class="divider mt-10">Log of changes</div>
   <div class="mt-4">
-    {% if log|length > 0 %}
-    <ul class="list bg-base-100 rounded-box shadow-md">
-      {% for l in log %}
-      <li class="list-row">
-	<div>{{ l['timestamp'] | ago }}</div>
-	<div>{{ l['summary'] }}</div>
-	<div>{{ l['user'] }}</div>
-      </li>
-      {% endfor %}
-    </ul>
-    {% else %}
-    <i>No Changes.</i>
-    {% endif %}
+    {% include "log_component.html" %}
   </div>
   {% endif %}	<!-- if editable -->
 </div>

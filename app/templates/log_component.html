@@ -1,0 +1,19 @@
+<div>
+  {% if log|length > 0 %}
+  <ul class="list bg-base-100 rounded-box">
+    {% for l in log %}
+    <li class="list-row">
+      <div>{{ l['timestamp'] | ago }}</div>
+	<div>
+	  <div>{{ l['summary'] }}</div>
+	  {% set v,t = l['target'].split('/') %}
+	  <div class="text-xs uppercase font-semibold opacity-60"><a href="/vocab/{{v}}/term/{{t}}">{{ l['target'] }}</a></div>
+	</div>
+	<div>{{ l['user'] }}</div>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <i>No Changes.</i>
+  {% endif %}
+</div>
