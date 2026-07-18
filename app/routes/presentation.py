@@ -30,6 +30,16 @@ async def home(request: Request,
 
 
 # ---------------------------------------------------
+@router.get("/user", response_class=HTMLResponse)
+async def home(request: Request,
+               user=Depends(auth_user)):
+    context = {
+        "user": user,
+    }
+    return templates.TemplateResponse(request=request, name="user.html", context=context)
+
+
+# ---------------------------------------------------
 @router.get("/vocab/{vocab}/digest", response_class=HTMLResponse)
 async def vocab_digest(vocab: str,
                    request: Request,

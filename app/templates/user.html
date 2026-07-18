@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+
+{% block main_modal %}
+<h3 class="text-lg font-bold mb-4">Dialog</h3>
+<p class="">This is content to appear in a dialog.</p>
+<span class="btn mt-4" onclick="main_modal.close()">Close</span>
+{% endblock main_modal %}
+
+{% block help_modal %}
+<p class="">This page has information on your account.</p>
+{% endblock help_modal %}
+
+
+{% block nav_middle %}
+<span>{{user.name}}</span>
+{% endblock nav_middle %}
+
+
+
+
+{% block content %}
+<div class="flex flex-col m-4">
+  <h1 class="text-2xl">User data</h1>
+  <table class="table">
+    <tbody>
+      <tr> <th>Name</th> <td>{{user.name}}</td> </tr>
+      <tr> <th>Email</th> <td>{{user.email}}</td> </tr>
+      <tr> <th>Gilhub</th> <td>{{user.github}}</td> </tr>
+      </tr>
+  </table>
+</div>
+{% endblock %}

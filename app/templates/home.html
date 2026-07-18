@@ -8,40 +8,28 @@
 {% endblock main_modal %}
 
 {% block help_modal %}
-<p class="">This is your home page</p>
+<p class="">This is your home page.</p>
+<p>You will find a list of vocabularies that are available. Some are editable and some are read-only and only for reference. Clicking on the vocabulary name takes you to the digest for that vocabulary, there are also links directly to the list of terms and to the graph of the terms.</p>
 {% endblock help_modal %}
 
 
 {% block nav_middle %}
-<span>{{user.name}}</span>
+<span>Home</span>
 {% endblock nav_middle %}
 
-
-{% block user_menu %}
-  <li><i>{{ user.github }}</i></li>
-  <li><a href="/logout">Logout</a></li>
-{% endblock user_menu %}
 
 
 {% block content %}
 <div class="flex flex-col m-4">
-  <h1 class="text-2xl">User data</h1>
-  <table class="table">
-    <tbody>
-      <tr> <th>Name</th> <td>{{user.name}}</td> </tr>
-      <tr> <th>Email</th> <td>{{user.email}}</td> </tr>
-      <tr> <th>Gilhub</th> <td>{{user.github}}</td> </tr>
-      </tr>
-  </table>
 <h1 class="text-2xl mt-10">Vocabularies</h1>
 <ul class="list bg-base-100 rounded-box shadow-md">
   {% for vocab in vocabs %}
   <li class="list-row">
     <div>
       {% if vocab.is_editable(user) %}
-      <span class="size-10 stroke-current fill-none">{% include "icons/editable.svg" %}</span>
+      <div class="size-8 stroke-current fill-none">{% include "icons/editable.svg" %}</div>
       {% else %}
-      <span class="size-10 stroke-current fill-none">{% include "icons/locked.svg" %}</span>
+      <div class="size-8 stroke-current fill-none">{% include "icons/locked.svg" %}</div>
       {% endif %}
     </div>
     <div class="">
