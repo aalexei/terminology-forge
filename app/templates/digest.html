@@ -24,10 +24,6 @@
 <!-- <input id="filter" name="filtr" type="text" placeholder="Filter" class="input input-bordered w-24 md:w-auto search navbar-center text-base-content ml-5" value="{{ filter }}" /> -->
 {% endblock nav_middle %}
 
-{% block user_menu %}
-  <li><i>{{ user.github }}</i></li>
-  <li><a href="/logout">Logout</a></li>
-{% endblock user_menu %}
 
 {% block content %}
 <div class="m-4 flex flex-col">  
@@ -41,6 +37,10 @@
     <a href="/vocab/{{ vocab.key }}/graph" class="btn">
       <span class="size-6 stroke-current fill-none">{% include "icons/graph.svg" %}</span>
       Graph
+    </a>
+    <a href="/vocab/{{ vocab.key }}/tasks" class="btn">
+      <span class="size-6 stroke-current fill-none">{% include "icons/editable.svg" %}</span>
+      Tasks
     </a>
   </div>
   {% if vocab.is_editable(user) %}

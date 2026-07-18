@@ -18,18 +18,14 @@
 {% block nav_middle %}
 {% endblock nav_middle %}
 
-{% block user_menu %}
-  <li><i>{{ user.github }}</i></li>
-  <li><a href="/logout">Logout</a></li>
-{% endblock user_menu %}
 
 {% block content %}
   <div class="m-4 flex flex-col">
   <div class="flex flex-row gap-4">  
     {% if task.locked %}
-    <span class="size-6 stroke-current fill-none">{% include "icons/locked.svg" %}</span>
+    <div class="size-6 stroke-current fill-none">{% include "icons/locked.svg" %}</div>
     {% else %}
-    <span class="size-6 stroke-current fill-none">{% include "icons/editable.svg" %}</span>
+    <div class="size-6 stroke-current fill-none">{% include "icons/editable.svg" %}</div>
     {% endif %}
     <h1 class="text-2xl">Task: <span class="text-secondary">{{ task.name }}</span></h1>
   </div>

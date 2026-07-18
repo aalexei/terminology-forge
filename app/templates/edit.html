@@ -12,11 +12,6 @@
 {% endblock nav_middle %}
 
 
-{% block user_menu %}
-  <li><i>{{ user.github }}</i></li>
-  <li><a href="/logout">Logout</a></li>
-{% endblock user_menu %}
-
   
 {% block content %}
 <form method="post" action="/vocab/{{vocab.key}}/edit/{{ term.key }}">

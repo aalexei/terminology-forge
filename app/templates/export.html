@@ -1,9 +1,5 @@
 {% extends "base.html" %}
 
-{% block user_menu %}
-  <li><i>{{ user.github }}</i></li>
-  <li><a href="/logout">Logout</a></li>
-{% endblock user_menu %}
 
 {% block nav_middle %}
 <a href="/vocab/{{ vocab.key }}/digest" class="btn btn-ghost"><span class="tooltip tooltip-bottom" data-tip="{{ vocab.name }}">{{vocab.key}}</span></a>

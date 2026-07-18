@@ -73,8 +73,13 @@
 	<!-- End user menu -->
 	<ul class="dropdown menu w-52 rounded-box rounded-t-none bg-base-200 shadow-sm" popover id="popover-user-menu" style="position-anchor:anchor-user-menu">
 	  {% block user_menu %}
+	  {% if user %}
+	  <li><a href="/user"><i>{{ user.github }}</i></a></li>
+	  <li><a href="/logout">Logout</a></li>
+	  {% else %}
 	  <li><i>Not Logged in</i></li>
 	  <li><a href="/">Log in</a></li>
+	  {% endif %}
 	  {% endblock user_menu %}
 	</ul>
       </div>
