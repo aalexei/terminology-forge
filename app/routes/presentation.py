@@ -156,12 +156,10 @@ async def set_work(vocab: str,
                    ):
 
     vocab_service = VocabService(request.app.state.client.db, vocab)
-    response = await vocab_service.set_work(vocab, term_key, task_key, work_id, content, user)
+    response = await vocab_service.set_work(term_key, task_key, work_id, content, user)
     # TODO log changes
     
     return HTMLResponse(response)
-
-
 
 
 

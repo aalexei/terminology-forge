@@ -526,14 +526,20 @@ class VocabService:
         return works
 
 
-    async def set_work(self, vocab, term_key, task_key, work_id, content, user):
+    async def set_work(self, term_key, task_key, work_id, content, user):
         """
         Set work on task
         """
         content = content.strip()
 
-        work = self.db.collection("work")
+        WORK = self.db.collection("work")
+        TASK = self.db.collection(f"{self.collection}_task")
         response = ""
+
+        task = schema.Task(**await TASK.get(task_key))
+        if task.locked:
+            # Check the task has not been locked since form
+            return "Task is locked"
         
         if work_id == 'None':
             # Create edge
@@ -543,19 +549,19 @@ class VocabService:
                 "_to": f"{self.collection}/{term_key}",
                 "content": content,
                 }
-            await work.insert(work_edge)
-            response = "Created edge"
+            await WORK.insert(work_edge)
+            response = f'Created content to task "{task.name}"'
             
         elif len(content)==0:
             # Delete edge
-            await work.delete(work_id)
-            response = "Edge deleted"
+            await WORK.delete(work_id)
+            response = f'Deleted content for task "{task.name}"'
             
         else:
             # Update edge
             # TODO what if content was changed in the mean time?
-            await work.update({'_id':work_id, 'content':content})
-            response = "Content updated"
+            await WORK.update({'_id':work_id, 'content':content})
+            response = f'Updated content for task "{task.name}"'
 
         await self.add_log(
             username = user.github,
