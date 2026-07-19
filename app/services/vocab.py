@@ -539,7 +539,7 @@ class VocabService:
         """
         # Get tasks and include work if available
         query = """
-        FOR t IN vgq_task
+        FOR t IN @@coll
           SORT t.order
           LET w = (
             FOR e in work
@@ -553,7 +553,10 @@ class VocabService:
         """
         cursor = await self.db.aql.execute(
             query,
-            bind_vars={"term_id": f"{self.collection}/{term_key}"},
+            bind_vars={
+                "@coll": f"{self.collection}_task",
+                "term_id": f"{self.collection}/{term_key}",
+            },
         )
         works = []
         async with cursor as ctx:
@@ -573,7 +576,7 @@ class VocabService:
         TASK = self.db.collection(f"{self.collection}_task")
         response = ""
 
-        task = schema.Task(**await TASK.get(task_key))
+        task = schema.Task(**(await TASK.get(task_key)))
         if task.locked:
             # Check the task has not been locked since form
             return "Task is locked"
@@ -587,7 +590,7 @@ class VocabService:
                 "content": content,
                 }
             await WORK.insert(work_edge)
-            response = f'Created content to task "{task.name}"'
+            response = f'Created content for task "{task.name}"'
             
         elif len(content)==0:
             # Delete edge
