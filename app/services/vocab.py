@@ -158,7 +158,6 @@ class VocabService:
           FILTER LENGTH(
             FOR s in search_terms
               FILTER CONTAINS(combined, s)
-              
               RETURN 1)
           == LENGTH(search_terms)
         

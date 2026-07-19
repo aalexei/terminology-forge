@@ -19,6 +19,20 @@
 
 
 {% block body_bottom %}
+<script type="text/javascript">
+  function addtofilter(text) {
+      const filter = document.getElementById('filter');
+      // var value = filter.value;
+      // if (!value.includes(text)) {
+      // 	  value += ' '+text;
+      // 	  value = value.trim();
+      // }
+      // filter.value = value;
+      filter.value = text;
+      const filter_form = document.getElementById('filter_form');
+      filter_form.requestSubmit();
+}
+</script>
 {% endblock body_bottom %}
 
 
@@ -44,7 +58,7 @@
 {% block nav_middle %}
 <div class="flex flex-row">
   <a href="/vocab/{{ vocab.key }}/digest" class="btn btn-ghost"><span class="tooltip tooltip-bottom" data-tip="{{ vocab.name }}">{{vocab.key}}</span></a>
-  <form method="post" action="/vocab/{{vocab.key}}/list">
+  <form method="post" id="filter_form" action="/vocab/{{vocab.key}}/list">
     <input id="filter" name="filtr" type="text" placeholder="Filter" class="input input-bordered w-24 md:w-auto search navbar-center text-base-content ml-5" value="{{ filtr }}" />
   </form>
 </div>
@@ -88,7 +102,7 @@
       </div>
       <div class="flex flex-row flex-none flex-wrap gap-2 listjs-tag">
 	{% for tag in t._tags %}
-	<div href="#" class="badge badge-sm badge-soft badge-secondary tooltip whitespace-nowrap" data-tip="{{ tag['description'] }}" onclick="addtofilter('@{{ tag['name'] }}')">{{ tag['name'] }}</div>
+	<div href="#" class="badge badge-sm badge-soft badge-secondary tooltip whitespace-nowrap" data-tip="{{ tag['description'] }}" onclick="addtofilter('{{ tag['name'] }}')">{{ tag['name'] }}</div>
 	{% endfor %}
       </div>
     </div>
@@ -105,7 +119,4 @@
     <div class="stat-value">{{ terms|length }}</div>
   </div>
 </div>
-
-
-
 {% endblock %}
