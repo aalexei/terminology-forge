@@ -142,19 +142,26 @@ class VocabService:
 
     async def get_terms(self, filtr=''):
 
-        query_filter = """
+        query_filter = r"""
+        LET search_terms = REGEX_SPLIT(LOWER(@filtr), "\\s+")
         FOR t in @@coll
           LET tags = (
             FOR v IN INBOUND t._id tagged
             RETURN {"_id":v._id, "name":v.name, "description":v.description} 
             )
-          LET combined = CONCAT_SEPARATOR(" ",
+          LET combined = LOWER(CONCAT_SEPARATOR(" ",
             t.term,
             t.definition,
             CONCAT_SEPARATOR(" ",tags[*].name),
             CONCAT_SEPARATOR(" ",t.notes[*])
-          )
-          FILTER ANALYZER(CONTAINS(combined, @filtr), "text_en")
+          ))
+          FILTER LENGTH(
+            FOR s in search_terms
+              FILTER CONTAINS(combined, s)
+              
+              RETURN 1)
+          == LENGTH(search_terms)
+        
           LET links = (
             FOR v IN OUTBOUND t._id link
             RETURN {"_id":v._id, "term":v.term} 
