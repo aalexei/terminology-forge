@@ -31,6 +31,7 @@
   <div class="m-4">{{ vocab.description }}</div>
 
   <ul class="list bg-base-100 rounded-box shadow-md">
+    {% if tasks|length >0 %}
     {% for task in tasks %}
     <li class="list-row">
       <div>
@@ -52,6 +53,10 @@
       </div>
     </li>
     {% endfor %}
+    {% else %}
+    <i> No tasks defined </i>
+    {% endif %}
+
 </div>
 {% endblock content %}
 
