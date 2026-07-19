@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+
+
 {% block main_menu %}
 <li><a href="/">Home</a></li>
 <li><a href="/vocab/{{ vocab.key }}/digest">Digest</a></li>
@@ -12,9 +14,12 @@
 {% endif %}
 {% endblock main_menu %}
 	  
+
+
 {% block nav_middle %}
 <a href="/vocab/{{ vocab.key }}/digest" class="btn btn-ghost"><span class="tooltip tooltip-bottom" data-tip="{{ vocab.name }}">{{vocab.key}}</span></a>
 {% endblock nav_middle %}
+
 
 
 {% block content %}

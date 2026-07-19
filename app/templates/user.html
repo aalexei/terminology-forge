@@ -1,21 +1,24 @@
 {% extends "base.html" %}
 
 
+
 {% block main_modal %}
 <h3 class="text-lg font-bold mb-4">Dialog</h3>
 <p class="">This is content to appear in a dialog.</p>
 <span class="btn mt-4" onclick="main_modal.close()">Close</span>
 {% endblock main_modal %}
 
+
+
 {% block help_modal %}
 <p class="">This page has information on your account.</p>
 {% endblock help_modal %}
 
 
+
 {% block nav_middle %}
 <span>{{user.name}}</span>
 {% endblock nav_middle %}
-
 
 
 

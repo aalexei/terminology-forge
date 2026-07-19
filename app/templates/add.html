@@ -1,17 +1,21 @@
 {% extends "base.html" %}
 
+
+
 {% block main_menu %}
 <li><a href="/">Home</a></li>
 <li><a href="/vocab/{{ vocab.key }}/list">List</a></li>
 <li><a href="/vocab/{{ vocab.key }}/graph">Graph</a></li>
 {% endblock main_menu %}
 
+
+
 {% block nav_middle %}
-  <h1 class="text-xl">Add new term to <i>{{ vocab.key }}</i></h1>
+<h1 class="text-xl">Add new term to <i>{{ vocab.key }}</i></h1>
 {% endblock nav_middle %}
 
-
   
+
 {% block content %}
 <form method="post" action="/vocab/{{ vocab.key }}/add">
 <div class="flex flex-col px-6 w-full">

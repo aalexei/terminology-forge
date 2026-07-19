@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+
+
 {% block extra_head %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.33.1/cytoscape.min.js"></script>
 <script src="https://unpkg.com/layout-base/layout-base.js"></script>
@@ -17,6 +19,7 @@
 {% endblock %}
 
 
+
 {% block main_modal %}
 <fieldset class="fieldset w-full">
   <input type="text" class="input w-full" placeholder="Add and remove tags" name="action" value="" />
@@ -25,6 +28,7 @@
 <button type="submit" class="btn">Set</button>
 <span class="btn" onclick="main_modal.close()">Cancel</span>
 {% endblock main_modal %}
+
 
 
 {% block main_menu %}
@@ -42,6 +46,8 @@
 {% endif %}
 <li><a href="/vocab/{{vocab.key}}/export">Export vocabulary</a></li>
 {% endblock main_menu %}
+
+
 
 {% block nav_middle %}
 <!-- Use name of filtr as filter is a python keyword -->
@@ -121,6 +127,8 @@
   </div>
 </div>
 {% endblock content %}
+
+
 
 {% block body_bottom %}
 <script type="text/javascript">

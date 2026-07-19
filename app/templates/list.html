@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+
+
 {% block main_modal %}
 <fieldset class="fieldset w-full">
   <input type="text" class="input w-full" placeholder="Add and remove tags" name="action" value="" />
@@ -9,11 +11,17 @@
 <span class="btn" onclick="main_modal.close()">Cancel</span>
 {% endblock main_modal %}
 
+
+
 {% block body_top %}
 {% endblock body_top %}
   
+
+
 {% block body_bottom %}
 {% endblock body_bottom %}
+
+
 
 {% block main_menu %}
 <li><a href="/">Home</a></li>
@@ -31,11 +39,15 @@
 <li><a href="/vocab/{{vocab.key}}/export">Export vocabulary</a></li>
 {% endblock main_menu %}
 
+
+
 {% block nav_middle %}
 <!-- Use name of filtr as filter is a python keyword -->
 <a href="/vocab/{{ vocab.key }}/digest" class="btn btn-ghost"><span class="tooltip tooltip-bottom" data-tip="{{ vocab.name }}">{{vocab.key}}</span></a>
 <input id="filter" name="filtr" type="text" placeholder="Filter" class="input input-bordered w-24 md:w-auto search navbar-center text-base-content ml-5" value="{{ filter }}" />
 {% endblock nav_middle %}
+
+
 
 {% block nav_end %}
 <ul class="menu menu-horizontal px-1">

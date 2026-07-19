@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+
+
 {% block extra_head %}
 <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/sigma.js/2.4.0/sigma.min.js"></script> -->
 <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/graphology/0.25.4/graphology.umd.min.js"></script> -->
@@ -17,6 +19,7 @@
 {% endblock %}
 
 
+
 {% block main_modal %}
 <fieldset class="fieldset w-full">
   <input type="text" class="input w-full" placeholder="Add and remove tags" name="action" value="" />
@@ -27,6 +30,7 @@
 {% endblock main_modal %}
 
 
+
 {% block main_menu %}
 <li><a href="/">Home</a></li>
 <li class="menu-title">Actions:</li>
@@ -35,11 +39,15 @@
 <li><a href="/vocab/{{vocab.key}}/export">Export vocabulary</a></li>
 {% endblock main_menu %}
 
+
+
 {% block nav_middle %}
 <!-- Use name of filtr as filter is a python keyword -->
 <span class="tooltip tooltip-bottom" data-tip="{{ vocab.name }}">{{vocab.key}}</span>
 <input id="filter" name="filtr" type="text" placeholder="Filter" class="input input-bordered w-24 md:w-auto search navbar-center text-base-content ml-5" value="{{ filter }}" />
 {% endblock nav_middle %}
+
+
 
 {% block nav_end %}
 <ul class="menu menu-horizontal px-1">
@@ -57,11 +65,14 @@
 {% endblock nav_end %}
 
 
-  {% block content %}
+
+{% block content %}
   <div id="container"  class="w-full h-screen"></div>
 {% endblock %}
 
-  {% block body_bottom %}
+
+
+{% block body_bottom %}
   <script type="module">
     import * as sigma from 'sigma';
     import 'graphology'; // has no exports, import all

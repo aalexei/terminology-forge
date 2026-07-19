@@ -1,10 +1,13 @@
 {% extends "base.html" %}
 
 
+
 {% block nav_middle %}
 <a href="/vocab/{{ vocab.key }}/digest" class="btn btn-ghost"><span class="tooltip tooltip-bottom" data-tip="{{ vocab.name }}">{{vocab.key}}</span></a>
 {% endblock nav_middle %}
   
+
+
 {% block help_modal %}
 <div class="flex flex-col gap-4">
 <p>Here you can export the <i>{{vocab.key}}</i> vocabulary into two formats:</p>
@@ -14,6 +17,8 @@
 </ul>
 </div>
 {% endblock help_modal %}
+
+
 
 {% block content %}
 <div class="flex flex-col px-6">

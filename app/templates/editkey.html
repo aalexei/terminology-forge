@@ -1,15 +1,23 @@
 {% extends "base.html" %}
 
+
+
 {% block body_top %}
 <form method="post" action="/editkey/{{ item['key'] }}">
 {% endblock body_top %}
+
+
+
 {% block body_bottom %}
 </form>
 {% endblock body_bottom %}
 
+
+
 {% block nav_end %}
 <button type="submit" class="btn btn-outline">Save</button>
 {% endblock nav_end %}
+
 
 
 {% block content %}
