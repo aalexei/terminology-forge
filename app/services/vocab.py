@@ -202,7 +202,7 @@ class VocabService:
         async with cursor as ctx:
             async for t in ctx:
                 T = schema.Term(**t["term"])
-                extend_term(T, t["tags"], t["links"], self.collection)
+                extend_term(T, t["tags"], t["links"], self.collection, context="term")
                 T._indegree = t["indegree"]
                 T._outdegree = t["outdegree"]
                 terms.append(T)
