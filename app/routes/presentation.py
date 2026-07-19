@@ -182,8 +182,13 @@ async def show_term(vocab: str, tid: str, request: Request, user=Depends(auth_us
 
     term = await term_service.get_term(tid)
     vocabobj = await term_service.get_vocab_info(vocab)
-    log = await term_service.get_log(f"{vocab}/{tid}")
-    works = await term_service.get_term_works(tid)
+    if vocabobj.editable:
+        log = await term_service.get_log(f"{vocab}/{tid}")
+        works = await term_service.get_term_works(tid)
+    else:
+        # The UI won't show these anyway
+        log = []
+        works = []
 
     context = {
         "user": user,
