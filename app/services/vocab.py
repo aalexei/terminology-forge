@@ -142,6 +142,47 @@ class VocabService:
 
     async def get_terms(self, filtr=''):
 
+        query_filter = """
+        FOR t in @@coll
+          LET tags = (
+            FOR v IN INBOUND t._id tagged
+            RETURN {"_id":v._id, "name":v.name, "description":v.description} 
+            )
+          LET combined = CONCAT_SEPARATOR(" ",
+            t.term,
+            t.definition,
+            CONCAT_SEPARATOR(" ",tags[*].name),
+            CONCAT_SEPARATOR(" ",t.notes[*])
+          )
+          FILTER ANALYZER(CONTAINS(combined, @filtr), "text_en")
+          LET links = (
+            FOR v IN OUTBOUND t._id link
+            RETURN {"_id":v._id, "term":v.term} 
+            )
+          LET indegree = LENGTH(FOR e IN INBOUND t._id link RETURN true)
+          LET outdegree = LENGTH(FOR e IN OUTBOUND t._id link RETURN true)
+        RETURN { "term":t, "tags":tags, "links":links, "indegree":indegree, "outdegree":outdegree }
+        """        
+        
+        query_view = """
+        FOR t in @@coll
+
+          SEARCH ANALYZER(t.term IN TOKENS(@filtr, "text_en"), "text_en") OR ANALYZER(t.definition IN TOKENS(@filtr, "text_en"), "text_en") OR ANALYZER(t.notes IN TOKENS(@filtr, "text_en"), "text_en")
+          LET tags = (
+            FOR v IN INBOUND t._id tagged
+            RETURN {"_id":v._id, "name":v.name, "description":v.description} 
+            )
+        
+        
+          LET links = (
+            FOR v IN OUTBOUND t._id link
+            RETURN {"_id":v._id, "term":v.term} 
+            )
+          LET indegree = LENGTH(FOR e IN INBOUND t._id link RETURN true)
+          LET outdegree = LENGTH(FOR e IN OUTBOUND t._id link RETURN true)
+        RETURN { "term":t, "tags":tags, "links":links, "indegree":indegree, "outdegree":outdegree }
+        """        
+        
         query = """
         FOR t IN @@coll
           LET tags = (
@@ -156,11 +197,25 @@ class VocabService:
           LET outdegree = LENGTH(FOR e IN OUTBOUND t._id link RETURN true)
         RETURN { "term":t, "tags":tags, "links":links, "indegree":indegree, "outdegree":outdegree }
         """
+        filtr = filtr.strip()
 
-        cursor = await self.db.aql.execute(
-            query,
-            bind_vars={"@coll": self.collection},
-        )
+        if len(filtr) == 0:
+            cursor = await self.db.aql.execute(
+                query,
+                bind_vars={"@coll": self.collection,
+                           },
+            )
+        else:
+            # cursor = await self.db.aql.execute(
+            #     query_view,
+            #     bind_vars={"@coll": f"{self.collection}_view",
+            #                "filtr": filtr},
+            # )
+            cursor = await self.db.aql.execute(
+                query_filter,
+                bind_vars={"@coll": self.collection,
+                           "filtr": filtr},
+            )
         terms = []
         async with cursor as ctx:
             async for t in ctx:

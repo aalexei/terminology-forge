@@ -63,15 +63,16 @@ async def vocab_get(vocab: str,
                    user=Depends(auth_user)):
     return await vocab_list(request, vocab, user)
 @router.post("/vocab/{vocab}/list", response_class=HTMLResponse)
+
 async def vocab_post(vocab: str,
                     request: Request,
                     filtr: Annotated[str, Form()] = "",
                     user=Depends(auth_user)):
+    # Use name of filtr as filter is a python keyword
     return await vocab_list(request, vocab, user, filtr=filtr)
+
 async def vocab_list(request, vocab, user, filtr=""):
 
-    # Every user has read access to all vocabs
-    
     term_service = VocabService(request.app.state.client.db, vocab)
     terms = await term_service.get_terms(filtr)
     vocabobj = await term_service.get_vocab_info(vocab)
@@ -79,7 +80,7 @@ async def vocab_list(request, vocab, user, filtr=""):
         "user": user,
         "vocab": vocabobj,
         "terms": terms,
-        "filter": filtr,
+        "filtr": filtr,
     }
     return templates.TemplateResponse(request=request, name="list.html", context=context)
 
