@@ -156,7 +156,7 @@ for row in sheet[4:2000]:
             # Skip lines that do not define a term
             continue
 
-        key = term2key(r['T'])
+        key = term2key(r['T'].strip())
         if key in keys_seen:
             print (f'==== Key "{key}" multiply defined')
             continue
@@ -166,7 +166,7 @@ for row in sheet[4:2000]:
         # Collect base info
         term = {
             'key': key,
-            'term': r['T'],
+            'term': r['T'].strip(),
             'definition': NN(r['AD']),
             'source': NN(r['AR']),
             'section':'',
