@@ -20,8 +20,8 @@ templates.env.filters['ago'] = ago
 @router.get("/", response_class=HTMLResponse)
 async def home(request: Request,
                user=Depends(auth_user)):
-    term_service = VocabService(request.app.state.client.db)
-    vocabs = await term_service.get_vocabs()
+    vocab_service = VocabService(request.app.state.client.db)
+    vocabs = await vocab_service.get_vocabs()
     context = {
         "user": user,
         "vocabs": vocabs,
@@ -44,9 +44,9 @@ async def home(request: Request,
 async def vocab_digest(vocab: str,
                    request: Request,
                    user=Depends(auth_user)):
-    term_service = VocabService(request.app.state.client.db, vocab)
-    vocabobj = await term_service.get_vocab_info(vocab)
-    log = await term_service.get_log(vocab)
+    vocab_service = VocabService(request.app.state.client.db, vocab)
+    vocabobj = await vocab_service.get_vocab_info(vocab)
+    log = await vocab_service.get_log(vocab)
     
     context = {
         "user": user,
@@ -73,9 +73,9 @@ async def vocab_post(vocab: str,
 
 async def vocab_list(request, vocab, user, filtr=""):
 
-    term_service = VocabService(request.app.state.client.db, vocab)
-    terms = await term_service.get_terms(filtr)
-    vocabobj = await term_service.get_vocab_info(vocab)
+    vocab_service = VocabService(request.app.state.client.db, vocab)
+    terms = await vocab_service.get_terms(filtr)
+    vocabobj = await vocab_service.get_vocab_info(vocab)
     context = {
         "user": user,
         "vocab": vocabobj,
@@ -90,9 +90,9 @@ async def vocab_list(request, vocab, user, filtr=""):
 async def vocab_graph(vocab: str,
                    request: Request,
                    user=Depends(auth_user)):
-    term_service = VocabService(request.app.state.client.db, vocab)
-    elements = await term_service.get_graph_elements()
-    vocabobj = await term_service.get_vocab_info(vocab)
+    vocab_service = VocabService(request.app.state.client.db, vocab)
+    elements = await vocab_service.get_graph_elements()
+    vocabobj = await vocab_service.get_vocab_info(vocab)
     context = {
         "user": user,
         "vocab": vocabobj,
@@ -106,9 +106,9 @@ async def vocab_graph(vocab: str,
 async def vocab_graph2(vocab: str,
                    request: Request,
                    user=Depends(auth_user)):
-    term_service = VocabService(request.app.state.client.db, vocab)
-    elements = await term_service.get_graph_elements()
-    vocabobj = await term_service.get_vocab_info(vocab)
+    vocab_service = VocabService(request.app.state.client.db, vocab)
+    elements = await vocab_service.get_graph_elements()
+    vocabobj = await vocab_service.get_vocab_info(vocab)
     context = {
         "user": user,
         "vocab": vocabobj,
@@ -122,9 +122,9 @@ async def vocab_graph2(vocab: str,
 async def vocab_tasks(vocab: str,
                    request: Request,
                    user=Depends(auth_user)):
-    term_service = VocabService(request.app.state.client.db, vocab)
-    vocabobj = await term_service.get_vocab_info(vocab)
-    tasks = await term_service.get_tasks()
+    vocab_service = VocabService(request.app.state.client.db, vocab)
+    vocabobj = await vocab_service.get_vocab_info(vocab)
+    tasks = await vocab_service.get_tasks()
     
     context = {
         "user": user,
@@ -140,11 +140,11 @@ async def vocab_task(vocab: str,
                    request: Request,
                    user=Depends(auth_user)):
 
-    term_service = VocabService(request.app.state.client.db, vocab)
-    vocabobj = await term_service.get_vocab_info(vocab)
+    vocab_service = VocabService(request.app.state.client.db, vocab)
+    vocabobj = await vocab_service.get_vocab_info(vocab)
 
-    task = await term_service.get_task(tid)
-    works = await term_service.get_task_works(tid)
+    task = await vocab_service.get_task(tid)
+    works = await vocab_service.get_task_works(tid)
     
     context = {
         "user": user,
@@ -178,13 +178,13 @@ async def set_work(vocab: str,
 @router.get("/vocab/{vocab}/term/{tid}", response_class=HTMLResponse)
 async def show_term(vocab: str, tid: str, request: Request, user=Depends(auth_user)):
 
-    term_service = VocabService(request.app.state.client.db, vocab)
+    vocab_service = VocabService(request.app.state.client.db, vocab)
 
-    term = await term_service.get_term(tid)
-    vocabobj = await term_service.get_vocab_info(vocab)
+    term = await vocab_service.get_term(tid)
+    vocabobj = await vocab_service.get_vocab_info(vocab)
     if vocabobj.editable:
-        log = await term_service.get_log(f"{vocab}/{tid}")
-        works = await term_service.get_term_works(tid)
+        log = await vocab_service.get_log(f"{vocab}/{tid}")
+        works = await vocab_service.get_term_works(tid)
     else:
         # The UI won't show these anyway
         log = []
@@ -222,8 +222,8 @@ async def set_tags(request: Request,
 @router.get("/vocab/{vocab}/export", response_class=HTMLResponse)
 async def export(vocab: str, request: Request, user=Depends(auth_user)):
     
-    term_service = VocabService(request.app.state.client.db, vocab)
-    vocabobj = await term_service.get_vocab_info(vocab)
+    vocab_service = VocabService(request.app.state.client.db, vocab)
+    vocabobj = await vocab_service.get_vocab_info(vocab)
     
     context = {
         "user": user,
@@ -236,9 +236,9 @@ async def export(vocab: str, request: Request, user=Depends(auth_user)):
 @router.post("/vocab/{vocab}/export", response_class=HTMLResponse)
 async def export_post(vocab: str, request: Request, action: Annotated[str, Form()] = "",  user=Depends(auth_user)):
 
-    term_service = VocabService(request.app.state.client.db, vocab)
-    vocabobj = await term_service.get_vocab_info(vocab)
-    data = await term_service.export(action)
+    vocab_service = VocabService(request.app.state.client.db, vocab)
+    vocabobj = await vocab_service.get_vocab_info(vocab)
+    data = await vocab_service.export(action)
 
     # TODO implement "all" toggle for editable vocabularies
     if action == "json":
@@ -248,7 +248,7 @@ async def export_post(vocab: str, request: Request, action: Annotated[str, Form(
         return PlainTextResponse(data_str, headers=headers)
     
     elif action == "csv":
-        # TODO move CSV export to term_service
+        # TODO move CSV export to vocab_service
         fp = io.StringIO()
         fieldnames = ['key', 'term', 'definition', 'section', 'source', 'rev', 'tags', 'status', 'cluster', 'src']
         csvwriter = csv.writer(fp, quoting=csv.QUOTE_NONNUMERIC)
@@ -274,8 +274,8 @@ async def export_post(vocab: str, request: Request, action: Annotated[str, Form(
 # ---------------------------------------------------
 @router.get("/vocab/{vocab}/add", response_class=HTMLResponse)
 async def add_term(vocab: str, request: Request, user=Depends(auth_user)):
-    term_service = VocabService(request.app.state.client.db, vocab)
-    vocabobj = await term_service.get_vocab_info(vocab)
+    vocab_service = VocabService(request.app.state.client.db, vocab)
+    vocabobj = await vocab_service.get_vocab_info(vocab)
     
     context = {
         "user": user,
@@ -297,8 +297,8 @@ async def add_term_post(vocab: str,
                          log: Annotated[str, Form()] = "",
                          user=Depends(auth_user)):
 
-    term_service = VocabService(request.app.state.client.db, vocab)
-    vocabobj = await term_service.get_vocab_info(vocab)
+    vocab_service = VocabService(request.app.state.client.db, vocab)
+    vocabobj = await vocab_service.get_vocab_info(vocab)
 
     notes2=[]
     for n in notes:
@@ -307,7 +307,7 @@ async def add_term_post(vocab: str,
 
     key = term2key(term)
     
-    if await term_service.has_term(key):
+    if await vocab_service.has_term(key):
         # return back most of the data in the form to have another go
         context = {
             "user": user,
@@ -335,11 +335,11 @@ async def add_term_post(vocab: str,
         section = ''
     )
     
-    await term_service.add_term(item)
+    await vocab_service.add_term(item)
     # TODO tags
     # TODO comment
     
-    await term_service.add_log(user.github, f"{vocab}/{item.key}", log)
+    await vocab_service.add_log(user.github, f"{vocab}/{item.key}", log)
     # TODO improve log .. strings or objects
     
     context = {
@@ -355,9 +355,9 @@ async def add_term_post(vocab: str,
 # ---------------------------------------------------
 @router.get("/vocab/{vocab}/edit/{tid}", response_class=HTMLResponse)
 async def edit_term(vocab: str, tid: str, request: Request, user=Depends(auth_user)):
-    term_service = VocabService(request.app.state.client.db, vocab)
-    vocabobj = await term_service.get_vocab_info(vocab)
-    term = await term_service.get_term(tid)
+    vocab_service = VocabService(request.app.state.client.db, vocab)
+    vocabobj = await vocab_service.get_vocab_info(vocab)
+    term = await vocab_service.get_term(tid)
 
     context = {
         "user": user,
@@ -383,8 +383,8 @@ async def edit_term_post(vocab: str,
                          rev: Annotated[int, Form()] = 1,
                          user=Depends(auth_user)):
 
-    term_service = VocabService(request.app.state.client.db, vocab)
-    vocabobj = await term_service.get_vocab_info(vocab)
+    vocab_service = VocabService(request.app.state.client.db, vocab)
+    vocabobj = await vocab_service.get_vocab_info(vocab)
 
     notes2=[]
     for n in notes:
@@ -404,11 +404,11 @@ async def edit_term_post(vocab: str,
 
     # TODO Seems fragile to have to set everything and del term
     
-    await term_service.update_term(item)
+    await vocab_service.update_term(item)
     
-    await term_service.add_log(user.github, f"{vocab}/{item.key}", log)
+    await vocab_service.add_log(user.github, f"{vocab}/{item.key}", log)
 
-    term = await term_service.get_term(tid)
+    term = await vocab_service.get_term(tid)
 
     context = {
         "user": user,
