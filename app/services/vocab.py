@@ -454,7 +454,8 @@ class VocabService:
                 FOR tag IN @@coll
                   LET targets = (
                     FOR v IN OUTBOUND tag._id tagged
-                    RETURN v._key
+                      SORT v._key
+                      RETURN v._key
                   )
                 RETURN { "tag":tag, "targets":targets }
                 """
@@ -471,7 +472,30 @@ class VocabService:
                         tags.append(T2)
                 tags.sort(key=lambda x:x['name'].lower())
 
-                # TODO tasks
+                # Get all tasks and their targets
+                tasks = []
+                query = """
+                FOR task IN @@coll
+                  LET works = (
+                    FOR v,e IN OUTBOUND task._id work
+                      SORT v._key
+                      RETURN {content:e.content, target:v._key}
+                  )
+                RETURN { "task":task, "works":works }
+                """
+                cursor = await self.db.aql.execute(
+                    query,
+                    bind_vars={"@coll": self.collection+'_task'},
+                )
+                async with cursor as ctx:
+                    async for t in ctx:
+                        T = schema.Tag(**t['task'])
+                        T2 = T.model_dump(by_alias=False)
+                        T2['works'] = t['works']
+                        del T2['key']
+                        tasks.append(T2)
+                tasks.sort(key=lambda x:x['name'].lower())
+                
                 # TODO logs
                 # TODO comments
 
@@ -480,6 +504,7 @@ class VocabService:
                     'info': info,
                     'tags': tags,
                     'terms': terms,
+                    'tasks': tasks,
                 }
     
             return export_data
