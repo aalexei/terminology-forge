@@ -272,8 +272,6 @@ class VocabService:
 
     async def get_tag_names(self):
 
-        # await school.edges("teach", "teachers/jon", direction="out")
-        
         tag_names = []
         cursor = await self.db.aql.execute(
             "FOR t IN @@coll RETURN t.name",
@@ -431,13 +429,12 @@ class VocabService:
                 "FOR doc IN @@coll RETURN doc",
                 bind_vars={"@coll": self.collection},
             )
-            async with cursor as ctx:
-                async for t in ctx:
-                    T = schema.Term(**t)
-                    T2 = T.model_dump(by_alias=False)
-                    if not info['editable'] and 'rev' in T2:
-                        del T2['rev']
-                    terms.append(T2)
+            async for t in cursor:
+                T = schema.Term(**t)
+                T2 = T.model_dump(by_alias=False)
+                if not info['editable'] and 'rev' in T2:
+                    del T2['rev']
+                terms.append(T2)
             terms.sort(key=lambda x:x['key'].lower())
 
             if not info['editable'] or not all:
@@ -447,7 +444,7 @@ class VocabService:
                     'terms': terms,
                 }
             else:
-
+                # Vocab is editable
                 # Get all tags and their targets
                 tags = []
                 query = """
