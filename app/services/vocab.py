@@ -452,6 +452,7 @@ class VocabService:
                 tags = []
                 query = """
                 FOR tag IN @@coll
+                  SORT tag.name
                   LET targets = (
                     FOR v IN OUTBOUND tag._id tagged
                       SORT v._key
@@ -463,19 +464,18 @@ class VocabService:
                     query,
                     bind_vars={"@coll": self.collection+'_tag'},
                 )
-                async with cursor as ctx:
-                    async for t in ctx:
-                        T = schema.Tag(**t['tag'])
-                        T2 = T.model_dump(by_alias=False)
-                        T2['targets'] = t['targets']
-                        del T2['key']
-                        tags.append(T2)
-                tags.sort(key=lambda x:x['name'].lower())
+                async for t in cursor:
+                    T = schema.Tag(**t['tag'])
+                    T2 = T.model_dump(by_alias=False)
+                    T2['targets'] = t['targets']
+                    del T2['key']
+                    tags.append(T2)
 
                 # Get all tasks and their targets
                 tasks = []
                 query = """
                 FOR task IN @@coll
+                  SORT task.name
                   LET works = (
                     FOR v,e IN OUTBOUND task._id work
                       SORT v._key
@@ -487,14 +487,12 @@ class VocabService:
                     query,
                     bind_vars={"@coll": self.collection+'_task'},
                 )
-                async with cursor as ctx:
-                    async for t in ctx:
-                        T = schema.Tag(**t['task'])
-                        T2 = T.model_dump(by_alias=False)
-                        T2['works'] = t['works']
-                        del T2['key']
-                        tasks.append(T2)
-                tasks.sort(key=lambda x:x['name'].lower())
+                async for t in cursor:
+                    T = schema.Task(**t['task'])
+                    T2 = T.model_dump(by_alias=False)
+                    T2['works'] = t['works']
+                    del T2['key']
+                    tasks.append(T2)
                 
                 # TODO logs
                 # TODO comments
