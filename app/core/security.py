@@ -100,10 +100,10 @@ async def auth_user(request: Request):
     '''
 
     # broken internet .. shortcut
-    user_service = UserService(request.app.state.client.db)
-    uid = await user_service.github_to_uid("aalexei")
-    user = await user_service.get(uid)
-    return user
+    # user_service = UserService(request.app.state.client.db)
+    # uid = await user_service.github_to_uid("aalexei")
+    # user = await user_service.get(uid)
+    # return user
 
     
     sessionid = request.session.get('access_token')
