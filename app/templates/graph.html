@@ -121,7 +121,8 @@
       <div class="divider my-0"></div>
 
       <!-- Connections -->
-      <div id="conn-list" class="flex flex-col"></div>
+      <div id="conn-list-in" class="flex flex-col"></div>
+      <div id="conn-list-out" class="flex flex-col mt-2"></div>
 
     </div>
   </div>
@@ -320,8 +321,9 @@
 	  .map(t => `<span class="badge badge-xs badge-outline">${t.name}</span>`)
 	  .join('');
 
-      const neighbors = node.neighborhood().nodes();
-      document.getElementById('conn-list').innerHTML = neighbors.map(nb => {
+      <!-- const neighbors = node.neighborhood().nodes(); -->
+      const neighbors = node.incomers().nodes();
+      document.getElementById('conn-list-in').innerHTML = neighbors.map(nb => {
 	  const nd = nodeData[nb.id()];
 	  return `
       <div class="flex items-center gap-1.5 py-1 cursor-pointer hover:text-base-content transition-colors text-base-content/60 conn-item" data-id="${nb.id()}">
@@ -330,6 +332,16 @@
       </div>`;
       }).join('');
 
+      const neighbors_out = node.outgoers().nodes();
+      document.getElementById('conn-list-out').innerHTML = neighbors_out.map(nb => {
+	  const nd = nodeData[nb.id()];
+	  return `
+      <div class="flex items-center gap-1.5 py-1 cursor-pointer hover:text-base-content transition-colors text-base-content/60 conn-item" data-id="${nb.id()}">
+        <span class="w-1.5 h-1.5 rounded-full bg-warning/60 flex-shrink-0"></span>
+        <span class="text-[11px] truncate flex-1">${nd ? nd.term : nb.id()}</span>
+      </div>`;
+      }).join('');
+      
       document.querySelectorAll('.conn-item').forEach(el => {
 	  el.addEventListener('click', () => {
 	      const target = cy.getElementById(el.dataset.id);
