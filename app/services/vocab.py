@@ -116,6 +116,15 @@ async def relink(G, t1):
         for target in LinkedText(n).links():
             await add_link(t1,target,'note')
 
+class Ref:
+    def __init__(self, key, term, context, src, src_html=""):
+        self.key = key
+        self.term = term
+        self.context = context
+        self.src = src
+        if src_html=="":
+            src_html=src
+        self.src_html = src_html
 
 class VocabService:
 
@@ -341,8 +350,6 @@ class VocabService:
         async for entry in cursor:
             entries.append(entry)
             
-        # async for entry in await log.find({"target": target}):
-        #     entries.append(schema.Log(**entry))
         return entries 
 
     
@@ -630,3 +637,28 @@ class VocabService:
         )
 
         return response
+
+    async def get_refs(self, tid):
+        query = """
+        FOR v IN INBOUND @tid link
+          OPTIONS { uniqueVertices: "global", bfs: true }
+          RETURN v 
+        """
+        cursor = await self.db.aql.execute(
+            query,
+            bind_vars={"tid": f"{self.collection}/{tid}"},
+        )
+        refs = []
+        async for t in cursor:
+            T = schema.Term(**t)
+            if LinkedText(T.definition).has_key(tid):
+                src_html = LinkedText(T.definition).highlight_key(tid)
+                refs.append( Ref(T.key, T.term, 'definition', T.definition, src_html) )
+            for i,n in enumerate(T.notes):
+                if LinkedText(n).has_key(tid):
+                    src_html = LinkedText(n).highlight_key(tid)
+                    refs.append( Ref(T.key, T.term, f'note-{i}', n, src_html) )
+
+        return refs
+
+    

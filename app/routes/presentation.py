@@ -418,3 +418,99 @@ async def edit_term_post(vocab: str,
         "alert_type":"success",
     }
     return templates.TemplateResponse(request=request, name="edit.html", context=context)
+
+import difflib
+
+def diff(str1, str2):
+    matcher = difflib.SequenceMatcher(None, str1, str2)
+    out = []
+    for tag, i1, i2, j1, j2 in matcher.get_opcodes():
+        if tag == 'replace':
+            out.append(f'"{str1[i1:i2]}"->"{str2[j1:j2]}"')
+        elif tag == 'delete':
+            out.append(f'-"{str1[i1:i2]}"')
+        elif tag == 'insert':
+            out.append(f'+"{str2[j1:j2]}"')
+
+    return ' '.join(out)
+
+    
+# ---------------------------------------------------
+@router.get("/vocab/{vocab}/editterm/{tid}", response_class=HTMLResponse)
+async def edit_theterm(vocab: str, tid: str, request: Request, user=Depends(auth_user)):
+    vocab_service = VocabService(request.app.state.client.db, vocab)
+    vocabobj = await vocab_service.get_vocab_info(vocab)
+    term = await vocab_service.get_term(tid)
+
+    refs = await vocab_service.get_refs(tid)
+    
+    context = {
+        "user": user,
+        "vocab": vocabobj,
+        "item": term,
+        "refs": refs,
+    }
+    return templates.TemplateResponse(request=request, name="editterm.html", context=context)
+
+@router.post("/vocab/{vocab}/editterm/{tid}", response_class=HTMLResponse)
+async def edit_theterm_post(vocab: str,
+                         tid: str,
+                         request: Request,
+                         new_term: Annotated[str, Form()] = "",
+                         log: Annotated[str, Form()] = "",
+                         user=Depends(auth_user)):
+
+    vocab_service = VocabService(request.app.state.client.db, vocab)
+    vocabobj = await vocab_service.get_vocab_info(vocab)
+    term = await vocab_service.get_term(tid)
+
+    # TODO update term
+
+    if term.term != new_term:
+        changes = [f"{term.key}: "+diff(term.term,new_term)]
+    else:
+        changes = []
+    
+    # Changed links
+    form_data = await request.form()
+    for k,v in form_data.items():
+        # form keys have the patterns:
+        #   link--<term_key>--definition
+        #   link--<term_key>--note-<i>
+        if not k.startswith("link--"):
+            continue
+        bits = k.split('--')
+        ckey = bits[1]
+        cref = bits[2].split('-')
+        cvalue = v.strip()
+
+        citem = await vocab_service.get_term(ckey)
+        if cref[0] == 'definition':
+            if citem.definition != cvalue:
+                # TODO update definition
+                #changes.append(f"{citem.key}.definition:'{citem.definition}'->'{cvalue}'")
+                changes.append(f"{citem.key}.definition: {diff(citem.definition,cvalue)}")
+        elif cref[0] == 'note':
+            if citem.notes[int(cref[1])] != cvalue:
+                # TODO update note
+                # changes.append(f"{citem.key}.note[{cref[1]}]:'{citem.notes[int(cref[1])]}'->'{cvalue}'")
+                changes.append(f"{citem.key}.note[{cref[1]}]: {diff(citem.notes[int(cref[1])],cvalue)}")
+        else:
+            raise Exception(f"unknown change item {k}")
+        
+    print(log+' Changes: '+'; '.join(changes))
+
+    # TODO add log of changes
+    
+    # refresh the data and present form again
+    term = await vocab_service.get_term(tid)
+    refs = await vocab_service.get_refs(tid)
+
+    context = {
+        "user": user,
+        "vocab": vocabobj,
+        "item": term,
+        "refs": refs,
+    }
+    return templates.TemplateResponse(request=request, name="editterm.html", context=context)
+
