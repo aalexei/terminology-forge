@@ -2,6 +2,16 @@ from pydantic import BaseModel, Field, PrivateAttr, ConfigDict, AliasChoices
 from typing import Optional, Union, List, Dict, Any
 from arangoasync.database import StandardDatabase
 
+class Change(BaseModel):
+    """
+    Internal class to collect batch changes
+    """
+    key: str
+    context: str
+    value: str
+    n: int = 0
+
+
 class DocumentModel(BaseModel):
     """
     Base Arango document model.
@@ -98,6 +108,7 @@ class Log(DocumentModel):
     user: str
     target: str
     summary: str
+    diff: str
 
     
 class Task(DocumentModel):

@@ -2,6 +2,7 @@ import re
 import json
 import time
 from db import schema
+from core.util import diff
 
 def term2key(term):
     """
@@ -662,3 +663,64 @@ class VocabService:
         return refs
 
     
+    async def batch_change(self, batch_changes, username, log=""):
+
+        # For the message
+        changes = []
+        
+        for change in batch_changes:
+            if change.context == "term":
+                term = await self.get_term(change.key)
+                if term.term != change.value:
+                    d = diff(term.term,change.value)
+                    m = f"{term.key}.term: {d}"
+                    changes.append(m)
+                    # TODO update term
+                    
+                    log_entry = schema.Log(
+                        timestamp = time.time(),
+                        user = username,
+                        target = f"{self.collection}/{change.key}",
+                        summary = log,
+                        diff = m,
+                    )
+
+            elif change.context == "definition":
+                term = await self.get_term(change.key)
+                if term.definition != change.value:
+                    d = diff(term.definition,change.value)
+                    m = f"{term.key}.definition: {d}"
+                    changes.append(m)
+                    # TODO update definition
+                    
+                    log_entry = schema.Log(
+                        timestamp = time.time(),
+                        user = username,
+                        target = f"{self.collection}/{change.key}",
+                        summary = log,
+                        diff = m,
+                    )
+                    
+            elif change.context == "note":
+                term = await self.get_term(change.key)
+                if term.notes[change.n] != change.value:
+                    d = diff(term.notes[change.n],change.value)
+                    m = f"{term.key}.note[{change.n}]: {d}"
+                    changes.append(m)
+                    # TODO update note
+                    
+                    log_entry = schema.Log(
+                        timestamp = time.time(),
+                        user = username,
+                        target = f"{self.collection}/{change.key}",
+                        summary = log,
+                        diff = m,
+                    )
+                    
+            else:
+                # Should not get here as all internal
+                raise Exception(f"Unknown change item {change.context}")
+
+        message = "Changes: " + "; ".join(changes)
+
+        return message
