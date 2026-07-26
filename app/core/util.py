@@ -1,4 +1,5 @@
 from datetime import datetime
+import difflib
 
 def ago(timestamp):
     """
@@ -23,3 +24,19 @@ def ago(timestamp):
         return f"{seconds/60:.1f} minutes ago"
     else:
         return "just now"
+
+
+def diff(str1, str2):
+    matcher = difflib.SequenceMatcher(None, str1, str2)
+    out = []
+    for tag, i1, i2, j1, j2 in matcher.get_opcodes():
+        if tag == 'replace':
+            out.append(f'"{str1[i1:i2]}"->"{str2[j1:j2]}"')
+        elif tag == 'delete':
+            out.append(f'-"{str1[i1:i2]}"')
+        elif tag == 'insert':
+            out.append(f'+"{str2[j1:j2]}"')
+
+    return ' '.join(out)
+
+    

@@ -5,7 +5,7 @@ from typing import Annotated, Union
 from loguru import logger
 from core.security import auth_user
 from core import exceptions
-from core.util import ago
+from core.util import ago, diff
 from db import schema
 from services.user import UserService
 from services.vocab import VocabService, term2key
@@ -419,20 +419,6 @@ async def edit_term_post(vocab: str,
     }
     return templates.TemplateResponse(request=request, name="edit.html", context=context)
 
-import difflib
-
-def diff(str1, str2):
-    matcher = difflib.SequenceMatcher(None, str1, str2)
-    out = []
-    for tag, i1, i2, j1, j2 in matcher.get_opcodes():
-        if tag == 'replace':
-            out.append(f'"{str1[i1:i2]}"->"{str2[j1:j2]}"')
-        elif tag == 'delete':
-            out.append(f'-"{str1[i1:i2]}"')
-        elif tag == 'insert':
-            out.append(f'+"{str2[j1:j2]}"')
-
-    return ' '.join(out)
 
     
 # ---------------------------------------------------
@@ -452,6 +438,14 @@ async def edit_theterm(vocab: str, tid: str, request: Request, user=Depends(auth
     }
     return templates.TemplateResponse(request=request, name="editterm.html", context=context)
 
+class Change:
+    def __init__(self, target, context, value, n=0):
+        self.target = target
+        self.context = context
+        self.value = value
+        self.n = n
+
+# ---------------------------------------------------
 @router.post("/vocab/{vocab}/editterm/{tid}", response_class=HTMLResponse)
 async def edit_theterm_post(vocab: str,
                          tid: str,
@@ -466,11 +460,33 @@ async def edit_theterm_post(vocab: str,
 
     # TODO update term
 
+    batch_changes = []
+    changes = []
     if term.term != new_term:
-        changes = [f"{term.key}: "+diff(term.term,new_term)]
-    else:
-        changes = []
+        changes.append(f"{term.key}: "+diff(term.term,new_term))
+        batch_changes.append(Change(term.key, 'term', new_term))
     
+    
+    # Potentially changed linked terms
+    form_data = await request.form()
+    for k,v in form_data.items():
+        # form keys have the patterns:
+        #   link--<term_key>--definition
+        #   link--<term_key>--note-<i>
+        if not k.startswith("link--"):
+            continue
+        bits = k.split('--')
+        ckey = bits[1]
+        cref = bits[2].split('-')
+        cvalue = v.strip()
+        if len(cref)>1:
+            batch_changes.append(Change(ckey, cref[0], cvalue, int(cref[1])))
+        else:
+            batch_changes.append(Change(ckey, cref[0], cvalue))
+            
+    # TODO move this to vocab_service
+    breakpoint()
+        
     # Changed links
     form_data = await request.form()
     for k,v in form_data.items():
@@ -488,12 +504,10 @@ async def edit_theterm_post(vocab: str,
         if cref[0] == 'definition':
             if citem.definition != cvalue:
                 # TODO update definition
-                #changes.append(f"{citem.key}.definition:'{citem.definition}'->'{cvalue}'")
                 changes.append(f"{citem.key}.definition: {diff(citem.definition,cvalue)}")
         elif cref[0] == 'note':
             if citem.notes[int(cref[1])] != cvalue:
                 # TODO update note
-                # changes.append(f"{citem.key}.note[{cref[1]}]:'{citem.notes[int(cref[1])]}'->'{cvalue}'")
                 changes.append(f"{citem.key}.note[{cref[1]}]: {diff(citem.notes[int(cref[1])],cvalue)}")
         else:
             raise Exception(f"unknown change item {k}")
