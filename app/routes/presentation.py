@@ -461,7 +461,7 @@ async def edit_theterm_post(vocab: str,
     # Potentially changed linked terms
     form_data = await request.form()
     for k,v in form_data.items():
-        # form keys have the patterns:
+        # Form keys have the patterns:
         #   link--<term_key>--definition
         #   link--<term_key>--note-<i>
         if not k.startswith("link--"):
@@ -480,7 +480,7 @@ async def edit_theterm_post(vocab: str,
 
     message = await vocab_service.batch_change(batch_changes, user.github, log)
 
-    # refresh the data and present form again
+    # Refresh the data and present form again
     vocabobj = await vocab_service.get_vocab_info(vocab)
     term = await vocab_service.get_term(tid)
     refs = await vocab_service.get_refs(tid)
@@ -492,6 +492,6 @@ async def edit_theterm_post(vocab: str,
         "refs": refs,
         "alert": message,
         "alert_type":"success",
-  }
+    }
     return templates.TemplateResponse(request=request, name="editterm.html", context=context)
 

@@ -667,6 +667,8 @@ class VocabService:
 
         # For the message
         changes = []
+        VOCAB = self.db.collection(self.collection)
+        LOG = self.db.collection('log')
         
         for change in batch_changes:
             if change.context == "term":
@@ -676,6 +678,7 @@ class VocabService:
                     m = f"{term.key}.term: {d}"
                     changes.append(m)
                     # TODO update term
+                    await VOCAB.update({'_key':change.key, 'term':change.value})
                     
                     log_entry = schema.Log(
                         timestamp = time.time(),
@@ -684,6 +687,7 @@ class VocabService:
                         summary = log,
                         diff = m,
                     )
+                    await LOG.insert(log_entry.model_dump(exclude_unset=True))
 
             elif change.context == "definition":
                 term = await self.get_term(change.key)
@@ -692,6 +696,7 @@ class VocabService:
                     m = f"{term.key}.definition: {d}"
                     changes.append(m)
                     # TODO update definition
+                    await VOCAB.update({'_key':change.key, 'definition':change.value})
                     
                     log_entry = schema.Log(
                         timestamp = time.time(),
@@ -700,15 +705,18 @@ class VocabService:
                         summary = log,
                         diff = m,
                     )
+                    await LOG.insert(log_entry.model_dump(exclude_unset=True))
                     
             elif change.context == "note":
                 term = await self.get_term(change.key)
                 if term.notes[change.n] != change.value:
                     d = diff(term.notes[change.n],change.value)
-                    m = f"{term.key}.note[{change.n}]: {d}"
+                    m = f"{term.key}.notes[{change.n}]: {d}"
                     changes.append(m)
                     # TODO update note
-                    
+                    term.notes[change.n] = change.value
+                    await VOCAB.update({'_key':change.key, 'notes':term.notes})
+
                     log_entry = schema.Log(
                         timestamp = time.time(),
                         user = username,
@@ -716,6 +724,7 @@ class VocabService:
                         summary = log,
                         diff = m,
                     )
+                    await LOG.insert(log_entry.model_dump(exclude_unset=True))
                     
             else:
                 # Should not get here as all internal
