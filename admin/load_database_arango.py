@@ -36,8 +36,8 @@ class LinkedText:
         html = self.text.replace(f'[[{key}]',f'[[<span class="text-secondary">{key}</span>]')
         return html
 
-    def linkify(self, context='list'):
-        linkf = lambda x: linkify(x, context)
+    def linkify(self):
+        linkf = lambda x: linkify(x)
         return re.sub(r'\[\[(.*?)\]\]', linkf, self.text)
 
 def term2key(term):

@@ -13,7 +13,7 @@ def term2key(term):
     return re.sub(r"[^a-z0-9]","_",term.lower())
 
 
-def linkify(so, links, vocab, context):
+def linkify(so, links, vocab):
     '''
     Transform link of form [[key][text]] or [[key]] to actual html links
     '''
@@ -38,10 +38,7 @@ def linkify(so, links, vocab, context):
             text = key
 
     if target_id in links:
-        if context == 'list':
-            out = f'<a href="/vocab/{target_vocab}/list#{target_key}" class="link">{text}</a>'
-        else:
-            out = f'<a href="/vocab/{target_vocab}/term/{target_key}" class="link">{text}</a>'
+        out = f'<a href="/vocab/{target_vocab}/term/{target_key}" class="link">{text}</a>'
     else:
         # highlight that the link is dangling
         out = f'<a href="#" class="link link-warning">{text}</a>'
@@ -68,8 +65,8 @@ class LinkedText:
         html = self.text.replace(f'[[{key}]',f'[[<span class="text-secondary">{key}</span>]')
         return html
 
-    def linkify(self, links, vocab, context):
-        linkf = lambda x: linkify(x, links, vocab, context)
+    def linkify(self, links, vocab):
+        linkf = lambda x: linkify(x, links, vocab)
         return re.sub(r'\[\[(.*?)\]\]', linkf, self.text)
 
 
@@ -82,11 +79,11 @@ def extend_term(term, tags, links, vocab, context='list'):
     term._links = { l['_id']:l['term'] for l in links }
     term._vocab = vocab
     
-    term._definition_html = LinkedText(term.definition).linkify(term._links, term._vocab,  context)
+    term._definition_html = LinkedText(term.definition).linkify(term._links, term._vocab)
 
     notes_html = []
     for n in term.notes:
-        notes_html.append(LinkedText(n).linkify(term._links, term._vocab, context))
+        notes_html.append(LinkedText(n).linkify(term._links, term._vocab))
     term._notes_html = notes_html
         
     return term
@@ -399,26 +396,27 @@ class VocabService:
             query,
             bind_vars={"@coll": self.collection},
         )
-        
+
+        # Collect together data for js graph
         elements = { 'nodes':[], 'edges':[] }
-        async with cursor as ctx:
-            async for t in ctx:
-                elements['nodes'].append({
-                    'data': {
-                        'id': t['term']['_id'],
-                        'key': t['term']['_key'],
-                        'term':t['term']['term'],
-                        'definition':t['term']['definition'],
-                        'definition_html':LinkedText(t['term']['definition']).linkify(t['links'], self.collection, "term"),
-                        'tags': t['tags'],
-                    }})
-                for lnk in t['links']:
-                    if lnk['context'] == 'def':
-                        elements['edges'].append({
-                            'data': {
-                                'source': t['term']['_id'],
-                                'target':lnk['_id'],
-                            }})
+        async for t in cursor:
+            links = {l["_id"]:l["term"] for l in t["links"]}
+            elements['nodes'].append({
+                'data': {
+                    'id': t['term']['_id'],
+                    'key': t['term']['_key'],
+                    'term': t['term']['term'],
+                    'definition': t['term']['definition'],
+                    'definition_html': LinkedText(t['term']['definition']).linkify(links, self.collection),
+                    'tags': t['tags'],
+                }})
+            for lnk in t['links']:
+                if lnk['context'] == 'def':
+                    elements['edges'].append({
+                        'data': {
+                            'source': t['term']['_id'],
+                            'target':lnk['_id'],
+                        }})
 
         return json.dumps(elements)
 
