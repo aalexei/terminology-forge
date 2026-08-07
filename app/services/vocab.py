@@ -334,7 +334,6 @@ class VocabService:
 
     
     async def get_log(self, target):
-        #log = self.db.collection("log")
 
         # Execute the query
         cursor = await self.db.aql.execute('''
@@ -364,7 +363,6 @@ class VocabService:
         FOR v IN vocabularies
         RETURN v
         """
-
         cursor = await self.db.aql.execute(
             query
         )
@@ -511,7 +509,6 @@ class VocabService:
             return export_data
 
         # TODO implement CSV export
-    
         
         else:
             raise Exception()
@@ -667,7 +664,8 @@ class VocabService:
         changes = []
         VOCAB = self.db.collection(self.collection)
         LOG = self.db.collection('log')
-        
+
+        # TODO relink changed terms
         for change in batch_changes:
             if change.context == "term":
                 term = await self.get_term(change.key)
