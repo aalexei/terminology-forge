@@ -246,32 +246,32 @@ class VocabService:
 
     
     async def has_term(self, tid):
-        terms = self.db.collection(self.collection)
-        return await terms.has(tid) 
+        TERMS = self.db.collection(self.collection)
+        return await TERMS.has(tid) 
 
     
     async def add_term(self, term):
-        terms = self.db.collection(self.collection)
-        await terms.insert(term.model_dump(by_alias=True))
+        TERMS = self.db.collection(self.collection)
+        await TERMS.insert(term.model_dump(by_alias=True))
         
         # Relink
         TERM = await terms.get(term.key)
         # TODO go off preferences instead of hard-coded TFG
-        graph = self.db.graph('TFG')
-        await relink(graph, TERM)
+        GRAPH = self.db.graph('TFG')
+        await relink(GRAPH, TERM)
 
         
     async def update_term(self, term):
-        terms = self.db.collection(self.collection)
+        TERMS = self.db.collection(self.collection)
 
         # Adjust the data removing what we don't want to update
         term_data = term.model_dump(by_alias=True)
         del term_data['term']
         
-        await terms.update(term_data)
+        await TERMS.update(term_data)
 
         # Relink
-        TERM = await terms.get(term.key)
+        TERM = await TERMS.get(term.key)
         # TODO go off preferences instead of hard-coded TFG
         graph = self.db.graph('TFG')
         await relink(graph, TERM)
