@@ -528,8 +528,8 @@ class VocabService:
     
     async def get_task(self, task_key):
 
-        tasks = self.db.collection(f"{self.collection}_task")
-        task = await tasks.get(task_key)
+        TASKS = self.db.collection(f"{self.collection}_task")
+        task = await TASKS.get(task_key)
         return task
 
     
