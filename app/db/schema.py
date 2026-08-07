@@ -108,7 +108,7 @@ class Log(DocumentModel):
     user: str
     target: str
     summary: str
-    diff: str
+    diff: str = ""
 
     
 class Task(DocumentModel):
