@@ -549,9 +549,8 @@ class VocabService:
             bind_vars={"task_id": f"{self.collection}_task/{task_key}", "vocab":self.collection},
         )
         works = []
-        async with cursor as ctx:
-            async for t in ctx:
-                works.append(t)
+        async for t in cursor:
+            works.append(t)
 
         return works
 
@@ -582,9 +581,8 @@ class VocabService:
             },
         )
         works = []
-        async with cursor as ctx:
-            async for t in ctx:
-                works.append(t)
+        async for t in cursor:
+            works.append(t)
                 
         return works
 
