@@ -20,6 +20,28 @@
 <a href="/vocab/{{ vocab.key }}/digest" class="btn btn-ghost"><span class="tooltip tooltip-bottom" data-tip="{{ vocab.name }}">{{vocab.key}}</span></a>
 {% endblock nav_middle %}
 
+{% block help_modal %}
+This page has all the detailed information on a term split into various sections detailed below. For an editable vocabulary, this page is were most of the work occurs.
+
+<h3 class="font-semibold italic mt-4">Formal</h3>
+<p>These are fields that will appear in the final standard. In particular, <i>Notes</i> are formal notes to be published, not notes during the terms development. Use comments or a task to capture those. The formal fields can be edited by using the edit menu item on main menu.</p>
+
+<h3 class="font-semibold italic mt-4">Structural Info</h3>
+<p>The term's key is used for cross links. The links in and out help indicate a term's importance.</p>
+
+{% if vocab.is_editable(user) %}
+
+<h3 class="font-semibold italic mt-4">Tags</h3>
+<p>Tags are used to organise terms while developing a vocabulary. Tag names typically have a common prefix like "status.", this allows grouping in the list view.</p>
+
+<h3 class="font-semibold italic mt-4">Tasks</h3>
+<p>An admin may set a list of tasks to collect information for a term in a working group.</p>
+
+<h3 class="font-semibold italic mt-4">Log</h3>
+<p>A list of changes that have been made to the term or its related information.</p>
+
+{% endif %}
+{% endblock help_modal %}
 
 
 {% block content %}
