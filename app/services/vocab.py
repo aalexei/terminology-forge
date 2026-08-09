@@ -70,7 +70,7 @@ class LinkedText:
         return re.sub(r'\[\[(.*?)\]\]', linkf, self.text)
 
 
-def extend_term(term, tags, links, vocab, context='list'):
+def extend_term(term, tags, links, vocab):
     '''
     Add extra fields for display
     '''
@@ -209,7 +209,7 @@ class VocabService:
         async with cursor as ctx:
             async for t in ctx:
                 T = schema.Term(**t["term"])
-                extend_term(T, t["tags"], t["links"], self.collection, context="term")
+                extend_term(T, t["tags"], t["links"], self.collection)
                 T._indegree = t["indegree"]
                 T._outdegree = t["outdegree"]
                 terms.append(T)
@@ -238,7 +238,7 @@ class VocabService:
         async with cursor as ctx:
             async for t in ctx:
                 T = schema.Term(**t["term"])
-                extend_term(T, t["tags"], t["links"], self.collection, context="term")
+                extend_term(T, t["tags"], t["links"], self.collection)
                 T._indegree = t["indegree"]
                 T._outdegree = t["outdegree"]
                 
@@ -255,7 +255,7 @@ class VocabService:
         await TERMS.insert(term.model_dump(by_alias=True))
         
         # Relink
-        TERM = await terms.get(term.key)
+        TERM = await TERMS.get(term.key)
         # TODO go off preferences instead of hard-coded TFG
         GRAPH = self.db.graph('TFG')
         await relink(GRAPH, TERM)
@@ -318,7 +318,7 @@ class VocabService:
                 await graph.delete_edge(e['_id'])
 
         # New existing tags to link
-        tags = self.db.collection(self.collection+"_tag")
+        tags = self.db.collection(f"{self.collection}_tag")
         Es = set([e['name'] for e in edges])
         Ls = Ts-Es-Ns
         for tag_name in Ls:
@@ -327,7 +327,7 @@ class VocabService:
             await graph.link("tagged", tag['_id'], term_id)
 
         for tag_name in Ns:
-            tag = await graph.insert_vertex(self.collection+"_tag", {"name": tag_name})
+            tag = await graph.insert_vertex(f"{self.collection}_tag", {"name": tag_name})
             await graph.link("tagged", tag['_id'], term_id)
             
         return True
@@ -463,7 +463,7 @@ class VocabService:
                 """
                 cursor = await self.db.aql.execute(
                     query,
-                    bind_vars={"@coll": self.collection+'_tag'},
+                    bind_vars={"@coll": f"{self.collection}_tag"},
                 )
                 async for t in cursor:
                     T = schema.Tag(**t['tag'])
@@ -486,7 +486,7 @@ class VocabService:
                 """
                 cursor = await self.db.aql.execute(
                     query,
-                    bind_vars={"@coll": self.collection+'_task'},
+                    bind_vars={"@coll": f"{self.collection}_task"},
                 )
                 async for t in cursor:
                     T = schema.Task(**t['task'])
@@ -595,7 +595,6 @@ class VocabService:
 
         WORK = self.db.collection("work")
         TASK = self.db.collection(f"{self.collection}_task")
-        response = ""
 
         task = schema.Task(**(await TASK.get(task_key)))
         if task.locked:
