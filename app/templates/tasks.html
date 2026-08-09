@@ -29,7 +29,7 @@
 <div class="m-4 flex flex-col">  
   <h1 class="text-2xl">Tasks for {{ vocab.name }}</h1>
   <div class="m-4">{{ vocab.description }}</div>
-
+  <p class="m-4 text-base-content/50">Below is a list of tasks that have been set for this vocabulary.</p>
   <ul class="list bg-base-100 rounded-box shadow-md">
     {% if tasks|length >0 %}
     {% for task in tasks %}

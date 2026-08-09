@@ -23,7 +23,7 @@
 
 
 {% block content %}
-<div class="flex flex-col px-6">
+<div class="flex flex-col px-6 mb-10">
 
   <a href="/vocab/{{vocab.key}}/list#{{ term.key }}">
     <h1 class="text-2xl">
@@ -34,99 +34,100 @@
     </h1>
   </a>
 
-  
-  <div class="p-4">
-    <h2 class="text-lg font-bold">Definition:</h2>
+  <div class="divider mt-10">Formal Fields</div>
+  <p class="mx-4 text-base-content/50">These are fields that appear in the final vocabulary.</p>
+  <div class="mt-6 mx-4">
+    <h2 class="font-bold text-base-content/50">Definition:</h2>
     <div class="flex flex-row">
-    <span>{{ term._definition_html|safe }}</span> 
-    {% if term._definition_html|length == 0 %}
+      <span>{{ term._definition_html|safe }}</span> 
+      {% if term._definition_html|length == 0 %}
       <i>No definition.</i>
       {% endif %}
-      </div>
-    <div class="pt-4">
-      <h2 class="text-lg font-bold">Notes:</h2>
-      <ol class="list-decimal ml-4">
-	{% for n in term._notes_html %}
-	<li>
-	  {{ n|safe }}
-	</li>
-	{% endfor %}
-      </ol>
-      {% if term._notes_html|length == 0 %}
-      <i>No notes.</i>
+    </div>
+    
+    <h2 class="font-bold mt-4 text-base-content/50">Notes:</h2>
+    <ol class="list-decimal ml-4">
+      {% for n in term._notes_html %}
+      <li>
+	{{ n|safe }}
+      </li>
+      {% endfor %}
+    </ol>
+    {% if term._notes_html|length == 0 %}
+    <i>No notes.</i>
+    {% endif %}
+    
+    <h2 class="font-bold mt-4 text-base-content/50">Section:</h2>
+    <div>
+      {{ term.section }}
+      {% if term.section|length == 0 %}
+      <i>No section.</i>
       {% endif %}
     </div>
 
-    <div class="pt-4 flex flex-row gap-4">
-      <div>
-      <h2 class="text-lg font-bold">Formal:</h2>
-      <table class="table-sm self-start table-zebra border border-base-content/5 bg-base-100">
-	<tbody>
-	  <tr>
-            <th><div class="tooltip tooltip-right" data-tip="Formal section">Section</div></th>
-            <td>{{ term.section }}</td>
-	  </tr>
-	  <tr>
-            <th><div class="tooltip tooltip-right" data-tip="Formal Source">Source</div></th>
-            <td>{{ term.source }}</td>
-	  </tr>
-	  <tr>
-            <th><div class="tooltip tooltip-right" data-tip="Context for multiply-defined">Context</div></th>
-            <td>{{ term.context }}</td>
-	  </tr>
-	</tbody>
-      </table>
-      </div>
-      <div>
-<h2 class="text-lg font-bold">Structural:</h2>
-      <table class="table-sm self-start table-zebra border border-base-content/5 bg-base-100">
-	<tbody>
-	  <tr>
-            <th><div class="tooltip tooltip-right" data-tip="Unique key">Key</div></th>
-            <td>{{ term.key }}</td>
-	  </tr>
-	  <tr>
-            <th><div class="tooltip tooltip-right" data-tip="Inward links">In</div></th>
-            <td>{{ term._indegree }}</td>
-	  </tr>
-	  <tr>
-            <th><div class="tooltip tooltip-right" data-tip="Outward links">Out</div></th>
-            <td>{{ term._outdegree }}</td>
-	  </tr>
-	  {% if vocab.is_editable(user) %}
-	  <tr>
-            <th><div class="tooltip tooltip-right" data-tip="Revision">rev</div></th>
-            <td>{{ term.rev }}</td>
-	  </tr>
-	  {% endif %}
-	</tbody>
-      </table>
-      </div>
-    </div>   
-
-    
-    {% if vocab.is_editable(user) %}
-<div class="divider mt-10">Tags</div>
-   <div class="mt-10">
-      <fieldset class="fieldset">
-	<input type="text" class="input w-full" placeholder="Set tags" name="tags"
-	       value="{% for tag in term._tags %}{{ tag['name'] }}{% if not loop.last %}  {% endif %}{% endfor %}" hx-post="/x/settags" hx-target="#response" hx-include="#tag_key,#tag_vocab" />
-	<input type="hidden" id="tag_key" name="key" value="{{ term.key }}" />
-	<input type="hidden" id="tag_vocab" name="vocab" value="{{ vocab.key }}" />
-	<p class="label" id="target">Tags should be separated by spaces. Press return to save.</p>
-	<p class="label" id="response"></p>
-      </fieldset>
+    <h2 class="font-bold mt-4 text-base-content/50">Source:</h2>
+    <div>
+      {{ term.source }}
+      {% if term.source|length == 0 %}
+      <i>No source.</i>
+      {% endif %}
     </div>
 
+    <h2 class="font-bold mt-4 text-base-content/50">Context:</h2>
+    <div>
+      {{ term.context }}
+      {% if term._context|length == 0 %}
+      <i>Default context.</i>
+      {% endif %}
+    </div>
+  </div>   
 
-<div class="divider mt-10">Tasks</div>
-  <div class="flex flex-col gap-10">
+    
+  <div class="divider mt-10">Structural Info</div>
+  <div class="mx-4">
+    <div class="text-sm flex flex-col">
+      <div class="stats shadow">
+	<div class="stat">
+	  <div class="stat-title">Key</div>
+	  <div class="stat-value text-base font-mono">{{ term.key }}</div>
+	</div>
+	<div class="stat">
+	  <div class="stat-title">Inward links</div>
+	  <div class="stat-value text-base">{{ term._indegree }}</div>
+	</div>
+	<div class="stat">
+	  <div class="stat-title">Outward links</div>
+	  <div class="stat-value text-base">{{ term._outdegree }}</div>
+	</div>
+      </div>
+    </div> <!-- stats end -->
+  </div>   <!-- formal fields end -->
 
+    
+  {% if vocab.is_editable(user) %}
+  <div class="divider mt-10">Tags</div>
+  <p class="mx-4 text-base-content/50">Tags are the main organisational method for the terms during development.</p>
+  <div class="mt-6 mx-4">
+    <fieldset class="fieldset">
+      <input type="text" class="input w-full" placeholder="Set tags" name="tags"
+	     value="{% for tag in term._tags %}{{ tag['name'] }}{% if not loop.last %}  {% endif %}{% endfor %}" hx-post="/x/settags" hx-target="#response" hx-include="#tag_key,#tag_vocab" />
+      <input type="hidden" id="tag_key" name="key" value="{{ term.key }}" />
+      <input type="hidden" id="tag_vocab" name="vocab" value="{{ vocab.key }}" />
+      <p class="label" id="target">Tags should be separated by spaces. Press return to save.</p>
+      <p class="label" id="response"></p>
+    </fieldset>
+  </div> <!-- tags end -->
+
+
+  <div class="divider mt-10">Tasks</div>
+  <p class="mx-4 text-base-content/50">The following are tasks that have been set for the vocabulary.</p>
+  <div class="flex flex-col gap-6 mt-6 mx-4">
     {% if works|length >0 %}
     {% for work in works %}
     <div class="flex flex-col bg-base-100 w-full">
       <div class="flex flex-row justify-between">
 	<h2 class="text-xl">
+	  {{loop.index}}.
 	  <a href="/vocab/{{ vocab.key }}/task/{{ work.task_key }}">
 	    Task: <span class="text-secondary">{{ work.task_name }}</span>
 	  </a>
@@ -147,14 +148,15 @@
     {% else %}
     <i> No tasks defined </i>
     {% endif %}
-  </div>
+  </div> <!-- tasks end -->
 
 
     
   <div class="divider mt-10">Log of changes</div>
-  <div class="mt-4">
+  <div class="mx-4">
     {% include "log_component.html" %}
   </div>
   {% endif %}	<!-- if editable -->
-</div>
+
+</div> <!-- content end -->
 {% endblock %}
