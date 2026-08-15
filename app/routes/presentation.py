@@ -137,8 +137,8 @@ async def vocab_tasks(vocab: str,
 async def vocab_tasks(vocab: str,
                    request: Request,
                    task_name: Annotated[str, Form()],
-                   task_description: Annotated[str, Form()],
                    task_order: Annotated[float, Form()],
+                   task_description: Annotated[str, Form()] = "",
                    user=Depends(auth_user)):
     vocab_service = VocabService(request.app.state.client.db, vocab)
 
