@@ -36,7 +36,7 @@
   <h1 class="text-2xl">Tasks for {{ vocab.name }}</h1>
   <div class="m-4">{{ vocab.description }}</div>
   <p class="m-4 text-base-content/50">Below is a list of tasks that have been set for this vocabulary.</p>
-  <ul class="list bg-base-100 rounded-box shadow-md">
+  <ul class="list m-4 bg-base-100 rounded-box shadow-md">
     {% if tasks|length >0 %}
     {% for task in tasks %}
     <li class="list-row">
@@ -58,11 +58,40 @@
 	  </div>
 	</a>
       </div>
+      {% if vocab.is_administrable(user) %}
+      <div>
+	Edit
+      </div>
+      {% endif %}
     </li>
     {% endfor %}
     {% else %}
-    <i> No tasks defined </i>
+    <i class="m-4">No tasks defined</i>
     {% endif %}
+  </ul>
+  {% if vocab.is_administrable(user) %}
+  <div  class="mt-4 ml-4">
+  <div tabindex="0" class="collapse collapse-arrow bg-base-100 border-base-300 border">
+    <div class="collapse-title">Add new task</div>
+    <div class="collapse-content text-sm">
+      <form>
+	<fieldset class="fieldset">
+	  <legend class="fieldset-legend">Task title</legend>
+	  <input type="text" class="input" required placeholder="Short descriptive title" />
+	</fieldset>
+	<fieldset class="fieldset">
+	  <legend class="fieldset-legend">Description</legend>
+	  <textarea class="textarea w-full" placeholder="Description of task and instructions to the user."></textarea>
+	</fieldset>
+	<div class="flex flex-row mt-2 gap-4">
+	  <button class="btn">Submit</button>
+	  <input class="btn btn-square" type="reset" value="×"/>
+	</div>
+     </form>
+    </div>
+  </div>
+  </div>
+  {% endif %}
 
 </div>
 {% endblock content %}
