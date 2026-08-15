@@ -99,6 +99,11 @@ class Vocabulary(DocumentModel):
         """
         return self.editable and self.key in user.editor
             
+    def is_administrable(self, user):
+        """
+        Is this vocabulary administrable by user
+        """
+        return self.editable and self.key in user.admin
     
 class Log(DocumentModel):
     """
