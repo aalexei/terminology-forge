@@ -9,7 +9,7 @@ from core.util import ago
 from db import schema
 from services.user import UserService
 from services.vocab import VocabService, term2key
-import json
+import json, io, csv
 
 router = APIRouter()
 

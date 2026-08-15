@@ -25,6 +25,12 @@
 
 
 
+{% block help_modal %}
+<p class="">On this page is a list of tasks that may be set to help coordinate work on a vocabulary.</p>
+{% endblock help_modal %}
+
+
+
 {% block content %}
 <div class="m-4 flex flex-col">  
   <h1 class="text-2xl">Tasks for {{ vocab.name }}</h1>
@@ -44,7 +50,8 @@
       <div>
 	<a href="/vocab/{{ vocab.key }}/task/{{ task.key }}">
 	  <div class="text-lg text-secondary">
-	    {{ task.name }}
+	{{ loop.index }}. 
+	{{ task.name }}
 	  </div>
 	  <div>
 	    {{ task.description }}

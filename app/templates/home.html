@@ -10,22 +10,23 @@
 
 
 
-{% block help_modal %}
-<p class="">This is your home page.</p>
-<p>You will find a list of vocabularies that are available. Some are editable and some are read-only and only for reference. Clicking on the vocabulary name takes you to the digest for that vocabulary, there are also links directly to the list of terms and to the graph of the terms.</p>
-{% endblock help_modal %}
-
-
-
 {% block nav_middle %}
 <span>Home</span>
 {% endblock nav_middle %}
 
 
 
+{% block help_modal %}
+<p class="">This is your home page.</p>
+<p>You will find a list of vocabularies that are available. Some are editable and some are read-only and for reference only. Clicking on the vocabulary name takes you to the digest for that vocabulary, there are also direct links to the list of terms, the graph of the terms, and the list of tasks for editable vocabularies.</p>
+{% endblock help_modal %}
+
+
+
 {% block content %}
 <div class="flex flex-col m-4">
 <h1 class="text-2xl mt-10">Vocabularies</h1>
+<p class="m-4 text-base-content/50">These are the vocabularies that are accessible.</p>
 <ul class="list bg-base-100 rounded-box shadow-md">
   {% for vocab in vocabs %}
   <li class="list-row">
