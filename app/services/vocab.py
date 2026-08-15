@@ -532,7 +532,7 @@ class VocabService:
         """
         TASKS = self.db.collection(f"{self.collection}_task")
         task = await TASKS.get(task_key)
-        return task
+        return schema.Task(**task)
 
     
     async def add_task(self, name, description, order):
@@ -542,6 +542,15 @@ class VocabService:
         TASKS = self.db.collection(f"{self.collection}_task")
         T = schema.Task(name=name, description=description, order=order)
         await TASKS.insert(T.model_dump(exclude_unset=True))
+
+    
+    async def update_task(self, key, name, description, order, locked):
+        """
+        Update an existing task
+        """
+        TASKS = self.db.collection(f"{self.collection}_task")
+        T = schema.Task(key=key, name=name, description=description, order=order, locked=locked)
+        await TASKS.update(T.model_dump(exclude_unset=True))
 
     
     async def get_task_works(self, task_key):

@@ -39,7 +39,7 @@
   <ul class="list m-4 bg-base-100 rounded-box shadow-md">
     {% if tasks|length >0 %}
     {% for task in tasks %}
-    <li class="list-row">
+    <li class="list-row" hx-target="this" hx-swap="outerHTML">
       <div>
 	{% if task.locked %}
 	<div class="size-6 stroke-current fill-none">{% include "icons/locked.svg" %}</div>
@@ -60,6 +60,9 @@
       </div>
       {% if vocab.is_administrable(user) %}
       <div>
+	<span class="tooltip italic text-base-content/50" data-tip="order">{{ task.order }}</span>
+      </div>
+      <div class="btn btn-sm" hx-get="/vocab/{{ vocab.key }}/task/{{ task.key }}/inline/edit">
 	Edit
       </div>
       {% endif %}
@@ -91,7 +94,7 @@
 	  </fieldset>
 	<div class="flex flex-row mt-2 gap-4">
 	  <button class="btn" type="submit">Submit</button>
-	  <input class="btn btn-square" type="reset" value="×"/>
+	  <button class="btn btn-square" type="reset">×</button>
 	</div>
      </form>
     </div>

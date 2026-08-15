@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Request, Form, Depends
 from fastapi.responses import HTMLResponse, RedirectResponse, PlainTextResponse
 from fastapi.templating import Jinja2Templates
+import starlette.status as status
 from typing import Annotated, Union
 from loguru import logger
 from core.security import auth_user
@@ -133,6 +134,7 @@ async def vocab_tasks(vocab: str,
     }
     return templates.TemplateResponse(request=request, name="tasks.html", context=context)
 
+# ---------------------------------------------------
 @router.post("/vocab/{vocab}/tasks", response_class=HTMLResponse)
 async def vocab_tasks(vocab: str,
                    request: Request,
@@ -153,6 +155,39 @@ async def vocab_tasks(vocab: str,
         "tasks": tasks,
     }
     return templates.TemplateResponse(request=request, name="tasks.html", context=context)
+
+# ---------------------------------------------------
+@router.get("/vocab/{vocab}/task/{task}/inline/edit", response_class=HTMLResponse)
+async def vocab_task_inline_edit(vocab: str,
+                                 task: str,
+                                 request: Request,
+                                 user=Depends(auth_user)):
+    vocab_service = VocabService(request.app.state.client.db, vocab)
+    vocabobj = await vocab_service.get_vocab_info(vocab)
+    
+    task = await vocab_service.get_task(task)
+    context = {
+        "vocab": vocabobj,
+        "task": task,
+    }
+    return templates.TemplateResponse(request=request, name="task_edit_component.html", context=context)
+
+# ---------------------------------------------------
+@router.post("/vocab/{vocab}/task/{task}/inline/edit", response_class=HTMLResponse)
+async def put_vocab_task_inline(vocab: str,
+                            task: str,
+                            request: Request,
+                            task_name: Annotated[str, Form()],
+                            task_order: Annotated[float, Form()],
+                            task_description: Annotated[str, Form()] = "",
+                            task_locked: Annotated[bool, Form()] = False,
+                            user=Depends(auth_user)):
+    vocab_service = VocabService(request.app.state.client.db, vocab)
+    vocabobj = await vocab_service.get_vocab_info(vocab)
+
+    await vocab_service.update_task(task, task_name, task_description, task_order, task_locked)
+    target = f"/vocab/{vocab}/tasks"
+    return RedirectResponse(target, status_code=status.HTTP_302_FOUND)
 
 # ---------------------------------------------------
 @router.get("/vocab/{vocab}/task/{tid}", response_class=HTMLResponse)
