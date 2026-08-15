@@ -74,17 +74,23 @@
   <div tabindex="0" class="collapse collapse-arrow bg-base-100 border-base-300 border">
     <div class="collapse-title">Add new task</div>
     <div class="collapse-content text-sm">
-      <form>
+      <form action="" method="post">
 	<fieldset class="fieldset">
 	  <legend class="fieldset-legend">Task title</legend>
-	  <input type="text" class="input" required placeholder="Short descriptive title" />
+	  <input type="text" class="input" name="task_title" required placeholder="Short descriptive title" />
 	</fieldset>
 	<fieldset class="fieldset">
 	  <legend class="fieldset-legend">Description</legend>
-	  <textarea class="textarea w-full" placeholder="Description of task and instructions to the user."></textarea>
+	  <textarea class="textarea w-full" name="task_description" placeholder="Description of task and instructions to the user."></textarea>
 	</fieldset>
+	<fieldset class="fieldset">
+	  <legend class="fieldset-legend">Task order</legend>
+	  <input type="number" class="input validator" name="task_order" required placeholder="Number for task order" 
+  title="Can be a float" />
+	  <p class="validator-hint">Must be a number</p>
+	  </fieldset>
 	<div class="flex flex-row mt-2 gap-4">
-	  <button class="btn">Submit</button>
+	  <button class="btn" type="submit">Submit</button>
 	  <input class="btn btn-square" type="reset" value="×"/>
 	</div>
      </form>

@@ -123,7 +123,7 @@ class Task(DocumentModel):
     name: str
     description: str = ""
     locked: bool = False
-    order: int = 0
+    order: float = 0
     
 class Work(EdgeModel):
     """
