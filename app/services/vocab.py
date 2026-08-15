@@ -527,10 +527,21 @@ class VocabService:
 
     
     async def get_task(self, task_key):
-
+        """
+        Get a task by key
+        """
         TASKS = self.db.collection(f"{self.collection}_task")
         task = await TASKS.get(task_key)
         return task
+
+    
+    async def add_task(self, name, description, order):
+        """
+        Add a new task
+        """
+        TASKS = self.db.collection(f"{self.collection}_task")
+        T = schema.Task(name=name, description=description, order=order)
+        await TASKS.insert(T.model_dump(exclude_unset=True))
 
     
     async def get_task_works(self, task_key):

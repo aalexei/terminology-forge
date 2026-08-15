@@ -133,6 +133,27 @@ async def vocab_tasks(vocab: str,
     }
     return templates.TemplateResponse(request=request, name="tasks.html", context=context)
 
+@router.post("/vocab/{vocab}/tasks", response_class=HTMLResponse)
+async def vocab_tasks(vocab: str,
+                   request: Request,
+                   task_name: Annotated[str, Form()],
+                   task_description: Annotated[str, Form()],
+                   task_order: Annotated[float, Form()],
+                   user=Depends(auth_user)):
+    vocab_service = VocabService(request.app.state.client.db, vocab)
+
+    await vocab_service.add_task(task_name, task_description, task_order)
+    
+    vocabobj = await vocab_service.get_vocab_info(vocab)
+    tasks = await vocab_service.get_tasks()
+    
+    context = {
+        "user": user,
+        "vocab": vocabobj,
+        "tasks": tasks,
+    }
+    return templates.TemplateResponse(request=request, name="tasks.html", context=context)
+
 # ---------------------------------------------------
 @router.get("/vocab/{vocab}/task/{tid}", response_class=HTMLResponse)
 async def vocab_task(vocab: str,
