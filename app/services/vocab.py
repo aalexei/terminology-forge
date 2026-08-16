@@ -550,6 +550,8 @@ class VocabService:
         """
         TASKS = self.db.collection(f"{self.collection}_task")
         T = schema.Task(key=key, name=name, description=description, order=order, locked=locked)
+        # TODO update log
+        # TODO record user in vocab initialisation (make logging easier)
         await TASKS.update(T.model_dump(exclude_unset=True))
 
     

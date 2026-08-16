@@ -158,7 +158,7 @@ This page has all the detailed information on a term split into various sections
       <div class="mb-4">{{ work.task_description }}</div>
       <input type="hidden" id="work_id{{ loop.index }}" name="work_id" value="{{ work.work_id }}" />
       <fieldset class="fieldset">
-	<textarea class="textarea w-full" name="content" id="content{{ loop.index }}" placeholder="Add content">{{ work.work_content if work.work_content }}</textarea>
+	<textarea class="textarea w-full" name="content" id="content{{ loop.index }}"  placeholder="Add content">{{ work.work_content if work.work_content }}</textarea>
 	<div class="flex flex-row justify-between items-start">
 	  <div class="label ">Enter or modify text and save.</div>
 	  <button class="btn btn-primary" hx-post="/x/vocab/{{ vocab.key }}/term/{{ term.key }}/task/{{ work.task_key }}/setwork" hx-target="#response{{ loop.index }}" hx-include="#work_id{{ loop.index }},#content{{ loop.index }}">Save</button>
