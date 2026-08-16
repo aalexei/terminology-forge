@@ -128,9 +128,10 @@ class VocabService:
 
     collection = None
     
-    def __init__(self, db, vocab=''):
+    def __init__(self, db, vocab:str, user:schema.User):
         self.db = db
-        self.collection = vocab
+        self.collection: str = vocab
+        self.user: schema.User = user
 
 
     async def add_log(self, username, target, summary):
