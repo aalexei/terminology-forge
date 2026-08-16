@@ -81,6 +81,11 @@
 </ul>
 {% endblock nav_end %}
 
+{% block help_modal %}
+<p>This page lists terms in <i>{{ vocab.name}}</i>. Clicking on the term will take you to the term's page. The links in the definitions are to other terms in the vocabulary and will take you to those pages. </p>
+<p class="mt-2"><b>Filtering</b>. The list can be filtered by entering some text in the filter box in the header and pressing return. The list will be reduced to those terms that contain the text somewhere in the term's <i>name</i>, <i>definition</i>, <i>notes</i>, or <i>tags</i>. Text fragments separated by spaces will be searched for independently, and filtered terms must have all fragments present. Terms with links to another term can be filtered by enclosing the target's id in square brackets e.g. <code>[model]</code>.</p>
+<p class="mt-2"><b>Tags</b>. Tags for the term are shown, clicking on a tag will set the filter to filter on that tag.</p>
+{% endblock help_modal %}
 
 
 {% block content %}
