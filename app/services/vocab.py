@@ -332,6 +332,13 @@ class VocabService:
         )
         entries = []
         async for entry in cursor:
+            # Fix up the url
+            v,k = entry['target'].split('/')
+            if v.endswith('_task'):
+                url = f"/vocab/{v[:-5]}/task/{k}"
+            else:
+                 url = f"/vocab/{v}/term/{k}"
+            entry['url'] = url
             entries.append(entry)
             
         return entries 
@@ -547,7 +554,8 @@ class VocabService:
         """
         TASKS = self.db.collection(f"{self.collection}_task")
         T = schema.Task(name=name, description=description, order=order)
-        await TASKS.insert(T.model_dump(exclude_unset=True))
+        task = await TASKS.insert(T.model_dump(exclude_unset=True))
+        await self.add_log(task['_id'], f"Added task '{name}'")
 
     
     async def update_task(self, key, name, description, order, locked):
@@ -556,7 +564,8 @@ class VocabService:
         """
         TASKS = self.db.collection(f"{self.collection}_task")
         T = schema.Task(key=key, name=name, description=description, order=order, locked=locked)
-        # TODO [B] update log
+        # TODO show diff in log
+        await self.add_log(f"{self.collection}_task/{key}", "Updated task")
         await TASKS.update(T.model_dump(exclude_unset=True))
 
     

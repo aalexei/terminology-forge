@@ -6,8 +6,7 @@
       <div>{{ l['timestamp'] | ago }}</div>
 	<div>
 	  <div>{{ l['summary'] }}</div>
-	  {% set v,t = l['target'].split('/') %}
-	  <div class="text-xs uppercase font-semibold opacity-60"><a href="/vocab/{{v}}/term/{{t}}">{{ l['target'] }}</a></div>
+	  <div class="text-xs uppercase font-semibold opacity-60"><a href="{{ l['url'] }}">{{ l['target'] }}</a></div>
 	</div>
 	<div>{{ l['user'] }}</div>
     </li>
