@@ -535,7 +535,7 @@ async def edit_theterm_post(vocab: str,
             schema.Change(key=ckey, context=context, value=cvalue, n=n)
         )
 
-    message = await vocab_service.batch_change(batch_changes, user.github, log)
+    message = await vocab_service.batch_change(batch_changes, log)
 
     # Refresh the data and present form again
     vocabobj = await vocab_service.get_vocab_info(vocab)

@@ -134,20 +134,6 @@ class VocabService:
         self.user: schema.User = user
 
 
-    async def add_log(self, target, summary):
-        """
-        Add an entry to the log.
-        """
-        log = self.db.collection('log')
-        log_entry = schema.Log(
-            timestamp = time.time(),
-            user = self.user.username,
-            target = target,
-            summary = summary,
-        )
-        await log.insert(log_entry.model_dump(exclude_unset=True))
-
-
     async def get_terms(self, filtr=''):
 
         query_filter = r"""
@@ -350,7 +336,26 @@ class VocabService:
             
         return entries 
 
+
     
+    async def add_log(self, target, summary, diff=""):
+        """
+        Add an entry to the log.
+        target: target id
+        summary: summary of change
+        """
+        log = self.db.collection('log')
+        log_entry = schema.Log(
+            timestamp = time.time(),
+            user = self.user.username,
+            target = target,
+            summary = summary,
+            diff = diff,
+        )
+        await log.insert(log_entry.model_dump(exclude_unset=True))
+
+
+
     async def get_vocab_info(self, vocab):
         vocabularies = self.db.collection("vocabularies")
         infodata = await vocabularies.get(vocab)
@@ -496,7 +501,7 @@ class VocabService:
                     del T2['key']
                     tasks.append(T2)
                 
-                # TODO logs
+                # TODO [B] logs
                 # TODO comments
 
                 # Bundle everything together
@@ -509,7 +514,7 @@ class VocabService:
     
             return export_data
 
-        # TODO implement CSV export
+        # TODO [B] implement CSV export
         
         else:
             raise Exception()
@@ -551,8 +556,7 @@ class VocabService:
         """
         TASKS = self.db.collection(f"{self.collection}_task")
         T = schema.Task(key=key, name=name, description=description, order=order, locked=locked)
-        # TODO update log
-        # TODO record user in vocab initialisation (make logging easier)
+        # TODO [B] update log
         await TASKS.update(T.model_dump(exclude_unset=True))
 
     
@@ -677,14 +681,13 @@ class VocabService:
         return refs
 
     
-    async def batch_change(self, batch_changes, username, log=""):
+    async def batch_change(self, batch_changes, log=""):
 
         # For the message
         changes = []
         VOCAB = self.db.collection(self.collection)
-        LOG = self.db.collection('log')
 
-        # TODO relink changed terms
+        # TODO [A] relink changed terms
         for change in batch_changes:
             if change.context == "term":
                 term = await self.get_term(change.key)
@@ -692,17 +695,8 @@ class VocabService:
                     d = diff(term.term,change.value)
                     m = f"{term.key}.term: {d}"
                     changes.append(m)
-                    # TODO update term
                     await VOCAB.update({'_key':change.key, 'term':change.value})
-                    
-                    log_entry = schema.Log(
-                        timestamp = time.time(),
-                        user = username,
-                        target = f"{self.collection}/{change.key}",
-                        summary = log,
-                        diff = m,
-                    )
-                    await LOG.insert(log_entry.model_dump(exclude_unset=True))
+                    await self.add_log(f"{self.collection}/{change.key}", log, m)
 
             elif change.context == "definition":
                 term = await self.get_term(change.key)
@@ -710,17 +704,8 @@ class VocabService:
                     d = diff(term.definition,change.value)
                     m = f"{term.key}.definition: {d}"
                     changes.append(m)
-                    # TODO update definition
                     await VOCAB.update({'_key':change.key, 'definition':change.value})
-                    
-                    log_entry = schema.Log(
-                        timestamp = time.time(),
-                        user = username,
-                        target = f"{self.collection}/{change.key}",
-                        summary = log,
-                        diff = m,
-                    )
-                    await LOG.insert(log_entry.model_dump(exclude_unset=True))
+                    await self.add_log(f"{self.collection}/{change.key}", log, m)
                     
             elif change.context == "note":
                 term = await self.get_term(change.key)
@@ -728,18 +713,9 @@ class VocabService:
                     d = diff(term.notes[change.n],change.value)
                     m = f"{term.key}.notes[{change.n}]: {d}"
                     changes.append(m)
-                    # TODO update note
                     term.notes[change.n] = change.value
                     await VOCAB.update({'_key':change.key, 'notes':term.notes})
-
-                    log_entry = schema.Log(
-                        timestamp = time.time(),
-                        user = username,
-                        target = f"{self.collection}/{change.key}",
-                        summary = log,
-                        diff = m,
-                    )
-                    await LOG.insert(log_entry.model_dump(exclude_unset=True))
+                    await self.add_log(f"{self.collection}/{change.key}", log, m)
                     
             else:
                 # Should not get here as all internal
