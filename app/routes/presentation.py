@@ -184,7 +184,6 @@ async def put_vocab_task_inline(vocab: str,
                             task_locked: Annotated[bool, Form()] = False,
                             user=Depends(auth_user)):
     vocab_service = VocabService(request.app.state.client.db, vocab, user)
-    vocabobj = await vocab_service.get_vocab_info(vocab)
 
     await vocab_service.update_task(task, task_name, task_description, task_order, task_locked)
     target = f"/vocab/{vocab}/tasks"
