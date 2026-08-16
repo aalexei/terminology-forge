@@ -347,7 +347,7 @@ class VocabService:
         log = self.db.collection('log')
         log_entry = schema.Log(
             timestamp = time.time(),
-            user = self.user.username,
+            user = self.user.github,
             target = target,
             summary = summary,
             diff = diff,
