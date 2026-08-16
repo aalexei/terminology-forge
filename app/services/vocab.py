@@ -134,14 +134,14 @@ class VocabService:
         self.user: schema.User = user
 
 
-    async def add_log(self, username, target, summary):
+    async def add_log(self, target, summary):
         """
         Add an entry to the log.
         """
         log = self.db.collection('log')
         log_entry = schema.Log(
             timestamp = time.time(),
-            user = username,
+            user = self.user.username,
             target = target,
             summary = summary,
         )
@@ -610,7 +610,7 @@ class VocabService:
         return works
 
 
-    async def set_work(self, term_key, task_key, work_id, content, user):
+    async def set_work(self, term_key, task_key, work_id, content):
         """
         Set work on task
         """
@@ -647,7 +647,6 @@ class VocabService:
             response = f'Updated content for task "{task.name}"'
 
         await self.add_log(
-            username = user.github,
             target = f"{self.collection}/{term_key}",
             summary = response,
         )

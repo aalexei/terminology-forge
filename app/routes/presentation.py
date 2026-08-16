@@ -224,7 +224,7 @@ async def set_work(vocab: str,
                    ):
 
     vocab_service = VocabService(request.app.state.client.db, vocab, user)
-    response = await vocab_service.set_work(term_key, task_key, work_id, content, user)
+    response = await vocab_service.set_work(term_key, task_key, work_id, content)
     # TODO log changes
     
     return HTMLResponse(response)
@@ -396,7 +396,7 @@ async def add_term_post(vocab: str,
     # TODO tags
     # TODO comment
     
-    await vocab_service.add_log(user.github, f"{vocab}/{item.key}", log)
+    await vocab_service.add_log(f"{vocab}/{item.key}", log)
     # TODO improve log .. strings or objects
     
     context = {
@@ -463,7 +463,7 @@ async def edit_term_post(vocab: str,
     
     await vocab_service.update_term(item)
     
-    await vocab_service.add_log(user.github, f"{vocab}/{item.key}", log)
+    await vocab_service.add_log(f"{vocab}/{item.key}", log)
 
     term = await vocab_service.get_term(tid)
 
