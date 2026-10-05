@@ -8,6 +8,7 @@ from core.config import config
 import routes.authentication
 import routes.presentation
 from routes.exception_handlers import register_exception_handlers
+import uvicorn
 
 
 app = FastAPI(lifespan=lifespan, title=config.app_name)
@@ -24,9 +25,8 @@ app.include_router(routes.presentation.router)
         
 
 # ====================================================================
-if __name__ == "__main__":
+def main():
 
-    import uvicorn
     logger.info("Launched app")
     
     uvicorn.run(
@@ -40,3 +40,6 @@ if __name__ == "__main__":
         ssl_keyfile=config.ssl_keyfile,
         ssl_certfile=config.ssl_certfile,
     )
+
+if __name__ == "__main__":
+    main()
