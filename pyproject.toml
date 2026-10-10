@@ -1,7 +1,7 @@
 [project]
 name = "terminology-forge"
 version = "0.1.0"
-description = "Easing vocabulary development"
+description = "Terminology development"
 readme = { file = "README.org", content-type = "text/plain" }
 authors = [
     { name = "Alexei Gilchrist", email = "alexei@entropy.energy" }
