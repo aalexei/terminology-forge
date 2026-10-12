@@ -17,7 +17,6 @@ dependencies = [
   "uvicorn",
   "asyncio",
   "beautifulsoup4",
-  "arango",
   "itsdangerous",
   "bcrypt",
   "openpyxl",
